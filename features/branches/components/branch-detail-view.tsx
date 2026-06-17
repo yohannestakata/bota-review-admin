@@ -51,6 +51,8 @@ type FormState = {
   description: string
   label: string
   addressText: string
+  latitude: string
+  longitude: string
   phone: string
   priceLevel: string
   neighborhoodId: string
@@ -66,6 +68,8 @@ function initForm(branch: AdminBranch): FormState {
     description: branch.place.description ?? "",
     label: branch.label ?? "",
     addressText: branch.addressText ?? "",
+    latitude: branch.latitude ?? "",
+    longitude: branch.longitude ?? "",
     phone: branch.phone ?? "",
     priceLevel: branch.priceLevel ? String(branch.priceLevel) : "none",
     neighborhoodId: branch.neighborhood?.id ?? "none",
@@ -169,6 +173,8 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
       amenityIds: form.amenityIds,
     }
     if (form.phone.trim()) branchBody.phone = form.phone.trim()
+    if (form.latitude.trim()) branchBody.latitude = form.latitude.trim()
+    if (form.longitude.trim()) branchBody.longitude = form.longitude.trim()
     if (form.priceLevel !== "none") branchBody.priceLevel = Number(form.priceLevel)
     if (form.neighborhoodId !== "none")
       branchBody.neighborhoodId = form.neighborhoodId
@@ -337,6 +343,24 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
               id="phone"
               value={form.phone}
               onChange={(e) => set("phone", e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="latitude">Latitude</Label>
+            <Input
+              id="latitude"
+              value={form.latitude}
+              onChange={(e) => set("latitude", e.target.value)}
+              placeholder="9.0107"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="longitude">Longitude</Label>
+            <Input
+              id="longitude"
+              value={form.longitude}
+              onChange={(e) => set("longitude", e.target.value)}
+              placeholder="38.7975"
             />
           </div>
           <div className="grid gap-2">

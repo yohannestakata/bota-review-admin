@@ -12,6 +12,8 @@ export type AdminBranch = {
   label: string | null
   slug: string
   addressText: string | null
+  latitude: string | null
+  longitude: string | null
   phone: string | null
   priceLevel: number | null
   status: BranchStatus
@@ -46,6 +48,8 @@ export type Paginated<T> = { data: T[]; total: number }
 export type UpdateBranchBody = {
   label?: string
   addressText?: string
+  latitude?: string
+  longitude?: string
   phone?: string
   priceLevel?: number
   neighborhoodId?: string
