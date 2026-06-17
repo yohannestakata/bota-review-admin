@@ -30,6 +30,11 @@ function TargetCell({ submission }: { submission: SubmissionListItem }) {
 
 export const submissionColumns: ColumnDef<SubmissionListItem>[] = [
   {
+    id: "target",
+    header: "Target",
+    cell: ({ row }) => <TargetCell submission={row.original} />,
+  },
+  {
     id: "type",
     header: "Type",
     cell: ({ row }) => (
@@ -46,11 +51,6 @@ export const submissionColumns: ColumnDef<SubmissionListItem>[] = [
         {row.original.priority}
       </Badge>
     ),
-  },
-  {
-    id: "target",
-    header: "Target",
-    cell: ({ row }) => <TargetCell submission={row.original} />,
   },
   {
     id: "reporter",

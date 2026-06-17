@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { BranchPhotos } from "@/features/photos"
 import {
   useAmenities,
   useCuisines,
@@ -419,6 +420,17 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
               />
             </Field>
           </FieldGroup>
+        </FieldSet>
+
+        <FieldSeparator />
+
+        <FieldSet>
+          <FieldLegend>Photos</FieldLegend>
+          <FieldDescription>
+            At least one photo is required to publish. Uploads here are
+            auto-approved.
+          </FieldDescription>
+          <BranchPhotos branchId={branchId} />
         </FieldSet>
       </FieldGroup>
     </div>
