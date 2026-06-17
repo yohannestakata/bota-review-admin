@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -12,7 +11,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   DropdownMenu,
@@ -49,12 +47,13 @@ function Row({
 
 export function SubmissionDetailDialog({
   submission,
-  summary,
+  open,
+  onOpenChange,
 }: {
   submission: SubmissionListItem
-  summary: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
   const review = useReviewSubmission()
   const dismiss = useDismissSubmission()
   const busy = review.isPending || dismiss.isPending
@@ -77,7 +76,7 @@ export function SubmissionDetailDialog({
             ? "Approved — change applied to the branch"
             : "Approved"
         )
-        setOpen(false)
+        onOpenChange(false)
       },
       onError: (error) => toast.error(apiErrorMessage(error)),
     })
@@ -89,7 +88,7 @@ export function SubmissionDetailDialog({
       {
         onSuccess: () => {
           toast.success("Dismissed")
-          setOpen(false)
+          onOpenChange(false)
         },
         onError: (error) => toast.error(apiErrorMessage(error)),
       }
@@ -97,17 +96,7 @@ export function SubmissionDetailDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button
-            variant="link"
-            className="h-auto max-w-[260px] justify-start overflow-hidden p-0 font-normal text-foreground"
-          />
-        }
-      >
-        <span className="truncate">{summary}</span>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

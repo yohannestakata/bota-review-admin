@@ -52,6 +52,8 @@ interface DataTableProps<TData, TValue> {
   toolbarEnd?: React.ReactNode
   // Dims the table and shows a spinner during background refetches.
   loading?: boolean
+  // Makes rows clickable (e.g. to open a detail dialog).
+  onRowClick?: (row: TData) => void
   getRowId?: (row: TData, index: number) => string
   // When provided, the table renders the given page and delegates paging to the
   // server instead of slicing client-side.
@@ -66,6 +68,7 @@ export function DataTable<TData, TValue>({
   toolbar,
   toolbarEnd,
   loading,
+  onRowClick,
   getRowId,
   serverPagination,
 }: DataTableProps<TData, TValue>) {
@@ -189,6 +192,10 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={
+                    onRowClick ? () => onRowClick(row.original) : undefined
+                  }
+                  className={onRowClick ? "cursor-pointer" : undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

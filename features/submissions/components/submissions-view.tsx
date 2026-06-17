@@ -1,7 +1,7 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { DataTable } from "@/components/data-table"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,9 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { apiErrorMessage } from "@/lib/api-client"
 import { SUBMISSIONS_PAGE_SIZE as PAGE_SIZE } from "../keys"
 import { useSubmissions } from "../queries"
-import type { SubmissionStatus, SubmissionType } from "../types"
+import type {
+  SubmissionListItem,
+  SubmissionStatus,
+  SubmissionType,
+} from "../types"
+import { SubmissionDetailDialog } from "./submission-detail-dialog"
 import { SubmissionFilters } from "./submission-filters"
-import { getSubmissionColumns } from "./submissions-columns"
+import { submissionColumns } from "./submissions-columns"
 
 const VALID_STATUS: SubmissionStatus[] = ["pending", "reviewed", "dismissed"]
 const VALID_TYPE: SubmissionType[] = [
@@ -43,6 +48,8 @@ export function SubmissionsView() {
   // Reset to the first page whenever the filters change.
   useEffect(() => setPage(1), [status, type, debouncedQ])
 
+  const [selected, setSelected] = useState<SubmissionListItem | null>(null)
+
   const { data, isPending, isError, error, isFetching } = useSubmissions({
     status,
     type,
@@ -50,10 +57,6 @@ export function SubmissionsView() {
     page,
     limit: PAGE_SIZE,
   })
-  const columns = useMemo(
-    () => getSubmissionColumns(status === "pending"),
-    [status]
-  )
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-2">
@@ -75,10 +78,11 @@ export function SubmissionsView() {
         ) : (
           <div className="px-4 lg:px-6">
             <DataTable
-              columns={columns}
+              columns={submissionColumns}
               data={data.data}
               getRowId={(row) => row.id}
               loading={isFetching}
+              onRowClick={setSelected}
               toolbar={
                 <Input
                   placeholder="Search reporter, note…"
@@ -97,6 +101,14 @@ export function SubmissionsView() {
             />
           </div>
         )}
+
+        {selected ? (
+          <SubmissionDetailDialog
+            submission={selected}
+            open={selected !== null}
+            onOpenChange={(o) => !o && setSelected(null)}
+          />
+        ) : null}
       </div>
     </div>
   )
