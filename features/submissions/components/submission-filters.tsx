@@ -33,21 +33,7 @@ export function SubmissionFilters({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
-        {STATUS_TABS.map((tab) => (
-          <Button
-            key={tab.value}
-            size="sm"
-            variant={status === tab.value ? "outline" : "ghost"}
-            className={status === tab.value ? "bg-background shadow-sm" : ""}
-            onClick={() => setParam("status", tab.value)}
-          >
-            {tab.label}
-          </Button>
-        ))}
-      </div>
-
+    <div className="flex items-center gap-2">
       <Select
         value={type ?? "all"}
         onValueChange={(value) =>
@@ -65,6 +51,20 @@ export function SubmissionFilters({
           ))}
         </SelectContent>
       </Select>
+
+      <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
+        {STATUS_TABS.map((tab) => (
+          <Button
+            key={tab.value}
+            size="sm"
+            variant={status === tab.value ? "outline" : "ghost"}
+            className={status === tab.value ? "bg-background shadow-sm" : ""}
+            onClick={() => setParam("status", tab.value)}
+          >
+            {tab.label}
+          </Button>
+        ))}
+      </div>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import type { AxiosInstance } from "axios"
 
 import type {
   ListSubmissionsParams,
+  Paginated,
   Submission,
   SubmissionListItem,
 } from "./types"
@@ -9,11 +10,14 @@ import type {
 export async function listSubmissions(
   api: AxiosInstance,
   params: ListSubmissionsParams
-): Promise<SubmissionListItem[]> {
-  const { data } = await api.get<SubmissionListItem[]>("/admin/submissions", {
+): Promise<Paginated<SubmissionListItem>> {
+  const response = await api.get<SubmissionListItem[]>("/admin/submissions", {
     params,
   })
-  return data
+  const total = Number(
+    response.headers["x-total-count"] ?? response.data.length
+  )
+  return { data: response.data, total }
 }
 
 // Approving a field_correction applies its suggested value to the branch and

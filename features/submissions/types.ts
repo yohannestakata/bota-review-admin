@@ -56,4 +56,9 @@ export type SubmissionListItem = Submission & {
 export type ListSubmissionsParams = {
   status?: SubmissionStatus
   type?: SubmissionType
+  q?: string
+  page?: number
+  limit?: number
 }
+
+export type Paginated<T> = { data: T[]; total: number }

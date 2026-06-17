@@ -9,13 +9,8 @@ import {
 
 import { useApi } from "@/lib/use-api"
 import { dismissSubmission, listSubmissions, reviewSubmission } from "./api"
+import { submissionKeys } from "./keys"
 import type { ListSubmissionsParams } from "./types"
-
-export const submissionKeys = {
-  all: ["submissions"] as const,
-  list: (params: ListSubmissionsParams) =>
-    ["submissions", "list", params] as const,
-}
 
 export function useSubmissions(params: ListSubmissionsParams) {
   const api = useApi()

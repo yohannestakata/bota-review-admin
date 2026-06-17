@@ -1,10 +1,8 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDownIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import {
   formatDate,
   PRIORITY_VARIANT,
@@ -98,17 +96,7 @@ export function getSubmissionColumns(
     },
     {
       id: "submitted",
-      accessorFn: (row) => row.createdAt,
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="-ml-3 h-8"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Submitted
-          <ArrowUpDownIcon className="ml-2 size-4" />
-        </Button>
-      ),
+      header: "Submitted",
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
           {formatDate(row.original.createdAt)}

@@ -1,36 +1,26 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { DataTable } from "@/components/data-table"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { apiErrorMessage } from "@/lib/api-client"
-import { SUBMISSIONS_PAGE_SIZE as PAGE_SIZE } from "../keys"
-import { useSubmissions } from "../queries"
-import type { SubmissionStatus, SubmissionType } from "../types"
-import { SubmissionFilters } from "./submission-filters"
-import { getSubmissionColumns } from "./submissions-columns"
+import { BRANCHES_PAGE_SIZE as PAGE_SIZE } from "../keys"
+import { useBranches } from "../queries"
+import type { BranchStatus } from "../types"
+import { branchColumns } from "./branches-columns"
+import { BranchFilters } from "./branch-filters"
 
-const VALID_STATUS: SubmissionStatus[] = ["pending", "reviewed", "dismissed"]
-const VALID_TYPE: SubmissionType[] = [
-  "field_correction",
-  "place_missing",
-  "temporarily_closed",
-  "permanently_closed",
-]
+const VALID_STATUS: BranchStatus[] = ["draft", "published", "archived"]
 
-export function SubmissionsView() {
+export function BranchesView() {
   const searchParams = useSearchParams()
-  const statusParam = searchParams.get("status") as SubmissionStatus | null
-  const typeParam = searchParams.get("type") as SubmissionType | null
-
-  const status: SubmissionStatus =
-    statusParam && VALID_STATUS.includes(statusParam) ? statusParam : "pending"
-  const type =
-    typeParam && VALID_TYPE.includes(typeParam) ? typeParam : undefined
+  const statusParam = searchParams.get("status") as BranchStatus | null
+  const status =
+    statusParam && VALID_STATUS.includes(statusParam) ? statusParam : undefined
 
   const [q, setQ] = useState("")
   const [debouncedQ, setDebouncedQ] = useState("")
@@ -41,18 +31,22 @@ export function SubmissionsView() {
 
   const [page, setPage] = useState(1)
   // Reset to the first page whenever the filters change.
-  useEffect(() => setPage(1), [status, type, debouncedQ])
+  useEffect(() => setPage(1), [status, debouncedQ])
 
-  const { data, isPending, isError, error, isFetching } = useSubmissions({
+  const { data, isPending, isError, error, isFetching } = useBranches({
     status,
-    type,
     q: debouncedQ || undefined,
     page,
     limit: PAGE_SIZE,
   })
-  const columns = useMemo(
-    () => getSubmissionColumns(status === "pending"),
-    [status]
+
+  const toolbar = (
+    <Input
+      placeholder="Filter by name…"
+      value={q}
+      onChange={(event) => setQ(event.target.value)}
+      className="h-8 max-w-xs"
+    />
   )
 
   return (
@@ -75,19 +69,12 @@ export function SubmissionsView() {
         ) : (
           <div className="px-4 lg:px-6">
             <DataTable
-              columns={columns}
+              columns={branchColumns}
               data={data.data}
               getRowId={(row) => row.id}
               loading={isFetching}
-              toolbar={
-                <Input
-                  placeholder="Search reporter, note…"
-                  value={q}
-                  onChange={(event) => setQ(event.target.value)}
-                  className="h-8 max-w-xs"
-                />
-              }
-              toolbarEnd={<SubmissionFilters status={status} type={type} />}
+              toolbar={toolbar}
+              toolbarEnd={<BranchFilters status={status} />}
               serverPagination={{
                 page,
                 pageSize: PAGE_SIZE,
