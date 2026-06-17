@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -9,13 +10,20 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { apiErrorMessage } from "@/lib/api-client"
 import {
+  approveEffect,
+  DISMISS_REASONS,
   formatDate,
   PRIORITY_VARIANT,
   SUBMISSION_TYPE_LABEL,
@@ -56,6 +64,10 @@ export function SubmissionDetailDialog({
     submission.type === "place_missing"
       ? (details?.placeName ?? "New place")
       : (submission.branch?.label ?? "—")
+  const branchLinkLabel =
+    submission.type === "place_missing"
+      ? "Open draft to enrich & publish"
+      : "Open branch"
 
   function onApprove() {
     review.mutate(submission.id, {
@@ -71,14 +83,17 @@ export function SubmissionDetailDialog({
     })
   }
 
-  function onDismiss() {
-    dismiss.mutate(submission.id, {
-      onSuccess: () => {
-        toast.success("Dismissed")
-        setOpen(false)
-      },
-      onError: (error) => toast.error(apiErrorMessage(error)),
-    })
+  function onDismiss(reason: string) {
+    dismiss.mutate(
+      { id: submission.id, reason },
+      {
+        onSuccess: () => {
+          toast.success("Dismissed")
+          setOpen(false)
+        },
+        onError: (error) => toast.error(apiErrorMessage(error)),
+      }
+    )
   }
 
   return (
@@ -151,17 +166,48 @@ export function SubmissionDetailDialog({
           ) : null}
 
           {submission.note ? <Row label="Note">{submission.note}</Row> : null}
+          {submission.reviewNote ? (
+            <Row label="Dismissed">{submission.reviewNote}</Row>
+          ) : null}
         </dl>
 
+        {submission.branchId ? (
+          <Link
+            href={`/branches/${submission.branchId}`}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {branchLinkLabel} ↗
+          </Link>
+        ) : null}
+
         {isPending ? (
-          <DialogFooter>
-            <Button variant="outline" onClick={onDismiss} disabled={busy}>
-              Dismiss
-            </Button>
-            <Button onClick={onApprove} disabled={busy}>
-              {review.isPending ? "Approving…" : "Approve"}
-            </Button>
-          </DialogFooter>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+            <p className="text-xs text-muted-foreground">
+              Approve: {approveEffect(submission.type)}
+            </p>
+            <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={<Button variant="outline" disabled={busy} />}
+                >
+                  Dismiss
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {DISMISS_REASONS.map((reason) => (
+                    <DropdownMenuItem
+                      key={reason}
+                      onClick={() => onDismiss(reason)}
+                    >
+                      {reason}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button disabled={busy} onClick={onApprove}>
+                {review.isPending ? "Approving…" : "Approve"}
+              </Button>
+            </div>
+          </div>
         ) : null}
       </DialogContent>
     </Dialog>

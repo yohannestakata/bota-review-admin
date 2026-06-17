@@ -39,6 +39,27 @@ export const TYPE_OPTIONS: { value: SubmissionType | "all"; label: string }[] = 
   { value: "permanently_closed", label: "Permanently closed" },
 ]
 
+export const DISMISS_REASONS = [
+  "Incorrect",
+  "Duplicate",
+  "Spam",
+  "Not enough info",
+]
+
+// What approving a submission of each type actually does.
+export function approveEffect(type: SubmissionType): string {
+  switch (type) {
+    case "field_correction":
+      return "Applies this change to the branch."
+    case "place_missing":
+      return "Marks reviewed — open the draft to enrich & publish."
+    case "permanently_closed":
+      return "Archives the branch."
+    case "temporarily_closed":
+      return "Marks reviewed (flag the branch manually)."
+  }
+}
+
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
     month: "short",

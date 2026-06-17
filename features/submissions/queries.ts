@@ -35,7 +35,8 @@ export function useDismissSubmission() {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => dismissSubmission(api, id),
+    mutationFn: (vars: { id: string; reason?: string }) =>
+      dismissSubmission(api, vars.id, vars.reason),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: submissionKeys.all }),
   })

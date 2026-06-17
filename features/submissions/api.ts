@@ -34,10 +34,12 @@ export async function reviewSubmission(
 
 export async function dismissSubmission(
   api: AxiosInstance,
-  id: string
+  id: string,
+  reason?: string
 ): Promise<Submission> {
   const { data } = await api.patch<Submission>(
-    `/admin/submissions/${id}/dismiss`
+    `/admin/submissions/${id}/dismiss`,
+    reason ? { reason } : {}
   )
   return data
 }

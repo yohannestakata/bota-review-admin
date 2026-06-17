@@ -33,6 +33,7 @@ export type Submission = {
   status: SubmissionStatus
   reviewedByUserId: string | null
   reviewedAt: string | null
+  reviewNote: string | null
   createdAt: string
   updatedAt: string
 }
