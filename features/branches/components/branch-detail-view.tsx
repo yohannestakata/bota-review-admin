@@ -7,10 +7,17 @@ import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -91,10 +98,7 @@ function CheckboxGroup({
   return (
     <div className="flex flex-wrap gap-x-6 gap-y-2">
       {options.map((option) => (
-        <label
-          key={option.id}
-          className="flex items-center gap-2 text-sm"
-        >
+        <label key={option.id} className="flex items-center gap-2 text-sm">
           <Checkbox
             checked={selected.includes(option.id)}
             onCheckedChange={() => onToggle(option.id)}
@@ -131,12 +135,8 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
 
   if (isError) {
     return (
-      <div className="p-4 lg:p-6">
-        <Card>
-          <CardContent className="py-10 text-center text-sm text-destructive">
-            {apiErrorMessage(error)}
-          </CardContent>
-        </Card>
+      <div className="p-4 text-sm text-destructive lg:p-6">
+        {apiErrorMessage(error)}
       </div>
     )
   }
@@ -145,7 +145,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
     return (
       <div className="space-y-4 p-4 lg:p-6">
         <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-96 w-full max-w-2xl" />
       </div>
     )
   }
@@ -175,7 +175,8 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
     if (form.phone.trim()) branchBody.phone = form.phone.trim()
     if (form.latitude.trim()) branchBody.latitude = form.latitude.trim()
     if (form.longitude.trim()) branchBody.longitude = form.longitude.trim()
-    if (form.priceLevel !== "none") branchBody.priceLevel = Number(form.priceLevel)
+    if (form.priceLevel !== "none")
+      branchBody.priceLevel = Number(form.priceLevel)
     if (form.neighborhoodId !== "none")
       branchBody.neighborhoodId = form.neighborhoodId
 
@@ -256,165 +257,170 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Place</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={form.name}
-              onChange={(e) => set("name", e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="type">Type</Label>
-            <Select value={form.type} onValueChange={(v) => set("type", v ?? "")}>
-              <SelectTrigger id="type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PLACE_TYPES.map((type) => (
-                  <SelectItem key={type} value={type} className="capitalize">
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="description">Description</Label>
-            <textarea
-              id="description"
-              rows={3}
-              value={form.description}
-              onChange={(e) => set("description", e.target.value)}
-              className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <FieldGroup className="max-w-2xl">
+        <FieldSet>
+          <FieldLegend>Place</FieldLegend>
+          <FieldDescription>The brand this branch belongs to.</FieldDescription>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="name">Name</FieldLabel>
+              <Input
+                id="name"
+                value={form.name}
+                onChange={(e) => set("name", e.target.value)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="type">Type</FieldLabel>
+              <Select value={form.type} onValueChange={(v) => set("type", v ?? "")}>
+                <SelectTrigger id="type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PLACE_TYPES.map((type) => (
+                    <SelectItem key={type} value={type} className="capitalize">
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="description">Description</FieldLabel>
+              <textarea
+                id="description"
+                rows={3}
+                value={form.description}
+                onChange={(e) => set("description", e.target.value)}
+                className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Location &amp; contact</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="label">Branch label</Label>
-            <Input
-              id="label"
-              value={form.label}
-              onChange={(e) => set("label", e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="neighborhood">Neighborhood</Label>
-            <Select
-              value={form.neighborhoodId}
-              onValueChange={(v) => set("neighborhoodId", v ?? "none")}
-            >
-              <SelectTrigger id="neighborhood">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">—</SelectItem>
-                {(neighborhoods.data ?? []).map((n) => (
-                  <SelectItem key={n.id} value={n.id}>
-                    {n.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={form.addressText}
-              onChange={(e) => set("addressText", e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              value={form.phone}
-              onChange={(e) => set("phone", e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="latitude">Latitude</Label>
-            <Input
-              id="latitude"
-              value={form.latitude}
-              onChange={(e) => set("latitude", e.target.value)}
-              placeholder="9.0107"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="longitude">Longitude</Label>
-            <Input
-              id="longitude"
-              value={form.longitude}
-              onChange={(e) => set("longitude", e.target.value)}
-              placeholder="38.7975"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="price">Price</Label>
-            <Select
-              value={form.priceLevel}
-              onValueChange={(v) => set("priceLevel", v ?? "none")}
-            >
-              <SelectTrigger id="price">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PRICE_LEVELS.map((p) => (
-                  <SelectItem key={p.value} value={p.value}>
-                    {p.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+        <FieldSeparator />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Classification</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid gap-2">
-            <Label>Cuisines</Label>
-            <CheckboxGroup
-              options={cuisines.data ?? []}
-              selected={form.cuisineIds}
-              onToggle={(id) => toggle("cuisineIds", id)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Tags</Label>
-            <CheckboxGroup
-              options={tags.data ?? []}
-              selected={form.tagIds}
-              onToggle={(id) => toggle("tagIds", id)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Amenities</Label>
-            <CheckboxGroup
-              options={amenities.data ?? []}
-              selected={form.amenityIds}
-              onToggle={(id) => toggle("amenityIds", id)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+        <FieldSet>
+          <FieldLegend>Location &amp; contact</FieldLegend>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="label">Branch label</FieldLabel>
+              <Input
+                id="label"
+                value={form.label}
+                onChange={(e) => set("label", e.target.value)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="neighborhood">Neighborhood</FieldLabel>
+              <Select
+                value={form.neighborhoodId}
+                onValueChange={(v) => set("neighborhoodId", v ?? "none")}
+              >
+                <SelectTrigger id="neighborhood">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">—</SelectItem>
+                  {(neighborhoods.data ?? []).map((n) => (
+                    <SelectItem key={n.id} value={n.id}>
+                      {n.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="address">Address</FieldLabel>
+              <Input
+                id="address"
+                value={form.addressText}
+                onChange={(e) => set("addressText", e.target.value)}
+              />
+            </Field>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor="latitude">Latitude</FieldLabel>
+                <Input
+                  id="latitude"
+                  value={form.latitude}
+                  onChange={(e) => set("latitude", e.target.value)}
+                  placeholder="9.0107"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="longitude">Longitude</FieldLabel>
+                <Input
+                  id="longitude"
+                  value={form.longitude}
+                  onChange={(e) => set("longitude", e.target.value)}
+                  placeholder="38.7975"
+                />
+              </Field>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor="phone">Phone</FieldLabel>
+                <Input
+                  id="phone"
+                  value={form.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="price">Price</FieldLabel>
+                <Select
+                  value={form.priceLevel}
+                  onValueChange={(v) => set("priceLevel", v ?? "none")}
+                >
+                  <SelectTrigger id="price">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRICE_LEVELS.map((p) => (
+                      <SelectItem key={p.value} value={p.value}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
+          </FieldGroup>
+        </FieldSet>
+
+        <FieldSeparator />
+
+        <FieldSet>
+          <FieldLegend>Classification</FieldLegend>
+          <FieldGroup>
+            <Field>
+              <FieldLabel>Cuisines</FieldLabel>
+              <CheckboxGroup
+                options={cuisines.data ?? []}
+                selected={form.cuisineIds}
+                onToggle={(id) => toggle("cuisineIds", id)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Tags</FieldLabel>
+              <CheckboxGroup
+                options={tags.data ?? []}
+                selected={form.tagIds}
+                onToggle={(id) => toggle("tagIds", id)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Amenities</FieldLabel>
+              <CheckboxGroup
+                options={amenities.data ?? []}
+                selected={form.amenityIds}
+                onToggle={(id) => toggle("amenityIds", id)}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
+      </FieldGroup>
     </div>
   )
 }
