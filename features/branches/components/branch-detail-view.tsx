@@ -28,12 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BranchPhotos } from "@/features/photos"
-import {
-  BranchSubmissions,
-  useReviewSubmission,
-  useSubmission,
-} from "@/features/submissions"
-import type { Submission } from "@/features/submissions"
+import { BranchSubmissions, useReviewSubmission } from "@/features/submissions"
 import {
   useAmenities,
   useCuisines,
@@ -111,47 +106,11 @@ function CheckboxGroup({
   )
 }
 
-function SubmissionAside({ submission }: { submission: Submission }) {
-  return (
-    <div className="max-w-2xl rounded-md border bg-muted/30 p-3 text-sm">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-medium">Linked submission</span>
-        <Badge variant="outline">{submission.type.replaceAll("_", " ")}</Badge>
-      </div>
-      <dl className="mt-3 space-y-2">
-        {submission.fieldName ? (
-          <div className="grid grid-cols-[100px_1fr] gap-3">
-            <dt className="text-muted-foreground">Field</dt>
-            <dd>{submission.fieldName}</dd>
-          </div>
-        ) : null}
-        {submission.suggestedValue ? (
-          <div className="grid grid-cols-[100px_1fr] gap-3">
-            <dt className="text-muted-foreground">Suggestion</dt>
-            <dd className="break-words">{submission.suggestedValue}</dd>
-          </div>
-        ) : null}
-        {submission.note ? (
-          <div className="grid grid-cols-[100px_1fr] gap-3">
-            <dt className="text-muted-foreground">Note</dt>
-            <dd className="break-words">{submission.note}</dd>
-          </div>
-        ) : null}
-      </dl>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Saving, publishing, or archiving from here will mark this submission
-        reviewed.
-      </p>
-    </div>
-  )
-}
-
 export function BranchDetailView({ branchId }: { branchId: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const resolveSubmissionId = searchParams.get("resolveSubmission")
   const { data: branch, isPending, isError, error } = useBranch(branchId)
-  const linkedSubmission = useSubmission(resolveSubmissionId)
   const cuisines = useCuisines()
   const tags = useTags()
   const amenities = useAmenities()
@@ -322,10 +281,6 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
           </Button>
         </div>
       </div>
-
-      {linkedSubmission.data ? (
-        <SubmissionAside submission={linkedSubmission.data} />
-      ) : null}
 
       <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
         <FieldGroup className="max-w-2xl flex-1">

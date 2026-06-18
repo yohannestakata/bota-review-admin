@@ -133,7 +133,7 @@ function SubmissionCard({ submission }: { submission: SubmissionListItem }) {
 }
 
 export function BranchSubmissions({ branchId }: { branchId: string }) {
-  const { data } = useBranchSubmissions(branchId)
+  const { data, isPending, isError, error } = useBranchSubmissions(branchId)
   const submissions = data?.data ?? []
 
   return (
@@ -145,7 +145,11 @@ export function BranchSubmissions({ branchId }: { branchId: string }) {
         ) : null}
       </div>
 
-      {submissions.length === 0 ? (
+      {isError ? (
+        <p className="text-sm text-destructive">{apiErrorMessage(error)}</p>
+      ) : isPending ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : submissions.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No pending submissions for this branch.
         </p>
