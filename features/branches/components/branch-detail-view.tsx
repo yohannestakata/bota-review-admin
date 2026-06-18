@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { DatePicker } from "@/components/date-picker"
+import { NaturalDatePicker } from "@/components/natural-date-picker"
 import { BranchPhotos } from "@/features/photos"
 import { BranchSubmissions, useReviewSubmission } from "@/features/submissions"
 import {
@@ -436,34 +436,13 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
           <FieldDescription>
             When this branch&apos;s information was last confirmed accurate.
           </FieldDescription>
-          <Field>
+          <Field className="max-w-xs">
             <FieldLabel htmlFor="verified-at">Last verified</FieldLabel>
-            <div className="flex items-center gap-2">
-              <DatePicker
-                id="verified-at"
-                value={form.verifiedAt}
-                onChange={(date) => set("verifiedAt", date)}
-                placeholder="Not verified"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => set("verifiedAt", new Date())}
-              >
-                Today
-              </Button>
-              {form.verifiedAt ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => set("verifiedAt", undefined)}
-                >
-                  Clear
-                </Button>
-              ) : null}
-            </div>
+            <NaturalDatePicker
+              id="verified-at"
+              value={form.verifiedAt}
+              onChange={(date) => set("verifiedAt", date)}
+            />
           </Field>
         </FieldSet>
 
