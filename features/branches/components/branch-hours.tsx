@@ -2,9 +2,14 @@
 
 import { PlusIcon, XIcon } from "lucide-react"
 
-import { TimePicker } from "@/components/time-picker"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import type { BranchHours, DayKey, HoursInterval } from "../types"
+
+// shadcn "Date Picker with Time" treatment: a native time input with the
+// browser's calendar/clock indicator hidden.
+const TIME_INPUT_CLASS =
+  "w-auto appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
 
 const DAYS: { key: DayKey; label: string }[] = [
   { key: "mon", label: "Monday" },
@@ -83,18 +88,22 @@ export function BranchHoursEditor({
                 <>
                   {intervals.map((interval, index) => (
                     <div key={index} className="flex items-center gap-2">
-                      <TimePicker
+                      <Input
+                        type="time"
                         value={interval[0]}
-                        onChange={(time) =>
-                          updateInterval(key, index, 0, time)
+                        onChange={(e) =>
+                          updateInterval(key, index, 0, e.target.value)
                         }
+                        className={TIME_INPUT_CLASS}
                       />
                       <span className="text-muted-foreground">–</span>
-                      <TimePicker
+                      <Input
+                        type="time"
                         value={interval[1]}
-                        onChange={(time) =>
-                          updateInterval(key, index, 1, time)
+                        onChange={(e) =>
+                          updateInterval(key, index, 1, e.target.value)
                         }
+                        className={TIME_INPUT_CLASS}
                       />
                       <Button
                         type="button"
