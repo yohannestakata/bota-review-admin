@@ -44,7 +44,8 @@ import {
   useSaveBranch,
   useUnpublishBranch,
 } from "../queries"
-import type { AdminBranch, UpdateBranchBody } from "../types"
+import type { AdminBranch, BranchHours, UpdateBranchBody } from "../types"
+import { BranchHoursEditor, normalizeHours } from "./branch-hours"
 
 const PRICE_LEVELS = [
   { value: "none", label: "—" },
@@ -60,6 +61,7 @@ type FormState = {
   latitude: string
   longitude: string
   phone: string
+  hours: BranchHours
   priceLevel: string
   neighborhoodId: string
   cuisineIds: string[]
@@ -74,6 +76,7 @@ function initForm(branch: AdminBranch): FormState {
     latitude: branch.latitude ?? "",
     longitude: branch.longitude ?? "",
     phone: branch.phone ?? "",
+    hours: branch.hours ?? {},
     priceLevel: branch.priceLevel ? String(branch.priceLevel) : "none",
     neighborhoodId: branch.neighborhood?.id ?? "none",
     cuisineIds: branch.cuisines.map((c) => c.id),
@@ -168,6 +171,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
     const branchBody: UpdateBranchBody = {
       label: form.label.trim(),
       addressText: form.addressText.trim(),
+      hours: normalizeHours(form.hours),
       cuisineIds: form.cuisineIds,
       tagIds: form.tagIds,
       amenityIds: form.amenityIds,
@@ -402,6 +406,19 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
               </Field>
             </div>
           </FieldGroup>
+        </FieldSet>
+
+        <FieldSeparator />
+
+        <FieldSet id="hours" className="scroll-mt-6">
+          <FieldLegend>Hours</FieldLegend>
+          <FieldDescription>
+            Opening hours per day. Leave a day with no times to mark it closed.
+          </FieldDescription>
+          <BranchHoursEditor
+            value={form.hours}
+            onChange={(hours) => set("hours", hours)}
+          />
         </FieldSet>
 
         <FieldSeparator />

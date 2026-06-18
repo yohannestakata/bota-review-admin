@@ -42,7 +42,7 @@ function branchSectionForSubmission(submission: SubmissionListItem): string {
 
   switch (normalizedField(submission.fieldName)) {
     case "hours":
-      return "location"
+      return "hours"
     case "menu/prices":
       return "location"
     case "photos":
