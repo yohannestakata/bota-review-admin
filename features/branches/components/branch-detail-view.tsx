@@ -182,9 +182,16 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
   const searchParams = useSearchParams()
   // The submission being resolved — seeded from a deep link, or set by clicking
   // Edit/Enrich in the aside. Saving the branch marks it reviewed.
+  const resolveParam = searchParams.get("resolveSubmission")
   const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(
-    () => searchParams.get("resolveSubmission")
+    () => resolveParam
   )
+  // Re-sync when the deep link changes while the component stays mounted (e.g.
+  // opening another submission for the same branch). A null param means "no deep
+  // link", so it doesn't clobber a value set from the aside.
+  useEffect(() => {
+    if (resolveParam) setActiveSubmissionId(resolveParam)
+  }, [resolveParam])
   const { data: branch, isPending, isError, error } = useBranch(branchId)
   const cuisines = useCuisines()
   const tags = useTags()
