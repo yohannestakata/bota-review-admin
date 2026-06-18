@@ -8,7 +8,7 @@ import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Toggle } from "@/components/ui/toggle"
 import {
   Field,
   FieldDescription,
@@ -90,7 +90,15 @@ function initForm(branch: AdminBranch): FormState {
   }
 }
 
-function CheckboxGroup({
+const TAG_CATEGORY_ORDER = ["vibe", "diet", "time", "practical"]
+const TAG_CATEGORY_LABEL: Record<string, string> = {
+  vibe: "Vibe",
+  diet: "Diet",
+  time: "Time",
+  practical: "Practical",
+}
+
+function ChipGroup({
   options,
   selected,
   onToggle,
@@ -99,19 +107,68 @@ function CheckboxGroup({
   selected: string[]
   onToggle: (id: string) => void
 }) {
+  if (options.length === 0) {
+    return <p className="text-sm text-muted-foreground">None available.</p>
+  }
   return (
-    <div className="flex flex-wrap gap-x-6 gap-y-2">
+    <div className="flex flex-wrap gap-2">
       {options.map((option) => (
-        <label key={option.id} className="flex items-center gap-2 text-sm">
-          <Checkbox
-            checked={selected.includes(option.id)}
-            onCheckedChange={() => onToggle(option.id)}
-          />
+        <Toggle
+          key={option.id}
+          variant="outline"
+          size="sm"
+          pressed={selected.includes(option.id)}
+          onPressedChange={() => onToggle(option.id)}
+        >
           {option.name}
-        </label>
+        </Toggle>
       ))}
     </div>
   )
+}
+
+function TagChips({
+  tags,
+  selected,
+  onToggle,
+}: {
+  tags: { id: string; name: string; category: string }[]
+  selected: string[]
+  onToggle: (id: string) => void
+}) {
+  const categories = [
+    ...TAG_CATEGORY_ORDER,
+    ...[...new Set(tags.map((t) => t.category))].filter(
+      (c) => !TAG_CATEGORY_ORDER.includes(c)
+    ),
+  ]
+  const groups = categories
+    .map((category) => ({
+      category,
+      items: tags.filter((t) => t.category === category),
+    }))
+    .filter((group) => group.items.length > 0)
+
+  if (groups.length === 0) {
+    return <p className="text-sm text-muted-foreground">None available.</p>
+  }
+
+  return (
+    <div className="grid gap-3">
+      {groups.map(({ category, items }) => (
+        <div key={category} className="grid gap-2">
+          <span className="text-xs font-medium text-muted-foreground">
+            {TAG_CATEGORY_LABEL[category] ?? category}
+          </span>
+          <ChipGroup options={items} selected={selected} onToggle={onToggle} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function selectedCount(count: number): string {
+  return count ? ` · ${count}` : ""
 }
 
 export function BranchDetailView({ branchId }: { branchId: string }) {
@@ -452,24 +509,26 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
           <FieldLegend>Classification</FieldLegend>
           <FieldGroup>
             <Field>
-              <FieldLabel>Cuisines</FieldLabel>
-              <CheckboxGroup
+              <FieldLabel>Cuisines{selectedCount(form.cuisineIds.length)}</FieldLabel>
+              <ChipGroup
                 options={cuisines.data ?? []}
                 selected={form.cuisineIds}
                 onToggle={(id) => toggle("cuisineIds", id)}
               />
             </Field>
             <Field>
-              <FieldLabel>Tags</FieldLabel>
-              <CheckboxGroup
-                options={tags.data ?? []}
+              <FieldLabel>Tags{selectedCount(form.tagIds.length)}</FieldLabel>
+              <TagChips
+                tags={tags.data ?? []}
                 selected={form.tagIds}
                 onToggle={(id) => toggle("tagIds", id)}
               />
             </Field>
             <Field>
-              <FieldLabel>Amenities</FieldLabel>
-              <CheckboxGroup
+              <FieldLabel>
+                Amenities{selectedCount(form.amenityIds.length)}
+              </FieldLabel>
+              <ChipGroup
                 options={amenities.data ?? []}
                 selected={form.amenityIds}
                 onToggle={(id) => toggle("amenityIds", id)}
