@@ -2,12 +2,9 @@
 
 import { PlusIcon, XIcon } from "lucide-react"
 
+import { TimePicker } from "@/components/time-picker"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import type { BranchHours, DayKey, HoursInterval } from "../types"
-
-// shadcn "Time Picker" is the stock Input with type="time" — no extra styling.
-const TIME_INPUT_CLASS = "w-auto"
 
 const DAYS: { key: DayKey; label: string }[] = [
   { key: "mon", label: "Monday" },
@@ -86,22 +83,18 @@ export function BranchHoursEditor({
                 <>
                   {intervals.map((interval, index) => (
                     <div key={index} className="flex items-center gap-2">
-                      <Input
-                        type="time"
+                      <TimePicker
                         value={interval[0]}
-                        onChange={(e) =>
-                          updateInterval(key, index, 0, e.target.value)
+                        onChange={(time) =>
+                          updateInterval(key, index, 0, time)
                         }
-                        className={TIME_INPUT_CLASS}
                       />
                       <span className="text-muted-foreground">–</span>
-                      <Input
-                        type="time"
+                      <TimePicker
                         value={interval[1]}
-                        onChange={(e) =>
-                          updateInterval(key, index, 1, e.target.value)
+                        onChange={(time) =>
+                          updateInterval(key, index, 1, time)
                         }
-                        className={TIME_INPUT_CLASS}
                       />
                       <Button
                         type="button"
