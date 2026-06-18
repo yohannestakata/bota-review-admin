@@ -1,8 +1,15 @@
 "use client"
 
+import {
+  ArrowRightIcon,
+  BanIcon,
+  ClockIcon,
+  MapPinIcon,
+  PencilIcon,
+} from "lucide-react"
+import type { ComponentType } from "react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,41 +18,115 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { apiErrorMessage } from "@/lib/api-client"
+import { cn } from "@/lib/utils"
+import { DISMISS_REASONS, formatDate, isAutoAppliedField, reviewAction } from "../format"
 import {
-  DISMISS_REASONS,
-  formatDate,
-  PRIORITY_VARIANT,
-  reviewAction,
-  SUBMISSION_TYPE_LABEL,
-  SUBMISSION_TYPE_VARIANT,
-} from "../format"
-import { useDismissSubmission, useReviewSubmission } from "../queries"
-import { useBranchSubmissions } from "../queries"
-import type { PlaceMissingDetails, SubmissionListItem } from "../types"
+  useBranchSubmissions,
+  useDismissSubmission,
+  useReviewSubmission,
+} from "../queries"
+import type {
+  PlaceMissingDetails,
+  SubmissionListItem,
+  SubmissionType,
+} from "../types"
 
-function detailLines(submission: SubmissionListItem): { label: string; value: string }[] {
-  const lines: { label: string; value: string }[] = []
+const TYPE_ICON: Record<
+  SubmissionType,
+  ComponentType<{ className?: string }>
+> = {
+  field_correction: PencilIcon,
+  place_missing: MapPinIcon,
+  temporarily_closed: ClockIcon,
+  permanently_closed: BanIcon,
+}
 
+function cardTitle(submission: SubmissionListItem): string {
+  switch (submission.type) {
+    case "field_correction":
+      return submission.fieldName
+        ? `${submission.fieldName} correction`
+        : "Correction"
+    case "place_missing":
+      return "Missing place"
+    case "temporarily_closed":
+      return "Temporarily closed"
+    case "permanently_closed":
+      return "Permanently closed"
+  }
+}
+
+// Short, action-first button label tuned for the narrow aside (the dialog uses
+// the longer reviewAction labels).
+function shortLabel(submission: SubmissionListItem): string {
+  if (submission.type === "permanently_closed") return "Archive"
+  if (
+    submission.type === "field_correction" &&
+    isAutoAppliedField(submission.fieldName)
+  ) {
+    return "Apply"
+  }
+  return "Resolve"
+}
+
+function CardBody({ submission }: { submission: SubmissionListItem }) {
   if (submission.type === "field_correction") {
-    if (submission.fieldName)
-      lines.push({ label: "Field", value: submission.fieldName })
-    if (submission.currentValue)
-      lines.push({ label: "Current", value: submission.currentValue })
-    if (submission.suggestedValue)
-      lines.push({ label: "Suggested", value: submission.suggestedValue })
+    return (
+      <div className="rounded-md bg-muted/60 p-2.5 text-sm">
+        {submission.currentValue ? (
+          <div className="text-muted-foreground line-through decoration-muted-foreground/40">
+            {submission.currentValue}
+          </div>
+        ) : (
+          <div className="text-xs italic text-muted-foreground">
+            currently empty
+          </div>
+        )}
+        <div className="mt-1 flex items-start gap-1.5">
+          <ArrowRightIcon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+          <span className="break-words font-medium">
+            {submission.suggestedValue}
+          </span>
+        </div>
+      </div>
+    )
   }
 
   if (submission.type === "place_missing") {
     const details = submission.details as PlaceMissingDetails | null
-    if (details?.neighborhood)
-      lines.push({ label: "Neighborhood", value: details.neighborhood })
-    if (details?.contactPhone)
-      lines.push({ label: "Phone", value: details.contactPhone })
+    const rows: [string, string][] = []
+    if (details?.neighborhood) rows.push(["Area", details.neighborhood])
+    if (details?.contactPhone) rows.push(["Phone", details.contactPhone])
+    if (details?.description) rows.push(["About", details.description])
+    if (!rows.length) return null
+    return (
+      <dl className="space-y-1 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex gap-2">
+            <dt className="w-12 shrink-0 text-xs text-muted-foreground">
+              {label}
+            </dt>
+            <dd className="break-words">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    )
   }
 
-  if (submission.note) lines.push({ label: "Note", value: submission.note })
+  return null
+}
 
-  return lines
+function cardHint(submission: SubmissionListItem): string | null {
+  switch (submission.type) {
+    case "place_missing":
+      return "Enrich the form and publish, or resolve to close."
+    case "temporarily_closed":
+      return "Update the branch, or resolve to close."
+    case "permanently_closed":
+      return "Archives this branch."
+    default:
+      return null
+  }
 }
 
 function SubmissionCard({ submission }: { submission: SubmissionListItem }) {
@@ -53,7 +134,9 @@ function SubmissionCard({ submission }: { submission: SubmissionListItem }) {
   const dismiss = useDismissSubmission()
   const busy = review.isPending || dismiss.isPending
   const action = reviewAction(submission)
-  const lines = detailLines(submission)
+  const Icon = TYPE_ICON[submission.type]
+  const hint = cardHint(submission)
+  const isHigh = submission.priority === "high"
 
   function onResolve() {
     review.mutate(
@@ -76,46 +159,66 @@ function SubmissionCard({ submission }: { submission: SubmissionListItem }) {
   }
 
   return (
-    <div className="space-y-3 rounded-md border p-3 text-sm">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={SUBMISSION_TYPE_VARIANT[submission.type]}>
-          {SUBMISSION_TYPE_LABEL[submission.type]}
-        </Badge>
-        <Badge variant={PRIORITY_VARIANT[submission.priority]}>
-          {submission.priority}
-        </Badge>
+    <div
+      className={cn(
+        "rounded-lg border bg-card p-3 shadow-xs",
+        isHigh && "border-l-2 border-l-destructive"
+      )}
+    >
+      <div className="flex items-start gap-2.5">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+          <Icon className="size-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="truncate text-sm font-medium capitalize">
+              {cardTitle(submission)}
+            </span>
+            {isHigh ? (
+              <span className="shrink-0 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-destructive">
+                High
+              </span>
+            ) : null}
+          </div>
+          <div className="truncate text-xs text-muted-foreground">
+            {submission.user.displayName ?? "Unknown"} ·{" "}
+            {formatDate(submission.createdAt)}
+          </div>
+        </div>
       </div>
 
-      {lines.length ? (
-        <dl className="space-y-1.5">
-          {lines.map((line) => (
-            <div key={line.label} className="grid grid-cols-[84px_1fr] gap-2">
-              <dt className="text-muted-foreground">{line.label}</dt>
-              <dd className="break-words">{line.value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
+      <div className="mt-2.5 space-y-2.5">
+        <CardBody submission={submission} />
 
-      <p className="text-xs text-muted-foreground">
-        {submission.user.displayName ?? "Unknown"} ·{" "}
-        {formatDate(submission.createdAt)}
-      </p>
+        {submission.note ? (
+          <p className="border-l-2 pl-2.5 text-xs italic text-muted-foreground">
+            “{submission.note}”
+          </p>
+        ) : null}
 
-      <p className="text-xs text-muted-foreground">{action.effect}</p>
+        {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      </div>
 
-      <div className="flex items-center gap-2">
+      <div className="mt-3 flex items-center gap-2">
         <Button
           size="sm"
-          disabled={busy}
           variant={action.variant}
+          className="flex-1"
+          disabled={busy}
           onClick={onResolve}
         >
-          {review.isPending ? action.pendingLabel : action.label}
+          {review.isPending ? action.pendingLabel : shortLabel(submission)}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="outline" size="sm" disabled={busy} />}
+            render={
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={busy}
+                className="text-muted-foreground"
+              />
+            }
           >
             Dismiss
           </DropdownMenuTrigger>
@@ -138,10 +241,12 @@ export function BranchSubmissions({ branchId }: { branchId: string }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <h3 className="text-sm font-medium">Pending submissions</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium">Submissions</h3>
         {submissions.length ? (
-          <Badge variant="secondary">{submissions.length}</Badge>
+          <span className="text-xs text-muted-foreground">
+            {submissions.length} pending
+          </span>
         ) : null}
       </div>
 
@@ -150,11 +255,11 @@ export function BranchSubmissions({ branchId }: { branchId: string }) {
       ) : isPending ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : submissions.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No pending submissions for this branch.
+        <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+          No pending submissions.
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {submissions.map((submission) => (
             <SubmissionCard key={submission.id} submission={submission} />
           ))}
