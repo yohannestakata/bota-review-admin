@@ -6,10 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { BranchHours, DayKey, HoursInterval } from "../types"
 
-// shadcn "Time Picker" styling: a native time input with the browser's
-// calendar/clock indicator hidden so it matches the other inputs.
-const TIME_INPUT_CLASS =
-  "w-auto bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+// shadcn "Time Picker" is the stock Input with type="time" — no extra styling.
+const TIME_INPUT_CLASS = "w-auto"
 
 const DAYS: { key: DayKey; label: string }[] = [
   { key: "mon", label: "Monday" },
