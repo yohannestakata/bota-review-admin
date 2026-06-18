@@ -91,18 +91,21 @@ export function SubmissionDetailDialog({
   const editHref = branchHref(submission)
 
   function onReview(note?: string) {
-    review.mutate({
-      id: submission.id,
-      note,
-    }, {
-      onSuccess: () => {
-        toast.success(action.success)
-        setResolutionOpen(false)
-        setResolutionNote("")
-        onOpenChange(false)
+    review.mutate(
+      {
+        id: submission.id,
+        note,
       },
-      onError: (error) => toast.error(apiErrorMessage(error)),
-    })
+      {
+        onSuccess: () => {
+          toast.success(action.success)
+          setResolutionOpen(false)
+          setResolutionNote("")
+          onOpenChange(false)
+        },
+        onError: (error) => toast.error(apiErrorMessage(error)),
+      }
+    )
   }
 
   function onManualReview() {
@@ -162,10 +165,16 @@ export function SubmissionDetailDialog({
               <Row label="Review action">
                 {fieldCorrectionEffect(submission.fieldName)}
               </Row>
-              <Row label="Current">{submission.currentValue ?? "—"}</Row>
-              <Row label="Suggested">
-                <span className="font-medium">{submission.suggestedValue}</span>
-              </Row>
+              {submission.currentValue ? (
+                <Row label="Current">{submission.currentValue}</Row>
+              ) : null}
+              {submission.suggestedValue ? (
+                <Row label="Suggested">
+                  <span className="font-medium">
+                    {submission.suggestedValue}
+                  </span>
+                </Row>
+              ) : null}
             </>
           ) : null}
 
@@ -188,7 +197,11 @@ export function SubmissionDetailDialog({
 
           {submission.note ? <Row label="Note">{submission.note}</Row> : null}
           {submission.reviewNote ? (
-            <Row label={submission.status === "dismissed" ? "Dismissed" : "Resolved"}>
+            <Row
+              label={
+                submission.status === "dismissed" ? "Dismissed" : "Resolved"
+              }
+            >
               {submission.reviewNote}
             </Row>
           ) : null}

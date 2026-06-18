@@ -62,8 +62,12 @@ export function useApprovePhoto() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => approvePhoto(api, id),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: photoKeys.pending }),
+    onSuccess: (photo) => {
+      queryClient.invalidateQueries({ queryKey: photoKeys.pending })
+      queryClient.invalidateQueries({
+        queryKey: photoKeys.branch(photo.branchId),
+      })
+    },
   })
 }
 
@@ -72,7 +76,11 @@ export function useRejectPhoto() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => rejectPhoto(api, id),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: photoKeys.pending }),
+    onSuccess: (photo) => {
+      queryClient.invalidateQueries({ queryKey: photoKeys.pending })
+      queryClient.invalidateQueries({
+        queryKey: photoKeys.branch(photo.branchId),
+      })
+    },
   })
 }

@@ -1,6 +1,6 @@
 import type { AxiosInstance } from "axios"
 
-import type { Photo, PhotoCategory, UploadSignature } from "./types"
+import type { AdminPhoto, Photo, PhotoCategory, UploadSignature } from "./types"
 
 export async function listBranchPhotos(
   api: AxiosInstance,
@@ -10,8 +10,10 @@ export async function listBranchPhotos(
   return data
 }
 
-export async function listPendingPhotos(api: AxiosInstance): Promise<Photo[]> {
-  const { data } = await api.get<Photo[]>("/admin/photos/pending")
+export async function listPendingPhotos(
+  api: AxiosInstance
+): Promise<AdminPhoto[]> {
+  const { data } = await api.get<AdminPhoto[]>("/admin/photos/pending")
   return data
 }
 

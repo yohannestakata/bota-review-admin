@@ -63,10 +63,10 @@ function oneClickLabel(submission: SubmissionListItem): string {
 
 function detailRows(submission: SubmissionListItem): [string, string][] {
   if (submission.type === "field_correction") {
-    return [
-      ["From", submission.currentValue ?? "—"],
-      ["To", submission.suggestedValue ?? "—"],
-    ]
+    const rows: [string, string][] = []
+    if (submission.currentValue) rows.push(["From", submission.currentValue])
+    if (submission.suggestedValue) rows.push(["To", submission.suggestedValue])
+    return rows
   }
   if (submission.type === "place_missing") {
     const details = submission.details as PlaceMissingDetails | null

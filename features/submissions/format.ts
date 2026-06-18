@@ -35,13 +35,14 @@ export const STATUS_TABS: {
   { value: "dismissed", label: "Dismissed" },
 ]
 
-export const TYPE_OPTIONS: { value: SubmissionType | "all"; label: string }[] = [
-  { value: "all", label: "All types" },
-  { value: "field_correction", label: "Corrections" },
-  { value: "place_missing", label: "Missing places" },
-  { value: "temporarily_closed", label: "Temporarily closed" },
-  { value: "permanently_closed", label: "Permanently closed" },
-]
+export const TYPE_OPTIONS: { value: SubmissionType | "all"; label: string }[] =
+  [
+    { value: "all", label: "All types" },
+    { value: "field_correction", label: "Corrections" },
+    { value: "place_missing", label: "Missing places" },
+    { value: "temporarily_closed", label: "Temporarily closed" },
+    { value: "permanently_closed", label: "Permanently closed" },
+  ]
 
 export const DISMISS_REASONS = [
   "Already correct",
@@ -59,6 +60,8 @@ export function branchSectionForSubmission(
   if (submission.type === "temporarily_closed") return "status"
 
   switch (normalizedField(submission.fieldName)) {
+    case "name":
+      return "place"
     case "hours":
       return "hours"
     case "menu/prices":
@@ -93,7 +96,6 @@ export type ReviewAction = {
 }
 
 const AUTO_APPLIED_FIELDS = [
-  "name",
   "phone",
   "address",
   "address text",
@@ -108,7 +110,7 @@ export function normalizedField(fieldName: string | null): string {
 export function fieldCorrectionEffect(fieldName: string | null): string {
   switch (normalizedField(fieldName)) {
     case "name":
-      return "Applies to the branch label. Use the place page if the shared place name should change."
+      return "Review this manually. Use the place page when the shared place name should change."
     case "phone":
       return "Applies to the branch phone number."
     case "address":
