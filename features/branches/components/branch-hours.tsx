@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { BranchHours, DayKey, HoursInterval } from "../types"
 
+// shadcn "Time Picker" styling: a native time input with the browser's
+// calendar/clock indicator hidden so it matches the other inputs.
+const TIME_INPUT_CLASS =
+  "w-auto bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+
 const DAYS: { key: DayKey; label: string }[] = [
   { key: "mon", label: "Monday" },
   { key: "tue", label: "Tuesday" },
@@ -89,7 +94,7 @@ export function BranchHoursEditor({
                         onChange={(e) =>
                           updateInterval(key, index, 0, e.target.value)
                         }
-                        className="w-auto"
+                        className={TIME_INPUT_CLASS}
                       />
                       <span className="text-muted-foreground">–</span>
                       <Input
@@ -98,7 +103,7 @@ export function BranchHoursEditor({
                         onChange={(e) =>
                           updateInterval(key, index, 1, e.target.value)
                         }
-                        className="w-auto"
+                        className={TIME_INPUT_CLASS}
                       />
                       <Button
                         type="button"
