@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { DatePicker } from "@/components/date-picker"
 import { BranchPhotos } from "@/features/photos"
 import { BranchSubmissions, useReviewSubmission } from "@/features/submissions"
 import {
@@ -62,6 +63,7 @@ type FormState = {
   longitude: string
   phone: string
   hours: BranchHours
+  verifiedAt: Date | undefined
   priceLevel: string
   neighborhoodId: string
   cuisineIds: string[]
@@ -77,6 +79,9 @@ function initForm(branch: AdminBranch): FormState {
     longitude: branch.longitude ?? "",
     phone: branch.phone ?? "",
     hours: branch.hours ?? {},
+    verifiedAt: branch.informationLastVerifiedAt
+      ? new Date(branch.informationLastVerifiedAt)
+      : undefined,
     priceLevel: branch.priceLevel ? String(branch.priceLevel) : "none",
     neighborhoodId: branch.neighborhood?.id ?? "none",
     cuisineIds: branch.cuisines.map((c) => c.id),
@@ -172,6 +177,9 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
       label: form.label.trim(),
       addressText: form.addressText.trim(),
       hours: normalizeHours(form.hours),
+      informationLastVerifiedAt: form.verifiedAt
+        ? form.verifiedAt.toISOString()
+        : null,
       cuisineIds: form.cuisineIds,
       tagIds: form.tagIds,
       amenityIds: form.amenityIds,
@@ -419,6 +427,44 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
             value={form.hours}
             onChange={(hours) => set("hours", hours)}
           />
+        </FieldSet>
+
+        <FieldSeparator />
+
+        <FieldSet id="verification" className="scroll-mt-6">
+          <FieldLegend>Verification</FieldLegend>
+          <FieldDescription>
+            When this branch&apos;s information was last confirmed accurate.
+          </FieldDescription>
+          <Field>
+            <FieldLabel htmlFor="verified-at">Last verified</FieldLabel>
+            <div className="flex items-center gap-2">
+              <DatePicker
+                id="verified-at"
+                value={form.verifiedAt}
+                onChange={(date) => set("verifiedAt", date)}
+                placeholder="Not verified"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => set("verifiedAt", new Date())}
+              >
+                Today
+              </Button>
+              {form.verifiedAt ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => set("verifiedAt", undefined)}
+                >
+                  Clear
+                </Button>
+              ) : null}
+            </div>
+          </Field>
         </FieldSet>
 
         <FieldSeparator />

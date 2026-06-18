@@ -25,6 +25,7 @@ export type AdminBranch = {
   priceLevel: number | null
   status: BranchStatus
   verificationStatus: VerificationStatus
+  informationLastVerifiedAt: string | null
   rating: string
   reviewCount: number
   createdAt: string
@@ -60,6 +61,7 @@ export type UpdateBranchBody = {
   phone?: string
   hours?: BranchHours
   priceLevel?: number
+  informationLastVerifiedAt?: string | null
   neighborhoodId?: string
   cuisineIds?: string[]
   tagIds?: string[]
