@@ -20,10 +20,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { apiErrorMessage } from "@/lib/api-client"
+import { cn } from "@/lib/utils"
 import {
   DISMISS_REASONS,
   formatDate,
-  isAutoAppliedField,
+  isManualReview,
   reviewAction,
 } from "../format"
 import {
@@ -48,17 +49,16 @@ function cardTitle(submission: SubmissionListItem): string {
   }
 }
 
-// Short, action-first button label for the aside (the dialog uses the longer
-// reviewAction labels).
-function shortLabel(submission: SubmissionListItem): string {
-  if (submission.type === "permanently_closed") return "Archive"
-  if (
-    submission.type === "field_correction" &&
-    isAutoAppliedField(submission.fieldName)
-  ) {
-    return "Apply"
-  }
-  return "Resolve"
+// Manual types resolve only by editing the branch and saving, so they get an
+// "Edit"/"Enrich" button instead of a one-click action that wouldn't actually
+// apply the change.
+function editLabel(submission: SubmissionListItem): string {
+  return submission.type === "place_missing" ? "Enrich" : "Edit"
+}
+
+// Label for the genuine one-click actions (auto-applied corrections, closures).
+function oneClickLabel(submission: SubmissionListItem): string {
+  return submission.type === "permanently_closed" ? "Archive" : "Apply"
 }
 
 function detailRows(submission: SubmissionListItem): [string, string][] {
@@ -79,14 +79,23 @@ function detailRows(submission: SubmissionListItem): [string, string][] {
   return []
 }
 
-function SubmissionCard({ submission }: { submission: SubmissionListItem }) {
+function SubmissionCard({
+  submission,
+  active,
+  onEdit,
+}: {
+  submission: SubmissionListItem
+  active: boolean
+  onEdit: (submission: SubmissionListItem) => void
+}) {
   const review = useReviewSubmission()
   const dismiss = useDismissSubmission()
   const busy = review.isPending || dismiss.isPending
   const action = reviewAction(submission)
   const rows = detailRows(submission)
+  const manual = isManualReview(submission)
 
-  function onResolve() {
+  function onOneClick() {
     review.mutate(
       { id: submission.id },
       {
@@ -107,7 +116,7 @@ function SubmissionCard({ submission }: { submission: SubmissionListItem }) {
   }
 
   return (
-    <Card size="sm">
+    <Card size="sm" className={cn(active && "ring-2 ring-primary")}>
       <CardHeader>
         <CardTitle className="capitalize">{cardTitle(submission)}</CardTitle>
         <CardDescription>
@@ -139,15 +148,29 @@ function SubmissionCard({ submission }: { submission: SubmissionListItem }) {
         </CardContent>
       ) : null}
 
+      {active ? (
+        <CardContent>
+          <p className="text-xs text-muted-foreground">
+            Editing below — Save the branch to resolve this.
+          </p>
+        </CardContent>
+      ) : null}
+
       <CardFooter className="gap-2">
-        <Button
-          size="sm"
-          variant={action.variant}
-          disabled={busy}
-          onClick={onResolve}
-        >
-          {review.isPending ? action.pendingLabel : shortLabel(submission)}
-        </Button>
+        {manual ? (
+          <Button size="sm" disabled={busy} onClick={() => onEdit(submission)}>
+            {editLabel(submission)}
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant={action.variant}
+            disabled={busy}
+            onClick={onOneClick}
+          >
+            {review.isPending ? action.pendingLabel : oneClickLabel(submission)}
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger
             render={<Button variant="ghost" size="sm" disabled={busy} />}
@@ -167,7 +190,15 @@ function SubmissionCard({ submission }: { submission: SubmissionListItem }) {
   )
 }
 
-export function BranchSubmissions({ branchId }: { branchId: string }) {
+export function BranchSubmissions({
+  branchId,
+  activeId,
+  onEdit,
+}: {
+  branchId: string
+  activeId: string | null
+  onEdit: (submission: SubmissionListItem) => void
+}) {
   const { data, isPending, isError, error } = useBranchSubmissions(branchId)
   const submissions = data?.data ?? []
 
@@ -191,7 +222,12 @@ export function BranchSubmissions({ branchId }: { branchId: string }) {
       ) : (
         <div className="space-y-3">
           {submissions.map((submission) => (
-            <SubmissionCard key={submission.id} submission={submission} />
+            <SubmissionCard
+              key={submission.id}
+              submission={submission}
+              active={submission.id === activeId}
+              onEdit={onEdit}
+            />
           ))}
         </div>
       )}

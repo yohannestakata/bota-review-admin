@@ -23,11 +23,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { apiErrorMessage } from "@/lib/api-client"
 import {
+  branchSectionForSubmission,
   DISMISS_REASONS,
   fieldCorrectionEffect,
   formatDate,
   isManualReview,
-  normalizedField,
   PRIORITY_VARIANT,
   reviewAction,
   SUBMISSION_TYPE_LABEL,
@@ -35,26 +35,6 @@ import {
 } from "../format"
 import { useDismissSubmission, useReviewSubmission } from "../queries"
 import type { PlaceMissingDetails, SubmissionListItem } from "../types"
-
-function branchSectionForSubmission(submission: SubmissionListItem): string {
-  if (submission.type === "place_missing") return "location"
-  if (submission.type === "temporarily_closed") return "status"
-
-  switch (normalizedField(submission.fieldName)) {
-    case "hours":
-      return "hours"
-    case "menu/prices":
-      return "location"
-    case "photos":
-      return "photos"
-    case "tags/amenities":
-      return "classification"
-    case "wrong info":
-    case "duplicate":
-    default:
-      return "location"
-  }
-}
 
 function branchHref(submission: SubmissionListItem): string | null {
   if (!submission.branchId) return null

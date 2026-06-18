@@ -44,11 +44,35 @@ export const TYPE_OPTIONS: { value: SubmissionType | "all"; label: string }[] = 
 ]
 
 export const DISMISS_REASONS = [
+  "Already correct",
   "Incorrect",
   "Duplicate",
   "Spam",
   "Not enough info",
 ]
+
+// The branch-detail anchor id to scroll to when resolving a submission.
+export function branchSectionForSubmission(
+  submission: SubmissionListItem
+): string {
+  if (submission.type === "place_missing") return "location"
+  if (submission.type === "temporarily_closed") return "status"
+
+  switch (normalizedField(submission.fieldName)) {
+    case "hours":
+      return "hours"
+    case "menu/prices":
+      return "location"
+    case "photos":
+      return "photos"
+    case "tags/amenities":
+      return "classification"
+    case "wrong info":
+    case "duplicate":
+    default:
+      return "location"
+  }
+}
 
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {

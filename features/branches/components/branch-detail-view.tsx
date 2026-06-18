@@ -29,7 +29,12 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { NaturalDatePicker } from "@/components/natural-date-picker"
 import { BranchPhotos } from "@/features/photos"
-import { BranchSubmissions, useReviewSubmission } from "@/features/submissions"
+import {
+  branchSectionForSubmission,
+  BranchSubmissions,
+  useReviewSubmission,
+} from "@/features/submissions"
+import type { SubmissionListItem } from "@/features/submissions"
 import {
   useAmenities,
   useCuisines,
@@ -175,7 +180,11 @@ function selectedCount(count: number): string {
 export function BranchDetailView({ branchId }: { branchId: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const resolveSubmissionId = searchParams.get("resolveSubmission")
+  // The submission being resolved — seeded from a deep link, or set by clicking
+  // Edit/Enrich in the aside. Saving the branch marks it reviewed.
+  const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(
+    () => searchParams.get("resolveSubmission")
+  )
   const { data: branch, isPending, isError, error } = useBranch(branchId)
   const cuisines = useCuisines()
   const tags = useTags()
@@ -263,14 +272,27 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
   }
 
   function resolveLinkedSubmission(note: string) {
-    if (!resolveSubmissionId) return
+    if (!activeSubmissionId) return
     resolveSubmission.mutate(
-      { id: resolveSubmissionId, note },
+      { id: activeSubmissionId, note },
       {
-        onSuccess: () => toast.success("Submission marked reviewed"),
+        onSuccess: () => {
+          toast.success("Submission resolved")
+          setActiveSubmissionId(null)
+        },
         onError: (e) => toast.error(apiErrorMessage(e)),
       }
     )
+  }
+
+  // Clicking Edit/Enrich on an aside card: target it for resolution and jump to
+  // the relevant section so the moderator can make the change, then Save.
+  function onEditSubmission(submission: SubmissionListItem) {
+    setActiveSubmissionId(submission.id)
+    const section = branchSectionForSubmission(submission)
+    document
+      .getElementById(section)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   function runStatus(
@@ -551,7 +573,11 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
         </FieldGroup>
 
         <aside className="w-full shrink-0 xl:w-80">
-          <BranchSubmissions branchId={branchId} />
+          <BranchSubmissions
+            branchId={branchId}
+            activeId={activeSubmissionId}
+            onEdit={onEditSubmission}
+          />
         </aside>
       </div>
     </div>
