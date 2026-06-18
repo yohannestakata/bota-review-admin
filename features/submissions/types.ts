@@ -57,6 +57,7 @@ export type SubmissionListItem = Submission & {
 export type ListSubmissionsParams = {
   status?: SubmissionStatus
   type?: SubmissionType
+  branchId?: string
   q?: string
   page?: number
   limit?: number

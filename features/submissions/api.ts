@@ -20,14 +20,24 @@ export async function listSubmissions(
   return { data: response.data, total }
 }
 
+export async function getSubmission(
+  api: AxiosInstance,
+  id: string
+): Promise<Submission> {
+  const { data } = await api.get<Submission>(`/admin/submissions/${id}`)
+  return data
+}
+
 // Approving a field_correction applies its suggested value to the branch and
 // records an audit entry (handled server-side).
 export async function reviewSubmission(
   api: AxiosInstance,
-  id: string
+  id: string,
+  note?: string
 ): Promise<Submission> {
   const { data } = await api.patch<Submission>(
-    `/admin/submissions/${id}/review`
+    `/admin/submissions/${id}/review`,
+    note ? { note } : {}
   )
   return data
 }

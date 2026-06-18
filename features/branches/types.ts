@@ -57,9 +57,3 @@ export type UpdateBranchBody = {
   tagIds?: string[]
   amenityIds?: string[]
 }
-
-export type UpdatePlaceBody = {
-  name?: string
-  description?: string | null
-  type?: string
-}

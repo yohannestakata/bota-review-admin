@@ -5,7 +5,6 @@ import type {
   ListBranchesParams,
   Paginated,
   UpdateBranchBody,
-  UpdatePlaceBody,
 } from "./types"
 
 export async function listBranches(
@@ -34,15 +33,6 @@ export async function updateBranch(
   body: UpdateBranchBody
 ) {
   const { data } = await api.patch<AdminBranch>(`/admin/branches/${id}`, body)
-  return data
-}
-
-export async function updatePlace(
-  api: AxiosInstance,
-  placeId: string,
-  body: UpdatePlaceBody
-) {
-  const { data } = await api.patch(`/admin/places/${placeId}`, body)
   return data
 }
 

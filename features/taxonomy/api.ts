@@ -1,6 +1,17 @@
 import type { AxiosInstance } from "axios"
 
-import type { Amenity, Cuisine, Neighborhood, Tag } from "./types"
+import type {
+  Amenity,
+  CreateTagBody,
+  CreateTaxonomyItemBody,
+  Cuisine,
+  Neighborhood,
+  Tag,
+  TaxonomyKind,
+  TaxonomyItem,
+  UpdateTagBody,
+  UpdateTaxonomyItemBody,
+} from "./types"
 
 export async function listCuisines(api: AxiosInstance): Promise<Cuisine[]> {
   const { data } = await api.get<Cuisine[]>("/cuisines")
@@ -21,5 +32,41 @@ export async function listNeighborhoods(
   api: AxiosInstance
 ): Promise<Neighborhood[]> {
   const { data } = await api.get<Neighborhood[]>("/neighborhoods")
+  return data
+}
+
+export async function createTaxonomyItem(
+  api: AxiosInstance,
+  kind: Exclude<TaxonomyKind, "tags">,
+  body: CreateTaxonomyItemBody
+): Promise<TaxonomyItem> {
+  const { data } = await api.post<TaxonomyItem>(`/admin/${kind}`, body)
+  return data
+}
+
+export async function updateTaxonomyItem(
+  api: AxiosInstance,
+  kind: Exclude<TaxonomyKind, "tags">,
+  id: string,
+  body: UpdateTaxonomyItemBody
+): Promise<TaxonomyItem> {
+  const { data } = await api.patch<TaxonomyItem>(`/admin/${kind}/${id}`, body)
+  return data
+}
+
+export async function createTag(
+  api: AxiosInstance,
+  body: CreateTagBody
+): Promise<Tag> {
+  const { data } = await api.post<Tag>("/admin/tags", body)
+  return data
+}
+
+export async function updateTag(
+  api: AxiosInstance,
+  id: string,
+  body: UpdateTagBody
+): Promise<Tag> {
+  const { data } = await api.patch<Tag>(`/admin/tags/${id}`, body)
   return data
 }

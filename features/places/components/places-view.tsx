@@ -1,25 +1,15 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
 import { DataTable } from "@/components/data-table"
 import { Input } from "@/components/ui/input"
 import { apiErrorMessage } from "@/lib/api-client"
-import { BRANCHES_PAGE_SIZE as PAGE_SIZE } from "../keys"
-import { useBranches } from "../queries"
-import type { BranchStatus } from "../types"
-import { branchColumns } from "./branches-columns"
-import { BranchFilters } from "./branch-filters"
+import { PLACES_PAGE_SIZE as PAGE_SIZE } from "../keys"
+import { usePlaces } from "../queries"
+import { placeColumns } from "./places-columns"
 
-const VALID_STATUS: BranchStatus[] = ["draft", "published", "archived"]
-
-export function BranchesView() {
-  const searchParams = useSearchParams()
-  const statusParam = searchParams.get("status") as BranchStatus | null
-  const status =
-    statusParam && VALID_STATUS.includes(statusParam) ? statusParam : undefined
-
+export function PlacesView() {
   const [q, setQ] = useState("")
   const [debouncedQ, setDebouncedQ] = useState("")
   useEffect(() => {
@@ -28,11 +18,9 @@ export function BranchesView() {
   }, [q])
 
   const [page, setPage] = useState(1)
-  // Reset to the first page whenever the filters change.
-  useEffect(() => setPage(1), [status, debouncedQ])
+  useEffect(() => setPage(1), [debouncedQ])
 
-  const { data, isError, error, isFetching } = useBranches({
-    status,
+  const { data, isError, error, isFetching } = usePlaces({
     q: debouncedQ || undefined,
     page,
     limit: PAGE_SIZE,
@@ -40,7 +28,7 @@ export function BranchesView() {
 
   const toolbar = (
     <Input
-      placeholder="Filter by name…"
+      placeholder="Filter by place…"
       value={q}
       onChange={(event) => setQ(event.target.value)}
       className="h-8 max-w-xs"
@@ -57,12 +45,11 @@ export function BranchesView() {
         ) : (
           <div className="px-4 lg:px-6">
             <DataTable
-              columns={branchColumns}
+              columns={placeColumns}
               data={data?.data ?? []}
               getRowId={(row) => row.id}
               loading={isFetching}
               toolbar={toolbar}
-              toolbarEnd={<BranchFilters status={status} />}
               serverPagination={{
                 page,
                 pageSize: PAGE_SIZE,

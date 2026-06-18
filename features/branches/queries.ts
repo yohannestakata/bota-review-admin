@@ -15,14 +15,9 @@ import {
   publishBranch,
   unpublishBranch,
   updateBranch,
-  updatePlace,
 } from "./api"
 import { branchKeys } from "./keys"
-import type {
-  ListBranchesParams,
-  UpdateBranchBody,
-  UpdatePlaceBody,
-} from "./types"
+import type { ListBranchesParams, UpdateBranchBody } from "./types"
 
 export function useBranches(params: ListBranchesParams) {
   const api = useApi()
@@ -41,20 +36,11 @@ export function useBranch(id: string) {
   })
 }
 
-// Saves place fields (name/type/description) and branch fields in one go.
-export function useSaveBranch(id: string, placeId: string) {
+export function useSaveBranch(id: string) {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (vars: {
-      place: UpdatePlaceBody
-      branch: UpdateBranchBody
-    }) => {
-      if (Object.keys(vars.place).length > 0) {
-        await updatePlace(api, placeId, vars.place)
-      }
-      return updateBranch(api, id, vars.branch)
-    },
+    mutationFn: (body: UpdateBranchBody) => updateBranch(api, id, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: branchKeys.all })
       queryClient.invalidateQueries({ queryKey: branchKeys.detail(id) })

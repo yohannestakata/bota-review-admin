@@ -1,7 +1,8 @@
 "use client"
 
-import { ArrowLeftIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { ArrowLeftIcon, Building2Icon, ExternalLinkIcon } from "lucide-react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -28,6 +29,12 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { BranchPhotos } from "@/features/photos"
 import {
+  BranchSubmissions,
+  useReviewSubmission,
+  useSubmission,
+} from "@/features/submissions"
+import type { Submission } from "@/features/submissions"
+import {
   useAmenities,
   useCuisines,
   useNeighborhoods,
@@ -44,7 +51,6 @@ import {
 } from "../queries"
 import type { AdminBranch, UpdateBranchBody } from "../types"
 
-const PLACE_TYPES = ["restaurant", "cafe", "bakery", "bar", "other"]
 const PRICE_LEVELS = [
   { value: "none", label: "—" },
   { value: "1", label: "$" },
@@ -54,9 +60,6 @@ const PRICE_LEVELS = [
 ]
 
 type FormState = {
-  name: string
-  type: string
-  description: string
   label: string
   addressText: string
   latitude: string
@@ -71,9 +74,6 @@ type FormState = {
 
 function initForm(branch: AdminBranch): FormState {
   return {
-    name: branch.place.name ?? "",
-    type: branch.place.type,
-    description: branch.place.description ?? "",
     label: branch.label ?? "",
     addressText: branch.addressText ?? "",
     latitude: branch.latitude ?? "",
@@ -111,9 +111,47 @@ function CheckboxGroup({
   )
 }
 
+function SubmissionAside({ submission }: { submission: Submission }) {
+  return (
+    <div className="max-w-2xl rounded-md border bg-muted/30 p-3 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-medium">Linked submission</span>
+        <Badge variant="outline">{submission.type.replaceAll("_", " ")}</Badge>
+      </div>
+      <dl className="mt-3 space-y-2">
+        {submission.fieldName ? (
+          <div className="grid grid-cols-[100px_1fr] gap-3">
+            <dt className="text-muted-foreground">Field</dt>
+            <dd>{submission.fieldName}</dd>
+          </div>
+        ) : null}
+        {submission.suggestedValue ? (
+          <div className="grid grid-cols-[100px_1fr] gap-3">
+            <dt className="text-muted-foreground">Suggestion</dt>
+            <dd className="break-words">{submission.suggestedValue}</dd>
+          </div>
+        ) : null}
+        {submission.note ? (
+          <div className="grid grid-cols-[100px_1fr] gap-3">
+            <dt className="text-muted-foreground">Note</dt>
+            <dd className="break-words">{submission.note}</dd>
+          </div>
+        ) : null}
+      </dl>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Saving, publishing, or archiving from here will mark this submission
+        reviewed.
+      </p>
+    </div>
+  )
+}
+
 export function BranchDetailView({ branchId }: { branchId: string }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const resolveSubmissionId = searchParams.get("resolveSubmission")
   const { data: branch, isPending, isError, error } = useBranch(branchId)
+  const linkedSubmission = useSubmission(resolveSubmissionId)
   const cuisines = useCuisines()
   const tags = useTags()
   const amenities = useAmenities()
@@ -124,15 +162,17 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
     if (branch) setForm(initForm(branch))
   }, [branch])
 
-  const save = useSaveBranch(branchId, branch?.place.id ?? "")
+  const save = useSaveBranch(branchId)
   const publish = usePublishBranch()
   const unpublish = useUnpublishBranch()
   const archive = useArchiveBranch()
+  const resolveSubmission = useReviewSubmission()
   const busy =
     save.isPending ||
     publish.isPending ||
     unpublish.isPending ||
-    archive.isPending
+    archive.isPending ||
+    resolveSubmission.isPending
 
   if (isError) {
     return (
@@ -182,16 +222,23 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
       branchBody.neighborhoodId = form.neighborhoodId
 
     save.mutate(
+      branchBody,
       {
-        place: {
-          name: form.name.trim(),
-          type: form.type,
-          description: form.description.trim() || null,
+        onSuccess: () => {
+          toast.success("Saved")
+          resolveLinkedSubmission("Resolved by saving branch changes")
         },
-        branch: branchBody,
-      },
+        onError: (e) => toast.error(apiErrorMessage(e)),
+      }
+    )
+  }
+
+  function resolveLinkedSubmission(note: string) {
+    if (!resolveSubmissionId) return
+    resolveSubmission.mutate(
+      { id: resolveSubmissionId, note },
       {
-        onSuccess: () => toast.success("Saved"),
+        onSuccess: () => toast.success("Submission marked reviewed"),
         onError: (e) => toast.error(apiErrorMessage(e)),
       }
     )
@@ -199,17 +246,21 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
 
   function runStatus(
     mutation: { mutate: (id: string, opts: object) => void },
-    message: string
+    message: string,
+    resolveNote?: string
   ) {
     mutation.mutate(branchId, {
-      onSuccess: () => toast.success(message),
+      onSuccess: () => {
+        toast.success(message)
+        if (resolveNote) resolveLinkedSubmission(resolveNote)
+      },
       onError: (e: unknown) => toast.error(apiErrorMessage(e)),
     })
   }
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-6 p-4 lg:p-6">
-      <div className="flex flex-wrap items-center gap-3">
+      <div id="status" className="flex scroll-mt-6 flex-wrap items-center gap-3">
         <Button
           variant="outline"
           size="icon"
@@ -228,7 +279,13 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
               variant="outline"
               size="sm"
               disabled={busy}
-              onClick={() => runStatus(publish, "Published")}
+              onClick={() =>
+                runStatus(
+                  publish,
+                  "Published",
+                  "Resolved by publishing the branch"
+                )
+              }
             >
               Publish
             </Button>
@@ -237,7 +294,13 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
               variant="outline"
               size="sm"
               disabled={busy}
-              onClick={() => runStatus(unpublish, "Unpublished")}
+              onClick={() =>
+                runStatus(
+                  unpublish,
+                  "Unpublished",
+                  "Resolved by unpublishing the branch"
+                )
+              }
             >
               Unpublish
             </Button>
@@ -247,7 +310,9 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
               variant="outline"
               size="sm"
               disabled={busy}
-              onClick={() => runStatus(archive, "Archived")}
+              onClick={() =>
+                runStatus(archive, "Archived", "Resolved by archiving branch")
+              }
             >
               Archive
             </Button>
@@ -258,50 +323,44 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
         </div>
       </div>
 
-      <FieldGroup className="max-w-2xl">
-        <FieldSet>
+      {linkedSubmission.data ? (
+        <SubmissionAside submission={linkedSubmission.data} />
+      ) : null}
+
+      <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+        <FieldGroup className="max-w-2xl flex-1">
+        <FieldSet id="place" className="scroll-mt-6">
           <FieldLegend>Place</FieldLegend>
-          <FieldDescription>The brand this branch belongs to.</FieldDescription>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="name">Name</FieldLabel>
-              <Input
-                id="name"
-                value={form.name}
-                onChange={(e) => set("name", e.target.value)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="type">Type</FieldLabel>
-              <Select value={form.type} onValueChange={(v) => set("type", v ?? "")}>
-                <SelectTrigger id="type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PLACE_TYPES.map((type) => (
-                    <SelectItem key={type} value={type} className="capitalize">
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="description">Description</FieldLabel>
-              <textarea
-                id="description"
-                rows={3}
-                value={form.description}
-                onChange={(e) => set("description", e.target.value)}
-                className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              />
-            </Field>
-          </FieldGroup>
+          <FieldDescription>
+            Shared business profile used by every branch under this place.
+          </FieldDescription>
+          <div className="flex items-center justify-between gap-3 rounded-md border p-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <Building2Icon className="size-5 shrink-0 text-muted-foreground" />
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium">
+                  {branch.place.name ?? "Untitled place"}
+                </div>
+                <div className="text-xs capitalize text-muted-foreground">
+                  {branch.place.type} · {branch.place.status}
+                </div>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href={`/places/${branch.place.id}`} />}
+            >
+              <ExternalLinkIcon className="size-4" />
+              Open place
+            </Button>
+          </div>
         </FieldSet>
 
         <FieldSeparator />
 
-        <FieldSet>
+        <FieldSet id="location" className="scroll-mt-6">
           <FieldLegend>Location &amp; contact</FieldLegend>
           <FieldGroup>
             <Field>
@@ -392,7 +451,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
 
         <FieldSeparator />
 
-        <FieldSet>
+        <FieldSet id="classification" className="scroll-mt-6">
           <FieldLegend>Classification</FieldLegend>
           <FieldGroup>
             <Field>
@@ -424,7 +483,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
 
         <FieldSeparator />
 
-        <FieldSet>
+        <FieldSet id="photos" className="scroll-mt-6">
           <FieldLegend>Photos</FieldLegend>
           <FieldDescription>
             At least one photo is required to publish. Uploads here are
@@ -432,7 +491,12 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
           </FieldDescription>
           <BranchPhotos branchId={branchId} />
         </FieldSet>
-      </FieldGroup>
+        </FieldGroup>
+
+        <aside className="w-full shrink-0 xl:w-80">
+          <BranchSubmissions branchId={branchId} />
+        </aside>
+      </div>
     </div>
   )
 }
