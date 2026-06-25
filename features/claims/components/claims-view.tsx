@@ -3,9 +3,12 @@
 import {
   CheckIcon,
   ExternalLinkIcon,
+  GlobeIcon,
   MailIcon,
+  PhoneCallIcon,
   PhoneIcon,
   ShieldCheckIcon,
+  UserCheckIcon,
   XIcon,
 } from "lucide-react"
 import Link from "next/link"
@@ -62,6 +65,53 @@ function formatDate(iso: string): string {
 
 function formatRole(role: string): string {
   return role.replaceAll("_", " ")
+}
+
+const VERIFICATION_METHOD_META: Record<
+  string,
+  { label: string; icon: React.ElementType; actionHint: string }
+> = {
+  business_email: {
+    label: "Business email",
+    icon: MailIcon,
+    actionHint: "Send a verification link to the address below.",
+  },
+  social_media: {
+    label: "Social media",
+    icon: GlobeIcon,
+    actionHint: "Check for a DM from the handle below.",
+  },
+  phone_call: {
+    label: "Verification call",
+    icon: PhoneCallIcon,
+    actionHint: "Call the publicly listed business number.",
+  },
+  manual_review: {
+    label: "Manual review",
+    icon: UserCheckIcon,
+    actionHint: "Review the information provided.",
+  },
+}
+
+const PLATFORM_LABEL: Record<string, string> = {
+  instagram: "Instagram",
+  facebook: "Facebook",
+  tiktok: "TikTok",
+}
+
+function socialUrl(platform: string, handle: string): string | null {
+  const h = handle.trim().replace(/^@/, "")
+  if (!h) return null
+  switch (platform) {
+    case "instagram":
+      return `https://instagram.com/${h}`
+    case "facebook":
+      return `https://facebook.com/${h}`
+    case "tiktok":
+      return `https://tiktok.com/@${h}`
+    default:
+      return null
+  }
 }
 
 function ClaimActions({
@@ -145,6 +195,81 @@ function ClaimCard({
             <span>{claim.contactPhone}</span>
           </div>
         </div>
+
+        {(() => {
+          const meta = VERIFICATION_METHOD_META[claim.verificationMethod]
+          if (!meta) return null
+          const Icon = meta.icon
+          const platform = claim.verificationPlatform
+            ? PLATFORM_LABEL[claim.verificationPlatform]
+            : null
+          const isSocial = claim.verificationMethod === "social_media"
+          const isCall = claim.verificationMethod === "phone_call"
+          const evidence = claim.verificationEvidence?.trim() ?? null
+          const externalUrl =
+            evidence && isSocial && claim.verificationPlatform
+              ? socialUrl(claim.verificationPlatform, evidence)
+              : null
+          const mailto =
+            evidence && claim.verificationMethod === "business_email"
+              ? `mailto:${evidence}`
+              : null
+          return (
+            <div className="grid gap-1 rounded-md border p-3 text-sm">
+              <div className="flex items-center gap-2 font-medium">
+                <Icon className="size-4 shrink-0 text-muted-foreground" />
+                {meta.label}
+                {platform ? (
+                  <span className="text-muted-foreground">· {platform}</span>
+                ) : null}
+              </div>
+              <div className="text-muted-foreground">
+                {isSocial && platform
+                  ? `Check for a DM from the ${platform} account below.`
+                  : meta.actionHint}
+              </div>
+
+              {isCall ? (
+                <div className="mt-1">
+                  <span className="text-xs text-muted-foreground">
+                    Publicly listed number to call:{" "}
+                  </span>
+                  {claim.branch.phone ? (
+                    <a
+                      href={`tel:${claim.branch.phone}`}
+                      className="font-medium underline underline-offset-2"
+                    >
+                      {claim.branch.phone}
+                    </a>
+                  ) : (
+                    <span className="italic">none on file for this branch</span>
+                  )}
+                </div>
+              ) : evidence ? (
+                externalUrl ? (
+                  <a
+                    href={externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-flex items-center gap-1 break-all font-medium underline underline-offset-2"
+                  >
+                    {evidence}
+                    <ExternalLinkIcon className="size-3 shrink-0" />
+                  </a>
+                ) : mailto ? (
+                  <a
+                    href={mailto}
+                    className="mt-1 break-all font-medium underline underline-offset-2"
+                  >
+                    {evidence}
+                  </a>
+                ) : (
+                  <div className="mt-1 break-all font-medium">{evidence}</div>
+                )
+              ) : null}
+            </div>
+          )
+        })()}
 
         <div className="grid gap-1">
           <div className="text-xs font-medium text-muted-foreground">
