@@ -53,6 +53,6 @@ export type UploadSignature = {
   timestamp: number
   cloudName: string
   apiKey: string
-  uploadPreset: string
+  uploadPreset?: string | null
   folder: string
 }

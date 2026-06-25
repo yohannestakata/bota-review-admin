@@ -59,13 +59,25 @@ export async function uploadBranchPhoto(
   form.append("timestamp", String(sig.timestamp))
   form.append("signature", sig.signature)
   form.append("folder", sig.folder)
-  form.append("upload_preset", sig.uploadPreset)
+  // Only sent when the backend signs a preset — must match the signed params.
+  if (sig.uploadPreset) {
+    form.append("upload_preset", sig.uploadPreset)
+  }
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
     { method: "POST", body: form }
   )
-  if (!response.ok) throw new Error("Cloudinary upload failed")
+  if (!response.ok) {
+    let detail = `status ${response.status}`
+    try {
+      const body = (await response.json()) as { error?: { message?: string } }
+      detail = body.error?.message ?? detail
+    } catch {
+      // No JSON body — keep the status-derived detail.
+    }
+    throw new Error(`Cloudinary upload failed: ${detail}`)
+  }
   const uploaded = (await response.json()) as {
     public_id: string
     secure_url: string
