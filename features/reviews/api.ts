@@ -43,11 +43,12 @@ export async function rejectReview(
   return data
 }
 
-export async function listPendingReplies(
-  api: AxiosInstance
+export async function listReplies(
+  api: AxiosInstance,
+  queue: "pending" | "reported"
 ): Promise<AdminReplyPending[]> {
   const { data } = await api.get<AdminReplyPending[]>(
-    "/admin/reviews/replies/pending"
+    `/admin/reviews/replies/${queue}`
   )
   return data
 }

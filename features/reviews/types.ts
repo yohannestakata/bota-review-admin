@@ -55,12 +55,16 @@ export type AdminReply = {
   }
 }
 
+export type ReplyQueue = "pending" | "reported"
+
 export type AdminReplyPending = {
   id: string
   reviewId: string
   authorRole: "owner" | "user"
   body: string
   moderationStatus: ReviewStatus
+  reportCount: number
+  isFlagged: boolean
   createdAt: string
   updatedAt: string
   user: {

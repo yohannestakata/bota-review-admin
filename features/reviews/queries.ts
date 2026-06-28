@@ -6,12 +6,12 @@ import { useApi } from "@/lib/use-api"
 import {
   approveReply,
   approveReview,
-  listPendingReplies,
+  listReplies,
   listReviews,
   rejectReply,
   rejectReview,
 } from "./api"
-import type { RejectionReason, ReviewQueue } from "./types"
+import type { RejectionReason, ReplyQueue, ReviewQueue } from "./types"
 
 export const reviewKeys = {
   all: ["reviews"] as const,
@@ -20,7 +20,7 @@ export const reviewKeys = {
 
 export const replyKeys = {
   all: ["review-replies"] as const,
-  pending: () => ["review-replies", "pending"] as const,
+  queue: (queue: ReplyQueue) => ["review-replies", queue] as const,
 }
 
 export function useReviews(queue: ReviewQueue) {
@@ -56,11 +56,11 @@ export function useRejectReview() {
   })
 }
 
-export function usePendingReplies() {
+export function useReplies(queue: ReplyQueue) {
   const api = useApi()
   return useQuery({
-    queryKey: replyKeys.pending(),
-    queryFn: () => listPendingReplies(api),
+    queryKey: replyKeys.queue(queue),
+    queryFn: () => listReplies(api, queue),
   })
 }
 

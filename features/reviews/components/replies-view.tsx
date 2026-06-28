@@ -1,6 +1,12 @@
 "use client"
 
-import { CheckIcon, ExternalLinkIcon, XIcon } from "lucide-react"
+import {
+  CheckIcon,
+  ExternalLinkIcon,
+  MessageSquareIcon,
+  MessageSquareWarningIcon,
+  XIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -25,13 +31,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { apiErrorMessage } from "@/lib/api-client"
-import { useApproveReply, usePendingReplies, useRejectReply } from "../queries"
+import { useApproveReply, useRejectReply, useReplies } from "../queries"
 import {
   REJECTION_REASONS,
   type AdminReplyPending,
   type RejectionReason,
+  type ReplyQueue,
 } from "../types"
+
+const QUEUES: { value: ReplyQueue; label: string; icon: React.ReactNode }[] = [
+  {
+    value: "pending",
+    label: "Pending",
+    icon: <MessageSquareIcon className="size-4" />,
+  },
+  {
+    value: "reported",
+    label: "Reported",
+    icon: <MessageSquareWarningIcon className="size-4" />,
+  },
+]
 
 function initials(name: string | null): string {
   return (name ?? "U")
@@ -67,7 +88,10 @@ function ReplyCard({
         <CardTitle className="min-w-0">
           <span className="block truncate text-sm">{reply.branch.label}</span>
         </CardTitle>
-        <CardAction>
+        <CardAction className="flex items-center gap-2">
+          {reply.reportCount > 0 ? (
+            <Badge variant="destructive">{reply.reportCount} reports</Badge>
+          ) : null}
           <Badge variant={reply.authorRole === "owner" ? "default" : "outline"}>
             {reply.authorRole === "owner" ? "Owner" : "User"}
           </Badge>
@@ -194,8 +218,9 @@ function RejectDialog({
 }
 
 export function RepliesView() {
+  const [queue, setQueue] = useState<ReplyQueue>("pending")
   const [rejecting, setRejecting] = useState<AdminReplyPending | null>(null)
-  const { data, isPending, isError, error } = usePendingReplies()
+  const { data, isPending, isError, error } = useReplies(queue)
   const approve = useApproveReply()
   const reject = useRejectReply()
   const busy = approve.isPending || reject.isPending
@@ -224,12 +249,24 @@ export function RepliesView() {
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-4 p-4 lg:p-6">
+      <Tabs value={queue} onValueChange={(value) => setQueue(value as ReplyQueue)}>
+        <TabsList>
+          {QUEUES.map((item) => (
+            <TabsTrigger key={item.value} value={item.value}>
+              {item.icon}
+              {item.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          User replies awaiting moderation. Owner replies are auto-approved and
-          do not appear here.
+          {queue === "pending"
+            ? "User replies awaiting moderation. Owner replies are auto-approved and do not appear here."
+            : "Replies flagged by users. Reject to hide, or approve to clear the flag."}
         </p>
-        <Badge variant="outline">{replies.length} pending</Badge>
+        <Badge variant="outline">{replies.length} replies</Badge>
       </div>
 
       {isError ? (
