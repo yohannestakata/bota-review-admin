@@ -39,6 +39,48 @@ export type AdminReview = {
   }
 }
 
+export type AdminReply = {
+  id: string
+  reviewId: string
+  authorRole: "owner" | "user"
+  body: string
+  moderationStatus: ReviewStatus
+  createdAt: string
+  updatedAt: string
+  user: {
+    id: string
+    displayName: string | null
+    avatarUrl: string | null
+    trustLevel: string
+  }
+}
+
+export type AdminReplyPending = {
+  id: string
+  reviewId: string
+  authorRole: "owner" | "user"
+  body: string
+  moderationStatus: ReviewStatus
+  createdAt: string
+  updatedAt: string
+  user: {
+    id: string
+    displayName: string | null
+    avatarUrl: string | null
+    trustLevel: string
+  }
+  review: {
+    id: string
+    text: string
+    rating: number
+  }
+  branch: {
+    id: string
+    label: string
+    slug: string
+  }
+}
+
 export const REJECTION_REASONS: { value: RejectionReason; label: string }[] = [
   { value: "spam", label: "Spam" },
   { value: "fake_visit", label: "Fake visit" },

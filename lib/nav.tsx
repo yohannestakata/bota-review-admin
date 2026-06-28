@@ -5,6 +5,7 @@ import {
   LayoutDashboardIcon,
   LayoutGridIcon,
   MapPinnedIcon,
+  MessageSquareIcon,
   ShieldCheckIcon,
   StarIcon,
   StoreIcon,
@@ -32,6 +33,11 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Moderation",
     items: [
       { title: "Reviews", url: "/reviews", icon: <StarIcon /> },
+      {
+        title: "Review replies",
+        url: "/review-replies",
+        icon: <MessageSquareIcon />,
+      },
       { title: "Photos", url: "/photos", icon: <ImageIcon /> },
       { title: "Business claims", url: "/claims", icon: <ShieldCheckIcon /> },
     ],

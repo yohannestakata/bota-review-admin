@@ -1,6 +1,12 @@
 import type { AxiosInstance } from "axios"
 
-import type { AdminReview, RejectionReason, ReviewQueue } from "./types"
+import type {
+  AdminReply,
+  AdminReplyPending,
+  AdminReview,
+  RejectionReason,
+  ReviewQueue,
+} from "./types"
 
 const QUEUE_PATH: Record<ReviewQueue, string> = {
   pending: "pending",
@@ -34,5 +40,36 @@ export async function rejectReview(
   const { data } = await api.patch<AdminReview>(`/admin/reviews/${id}/reject`, {
     rejectionReason,
   })
+  return data
+}
+
+export async function listPendingReplies(
+  api: AxiosInstance
+): Promise<AdminReplyPending[]> {
+  const { data } = await api.get<AdminReplyPending[]>(
+    "/admin/reviews/replies/pending"
+  )
+  return data
+}
+
+export async function approveReply(
+  api: AxiosInstance,
+  id: string
+): Promise<AdminReply> {
+  const { data } = await api.patch<AdminReply>(
+    `/admin/reviews/replies/${id}/approve`
+  )
+  return data
+}
+
+export async function rejectReply(
+  api: AxiosInstance,
+  id: string,
+  rejectionReason: RejectionReason
+): Promise<AdminReply> {
+  const { data } = await api.patch<AdminReply>(
+    `/admin/reviews/replies/${id}/reject`,
+    { rejectionReason }
+  )
   return data
 }

@@ -3,12 +3,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { useApi } from "@/lib/use-api"
-import { approveReview, listReviews, rejectReview } from "./api"
+import {
+  approveReply,
+  approveReview,
+  listPendingReplies,
+  listReviews,
+  rejectReply,
+  rejectReview,
+} from "./api"
 import type { RejectionReason, ReviewQueue } from "./types"
 
 export const reviewKeys = {
   all: ["reviews"] as const,
   queue: (queue: ReviewQueue) => ["reviews", queue] as const,
+}
+
+export const replyKeys = {
+  all: ["review-replies"] as const,
+  pending: () => ["review-replies", "pending"] as const,
 }
 
 export function useReviews(queue: ReviewQueue) {
@@ -40,6 +52,37 @@ export function useRejectReview() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: reviewKeys.all })
       queryClient.invalidateQueries({ queryKey: ["branches"] })
+    },
+  })
+}
+
+export function usePendingReplies() {
+  const api = useApi()
+  return useQuery({
+    queryKey: replyKeys.pending(),
+    queryFn: () => listPendingReplies(api),
+  })
+}
+
+export function useApproveReply() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => approveReply(api, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: replyKeys.all })
+    },
+  })
+}
+
+export function useRejectReply() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (vars: { id: string; rejectionReason: RejectionReason }) =>
+      rejectReply(api, vars.id, vars.rejectionReason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: replyKeys.all })
     },
   })
 }
