@@ -9,9 +9,9 @@ import {
 
 import { useApi } from "@/lib/use-api"
 import { branchKeys } from "@/features/branches/keys"
-import { getPlace, listPlaces, updatePlace } from "./api"
+import { createPlace, getPlace, listPlaces, updatePlace } from "./api"
 import { placeKeys } from "./keys"
-import type { ListPlacesParams, UpdatePlaceBody } from "./types"
+import type { CreatePlaceBody, ListPlacesParams, UpdatePlaceBody } from "./types"
 
 export function usePlaces(params: ListPlacesParams) {
   const api = useApi()
@@ -27,6 +27,17 @@ export function usePlace(id: string) {
   return useQuery({
     queryKey: placeKeys.detail(id),
     queryFn: () => getPlace(api, id),
+  })
+}
+
+export function useCreatePlace() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreatePlaceBody) => createPlace(api, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.all })
+    },
   })
 }
 

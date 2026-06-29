@@ -50,3 +50,10 @@ export type UpdatePlaceBody = {
   type?: string
   status?: PlaceStatus
 }
+
+export type CreatePlaceBody = {
+  name: string
+  description?: string
+  type: string
+  status?: PlaceStatus
+}

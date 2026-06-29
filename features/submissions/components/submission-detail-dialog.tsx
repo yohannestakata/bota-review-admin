@@ -41,6 +41,13 @@ function branchHref(submission: SubmissionListItem): string | null {
   return `/branches/${submission.branchId}?resolveSubmission=${submission.id}#${branchSectionForSubmission(submission)}`
 }
 
+function createPlaceHref(details: PlaceMissingDetails | null): string {
+  const params = new URLSearchParams()
+  if (details?.placeName) params.set("name", details.placeName)
+  if (details?.description) params.set("description", details.description)
+  return `/places/new${params.size ? `?${params.toString()}` : ""}`
+}
+
 function manualPrimaryLabel(submission: SubmissionListItem): string {
   if (submission.type === "place_missing") return "Enrich draft"
   if (submission.type === "temporarily_closed") return "Handle closure"
@@ -89,6 +96,10 @@ export function SubmissionDetailDialog({
   const action = reviewAction(submission)
   const manual = isManualReview(submission)
   const editHref = branchHref(submission)
+  const fallbackCreateHref =
+    submission.type === "place_missing" && !editHref
+      ? createPlaceHref(details)
+      : null
 
   function onReview(note?: string) {
     review.mutate(
@@ -227,6 +238,15 @@ export function SubmissionDetailDialog({
                   render={<Link href={editHref} />}
                 >
                   {manualPrimaryLabel(submission)}
+                </Button>
+              ) : null}
+              {fallbackCreateHref ? (
+                <Button
+                  variant="outline"
+                  nativeButton={false}
+                  render={<Link href={fallbackCreateHref} />}
+                >
+                  Create place
                 </Button>
               ) : null}
               <DropdownMenu>

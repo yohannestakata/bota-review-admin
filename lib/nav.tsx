@@ -13,8 +13,14 @@ import {
   UsersIcon,
 } from "lucide-react"
 import type { ReactNode } from "react"
+import type { UserRole } from "@/features/auth"
 
-export type NavItem = { title: string; url: string; icon: ReactNode }
+export type NavItem = {
+  title: string
+  url: string
+  icon: ReactNode
+  roles?: UserRole[]
+}
 export type NavGroup = { label: string; items: NavItem[] }
 
 // Single source of truth for the admin information architecture. The sidebar
@@ -39,7 +45,12 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: <MessageSquareIcon />,
       },
       { title: "Photos", url: "/photos", icon: <ImageIcon /> },
-      { title: "Business claims", url: "/claims", icon: <ShieldCheckIcon /> },
+      {
+        title: "Business claims",
+        url: "/claims",
+        icon: <ShieldCheckIcon />,
+        roles: ["admin"],
+      },
     ],
   },
   {
@@ -52,11 +63,20 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Settings",
-    items: [{ title: "Users", url: "/users", icon: <UsersIcon /> }],
+    items: [
+      { title: "Users", url: "/users", icon: <UsersIcon />, roles: ["admin"] },
+    ],
   },
 ]
 
 export const NAV_ITEMS = NAV_GROUPS.flatMap((group) => group.items)
+
+export function filterNavGroupsForRole(role: UserRole): NavGroup[] {
+  return NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !item.roles || item.roles.includes(role)),
+  })).filter((group) => group.items.length > 0)
+}
 
 export function isNavItemActive(itemUrl: string, pathname: string): boolean {
   if (itemUrl === "/") return pathname === "/"

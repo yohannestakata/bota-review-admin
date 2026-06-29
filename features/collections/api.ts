@@ -1,6 +1,11 @@
 import type { AxiosInstance } from "axios"
 
-import type { Collection, CollectionFormValues, Paginated } from "./types"
+import type {
+  Collection,
+  CollectionDetail,
+  CollectionFormValues,
+  Paginated,
+} from "./types"
 
 export async function listCollections(
   api: AxiosInstance
@@ -35,6 +40,14 @@ export async function createCollection(
   return data
 }
 
+export async function getCollection(
+  api: AxiosInstance,
+  id: string
+): Promise<CollectionDetail> {
+  const { data } = await api.get<CollectionDetail>(`/admin/collections/${id}`)
+  return data
+}
+
 export async function updateCollection(
   api: AxiosInstance,
   id: string,
@@ -62,5 +75,40 @@ export async function archiveCollection(
   id: string
 ): Promise<Collection> {
   const { data } = await api.delete<Collection>(`/admin/collections/${id}`)
+  return data
+}
+
+export async function addCollectionBranch(
+  api: AxiosInstance,
+  id: string,
+  branchId: string,
+  displayOrder?: number
+) {
+  const { data } = await api.post(`/admin/collections/${id}/branches`, {
+    branchId,
+    displayOrder,
+  })
+  return data
+}
+
+export async function removeCollectionBranch(
+  api: AxiosInstance,
+  id: string,
+  branchId: string
+) {
+  const { data } = await api.delete(
+    `/admin/collections/${id}/branches/${branchId}`
+  )
+  return data
+}
+
+export async function reorderCollectionBranches(
+  api: AxiosInstance,
+  id: string,
+  branchIds: string[]
+) {
+  const { data } = await api.patch(`/admin/collections/${id}/order`, {
+    branchIds,
+  })
   return data
 }

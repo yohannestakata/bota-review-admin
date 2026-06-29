@@ -3,6 +3,7 @@ import type { AxiosInstance } from "axios"
 import type {
   AdminPlace,
   AdminPlaceDetail,
+  CreatePlaceBody,
   ListPlacesParams,
   Paginated,
   UpdatePlaceBody,
@@ -24,6 +25,14 @@ export async function getPlace(
   id: string
 ): Promise<AdminPlaceDetail> {
   const { data } = await api.get<AdminPlaceDetail>(`/admin/places/${id}`)
+  return data
+}
+
+export async function createPlace(
+  api: AxiosInstance,
+  body: CreatePlaceBody
+): Promise<AdminPlace> {
+  const { data } = await api.post<AdminPlace>("/admin/places", body)
   return data
 }
 

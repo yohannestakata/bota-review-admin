@@ -62,6 +62,24 @@ export type UpdateBranchBody = {
   hours?: BranchHours
   priceLevel?: number
   informationLastVerifiedAt?: string | null
+  status?: BranchStatus
+  neighborhoodId?: string
+  cuisineIds?: string[]
+  tagIds?: string[]
+  amenityIds?: string[]
+}
+
+export type CreateBranchBody = {
+  placeId: string
+  label: string
+  addressText: string
+  latitude?: string
+  longitude?: string
+  phone?: string | null
+  hours?: BranchHours
+  priceLevel?: number
+  informationLastVerifiedAt?: string | null
+  status?: BranchStatus
   neighborhoodId?: string
   cuisineIds?: string[]
   tagIds?: string[]

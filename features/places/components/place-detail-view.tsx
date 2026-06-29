@@ -1,7 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowLeftIcon } from "lucide-react"
+import { ArrowLeftIcon, PlusIcon } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -121,6 +121,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
   const [form, setForm] = useState<FormState | null>(null)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (place) setForm(initForm(place))
   }, [place])
 
@@ -175,7 +176,22 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
         </Button>
         <h2 className="text-xl font-semibold">{place.name}</h2>
         <Badge variant={STATUS_VARIANT[place.status]}>{place.status}</Badge>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <Link
+                href={`/branches/new?placeId=${place.id}&label=${encodeURIComponent(
+                  place.name
+                )}`}
+              />
+            }
+          >
+            <PlusIcon className="size-4" />
+            New branch
+          </Button>
           <Button size="sm" disabled={save.isPending} onClick={onSave}>
             {save.isPending ? "Saving…" : "Save"}
           </Button>

@@ -6,6 +6,7 @@ import * as React from "react"
 import { CommandIcon } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
+import type { UserRole } from "@/features/auth"
 import {
   Sidebar,
   SidebarContent,
@@ -18,10 +19,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { isNavItemActive, NAV_GROUPS } from "@/lib/nav"
+import { filterNavGroupsForRole, isNavItemActive } from "@/lib/nav"
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  role,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { role: UserRole }) {
   const pathname = usePathname()
+  const groups = filterNavGroupsForRole(role)
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -39,7 +44,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {NAV_GROUPS.map((group) => (
+        {groups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>

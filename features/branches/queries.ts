@@ -10,6 +10,7 @@ import {
 import { useApi } from "@/lib/use-api"
 import {
   archiveBranch,
+  createBranch,
   getBranch,
   listBranches,
   publishBranch,
@@ -17,7 +18,7 @@ import {
   updateBranch,
 } from "./api"
 import { branchKeys } from "./keys"
-import type { ListBranchesParams, UpdateBranchBody } from "./types"
+import type { CreateBranchBody, ListBranchesParams, UpdateBranchBody } from "./types"
 
 export function useBranches(params: ListBranchesParams) {
   const api = useApi()
@@ -33,6 +34,17 @@ export function useBranch(id: string) {
   return useQuery({
     queryKey: branchKeys.detail(id),
     queryFn: () => getBranch(api, id),
+  })
+}
+
+export function useCreateBranch() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateBranchBody) => createBranch(api, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: branchKeys.all })
+    },
   })
 }
 

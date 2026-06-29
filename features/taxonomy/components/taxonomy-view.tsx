@@ -103,6 +103,7 @@ function BasicItemDialog({
   const [status, setStatus] = useState<TaxonomyStatus>("active")
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(item?.name ?? "")
     setStatus(item?.status ?? "active")
   }, [item, open])
@@ -218,6 +219,7 @@ function TagDialog({
   const [status, setStatus] = useState<TaxonomyStatus>("active")
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(item?.name ?? "")
     setCategory(item?.category ?? "vibe")
     setStatus(item?.status ?? "active")
@@ -538,7 +540,11 @@ function TagsPanel({
   )
 }
 
-export function TaxonomyView() {
+export function TaxonomyView({
+  defaultValue = "cuisines",
+}: {
+  defaultValue?: TaxonomyKind
+}) {
   const neighborhoods = useNeighborhoods()
   const cuisines = useCuisines()
   const tags = useTags()
@@ -546,7 +552,7 @@ export function TaxonomyView() {
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-6 p-4 lg:p-6">
-      <Tabs defaultValue="cuisines">
+      <Tabs defaultValue={defaultValue}>
         <TabsList>
           <TabsTrigger value="cuisines">Cuisines</TabsTrigger>
           <TabsTrigger value="tags">Tags</TabsTrigger>

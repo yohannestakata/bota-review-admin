@@ -2,6 +2,7 @@ import type { AxiosInstance } from "axios"
 
 import type {
   AdminBranch,
+  CreateBranchBody,
   ListBranchesParams,
   Paginated,
   UpdateBranchBody,
@@ -24,6 +25,14 @@ export async function getBranch(
   id: string
 ): Promise<AdminBranch> {
   const { data } = await api.get<AdminBranch>(`/admin/branches/${id}`)
+  return data
+}
+
+export async function createBranch(
+  api: AxiosInstance,
+  body: CreateBranchBody
+): Promise<AdminBranch> {
+  const { data } = await api.post<AdminBranch>("/admin/branches", body)
   return data
 }
 

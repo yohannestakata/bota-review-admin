@@ -1,8 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { PlusIcon } from "lucide-react"
+import Link from "next/link"
 
 import { DataTable } from "@/components/data-table"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { apiErrorMessage } from "@/lib/api-client"
 import { PLACES_PAGE_SIZE as PAGE_SIZE } from "../keys"
@@ -18,7 +21,10 @@ export function PlacesView() {
   }, [q])
 
   const [page, setPage] = useState(1)
-  useEffect(() => setPage(1), [debouncedQ])
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPage(1)
+  }, [debouncedQ])
 
   const { data, isError, error, isFetching } = usePlaces({
     q: debouncedQ || undefined,
@@ -27,12 +33,18 @@ export function PlacesView() {
   })
 
   const toolbar = (
-    <Input
-      placeholder="Filter by place…"
-      value={q}
-      onChange={(event) => setQ(event.target.value)}
-      className="h-8 max-w-xs"
-    />
+    <div className="flex flex-wrap items-center gap-2">
+      <Input
+        placeholder="Filter by place…"
+        value={q}
+        onChange={(event) => setQ(event.target.value)}
+        className="h-8 max-w-xs"
+      />
+      <Button size="sm" nativeButton={false} render={<Link href="/places/new" />}>
+        <PlusIcon className="size-4" />
+        New place
+      </Button>
+    </div>
   )
 
   return (

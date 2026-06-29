@@ -2,6 +2,7 @@
 "use client"
 
 import { ArchiveIcon, CheckIcon, PencilIcon, PlusIcon } from "lucide-react"
+import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -278,7 +279,15 @@ function CollectionCard({
           </p>
         ) : null}
       </CardContent>
-      <CardFooter className="grid grid-cols-3 gap-2 p-4">
+      <CardFooter className="grid grid-cols-2 gap-2 p-4">
+        <Button
+          size="sm"
+          variant="outline"
+          nativeButton={false}
+          render={<Link href={`/collections/${collection.id}`} />}
+        >
+          Manage
+        </Button>
         <Button size="sm" variant="outline" onClick={() => onEdit(collection)}>
           <PencilIcon className="size-4" />
           Edit
@@ -319,11 +328,6 @@ export function CollectionsView() {
     update.isPending ||
     publish.isPending ||
     archive.isPending
-
-  function openNew() {
-    setEditing(null)
-    setDialogOpen(true)
-  }
 
   function openEdit(collection: Collection) {
     setEditing(collection)
@@ -372,7 +376,7 @@ export function CollectionsView() {
     <div className="@container/main flex flex-1 flex-col gap-4 p-4 lg:p-6">
       <div className="flex items-center justify-between gap-3">
         <Badge variant="outline">{collections.length} collections</Badge>
-        <Button onClick={openNew}>
+        <Button nativeButton={false} render={<Link href="/collections/new" />}>
           <PlusIcon className="size-4" />
           New collection
         </Button>

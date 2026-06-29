@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { getMe, isAdminRole } from "@/features/auth"
+import type { CurrentUser } from "@/features/auth"
 import { apiErrorMessage } from "@/lib/api-client"
 import { serverApi } from "@/lib/server-api"
 
@@ -17,10 +18,11 @@ export default async function AdminLayout({
 }) {
   // Middleware guarantees a signed-in user; here we additionally require an
   // editor/admin role (the source of truth is the backend user record).
+  let me: CurrentUser | null = null
   let allowed = false
   try {
     const api = await serverApi()
-    const me = await getMe(api)
+    me = await getMe(api)
     allowed = isAdminRole(me.role)
     if (!allowed) {
       console.warn(`[admin gate] denied: role="${me.role}" is not editor/admin`)
@@ -31,7 +33,7 @@ export default async function AdminLayout({
     console.error(`[admin gate] /me request failed: ${apiErrorMessage(error)}`)
     allowed = false
   }
-  if (!allowed) {
+  if (!allowed || !me) {
     redirect("/unauthorized")
   }
 
@@ -44,7 +46,7 @@ export default async function AdminLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar variant="inset" role={me.role} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">{children}</div>

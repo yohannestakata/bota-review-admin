@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { NaturalDatePicker } from "@/components/natural-date-picker"
+import { BranchMenus } from "@/features/menus"
 import { BranchPhotos } from "@/features/photos"
 import {
   branchSectionForSubmission,
@@ -61,6 +62,8 @@ const PRICE_LEVELS = [
   { value: "4", label: "$$$$" },
 ]
 
+const BRANCH_STATUSES = ["draft", "published", "archived"] as const
+
 type FormState = {
   label: string
   addressText: string
@@ -70,6 +73,7 @@ type FormState = {
   hours: BranchHours
   verifiedAt: Date | undefined
   priceLevel: string
+  status: AdminBranch["status"]
   neighborhoodId: string
   cuisineIds: string[]
   tagIds: string[]
@@ -88,6 +92,7 @@ function initForm(branch: AdminBranch): FormState {
       ? new Date(branch.informationLastVerifiedAt)
       : undefined,
     priceLevel: branch.priceLevel ? String(branch.priceLevel) : "none",
+    status: branch.status,
     neighborhoodId: branch.neighborhood?.id ?? "none",
     cuisineIds: branch.cuisines.map((c) => c.id),
     tagIds: branch.tags.map((t) => t.id),
@@ -190,6 +195,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
   // opening another submission for the same branch). A null param means "no deep
   // link", so it doesn't clobber a value set from the aside.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (resolveParam) setActiveSubmissionId(resolveParam)
   }, [resolveParam])
   const { data: branch, isPending, isError, error } = useBranch(branchId)
@@ -200,6 +206,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
 
   const [form, setForm] = useState<FormState | null>(null)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (branch) setForm(initForm(branch))
   }, [branch])
 
@@ -257,6 +264,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
       cuisineIds: form.cuisineIds,
       tagIds: form.tagIds,
       amenityIds: form.amenityIds,
+      status: form.status,
     }
     if (form.phone.trim()) branchBody.phone = form.phone.trim()
     if (form.latitude.trim()) branchBody.latitude = form.latitude.trim()
@@ -329,7 +337,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
           <span className="sr-only">Back</span>
         </Button>
         <h2 className="text-xl font-semibold">{branch.place.name}</h2>
-        <Badge variant={STATUS_VARIANT[branch.status]}>{branch.status}</Badge>
+        <Badge variant={STATUS_VARIANT[form.status]}>{form.status}</Badge>
 
         <div className="ml-auto flex items-center gap-2">
           {branch.status !== "published" ? (
@@ -424,6 +432,30 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
                 value={form.label}
                 onChange={(e) => set("label", e.target.value)}
               />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="branch-status">Status</FieldLabel>
+              <Select
+                value={form.status}
+                onValueChange={(value) =>
+                  set("status", value as AdminBranch["status"])
+                }
+              >
+                <SelectTrigger id="branch-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BRANCH_STATUSES.map((status) => (
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="capitalize"
+                    >
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
             <Field>
               <FieldLabel htmlFor="neighborhood">Neighborhood</FieldLabel>
@@ -565,6 +597,16 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
               />
             </Field>
           </FieldGroup>
+        </FieldSet>
+
+        <FieldSeparator />
+
+        <FieldSet id="menus" className="scroll-mt-6">
+          <FieldLegend>Menus</FieldLegend>
+          <FieldDescription>
+            Menu sections and items shown on the branch menu screen.
+          </FieldDescription>
+          <BranchMenus branchId={branchId} />
         </FieldSet>
 
         <FieldSeparator />
