@@ -11,7 +11,7 @@ export async function listCollections(
   api: AxiosInstance
 ): Promise<Paginated<Collection>> {
   const response = await api.get<Collection[]>("/admin/collections", {
-    params: { page: 1, limit: 100 },
+    params: { page: 1, limit: 50 },
   })
   const total = Number(
     response.headers["x-total-count"] ?? response.data.length

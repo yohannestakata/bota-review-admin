@@ -154,7 +154,7 @@ export function BranchCreateView() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const create = useCreateBranch()
-  const places = usePlaces({ page: 1, limit: 100 })
+  const places = usePlaces({ page: 1, limit: 50 })
   const cuisines = useCuisines()
   const tags = useTags()
   const amenities = useAmenities()
