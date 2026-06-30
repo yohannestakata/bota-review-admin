@@ -7,12 +7,37 @@ import type {
   Paginated,
 } from "./types"
 
+type PaginatedBody<T> = Paginated<T> & {
+  page?: number
+  limit?: number
+}
+
+function isPaginatedBody<T>(value: unknown): value is PaginatedBody<T> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "data" in value &&
+    Array.isArray((value as { data?: unknown }).data)
+  )
+}
+
 export async function listCollections(
   api: AxiosInstance
 ): Promise<Paginated<Collection>> {
-  const response = await api.get<Collection[]>("/admin/collections", {
-    params: { page: 1, limit: 50 },
-  })
+  const response = await api.get<Collection[] | PaginatedBody<Collection>>(
+    "/admin/collections",
+    {
+      params: { page: 1, limit: 50 },
+    }
+  )
+
+  if (isPaginatedBody<Collection>(response.data)) {
+    return {
+      data: response.data.data,
+      total: response.data.total,
+    }
+  }
+
   const total = Number(
     response.headers["x-total-count"] ?? response.data.length
   )
