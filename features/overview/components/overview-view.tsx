@@ -33,13 +33,15 @@ function formatDate(iso: string): string {
 }
 
 function MetricCard({ metric }: { metric: OverviewMetric }) {
-  const needsWork = (metric.value ?? 0) > 0
+  const value =
+    metric.value !== null && Number.isFinite(metric.value) ? metric.value : null
+  const needsWork = (value ?? 0) > 0
   return (
     <Card>
       <CardHeader>
         <CardDescription>{metric.label}</CardDescription>
         <CardTitle className="text-2xl font-semibold tabular-nums">
-          {metric.value === null ? "-" : metric.value}
+          {value === null ? "-" : String(value)}
         </CardTitle>
       </CardHeader>
       <CardFooter className="flex items-center justify-between gap-3">
@@ -109,7 +111,10 @@ export function OverviewView() {
     )
   }
 
-  const urgent = data.metrics.filter((metric) => (metric.value ?? 0) > 0)
+  const urgent = data.metrics.filter(
+    (metric) =>
+      metric.value !== null && Number.isFinite(metric.value) && metric.value > 0
+  )
   const quiet = urgent.length === 0
 
   return (

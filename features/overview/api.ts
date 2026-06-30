@@ -11,7 +11,7 @@ async function countArray<T>(
 ): Promise<number | null> {
   try {
     const response = await request
-    return response.data.length
+    return Array.isArray(response.data) ? response.data.length : null
   } catch {
     return null
   }
@@ -22,7 +22,11 @@ async function countPaginated<T>(
 ): Promise<number | null> {
   try {
     const response = await request
-    return Number(response.headers["x-total-count"] ?? response.data.length)
+    const count = Number(
+      response.headers["x-total-count"] ??
+        (Array.isArray(response.data) ? response.data.length : undefined)
+    )
+    return Number.isFinite(count) ? count : null
   } catch {
     return null
   }
@@ -56,7 +60,14 @@ function metric(
   detail: string,
   tone: OverviewMetric["tone"] = "default"
 ): OverviewMetric {
-  return { key, label, value, href, detail, tone }
+  return {
+    key,
+    label,
+    value: value !== null && Number.isFinite(value) ? value : null,
+    href,
+    detail,
+    tone,
+  }
 }
 
 function submissionActivity(item: SubmissionListItem): OverviewActivity {
@@ -250,6 +261,9 @@ export async function getOverview(api: AxiosInstance): Promise<OverviewData> {
 }
 
 function sumNullable(...values: (number | null)[]) {
-  if (values.every((value) => value === null)) return null
-  return values.reduce<number>((sum, value) => sum + (value ?? 0), 0)
+  const finiteValues = values.filter(
+    (value): value is number => value !== null && Number.isFinite(value)
+  )
+  if (finiteValues.length === 0) return null
+  return finiteValues.reduce((sum, value) => sum + value, 0)
 }
