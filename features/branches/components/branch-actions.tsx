@@ -39,7 +39,12 @@ export function BranchActions({ branch }: { branch: AdminBranch }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon" className="size-8" disabled={busy} />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            disabled={busy}
+          />
         }
       >
         <MoreHorizontalIcon className="size-4" />

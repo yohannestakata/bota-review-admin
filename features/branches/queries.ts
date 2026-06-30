@@ -18,7 +18,11 @@ import {
   updateBranch,
 } from "./api"
 import { branchKeys } from "./keys"
-import type { CreateBranchBody, ListBranchesParams, UpdateBranchBody } from "./types"
+import type {
+  CreateBranchBody,
+  ListBranchesParams,
+  UpdateBranchBody,
+} from "./types"
 
 export function useBranches(params: ListBranchesParams) {
   const api = useApi()

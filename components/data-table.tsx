@@ -105,7 +105,12 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       ...(server
-        ? { pagination: { pageIndex: server.page - 1, pageSize: server.pageSize } }
+        ? {
+            pagination: {
+              pageIndex: server.page - 1,
+              pageSize: server.pageSize,
+            },
+          }
         : {}),
     },
   })
@@ -113,7 +118,9 @@ export function DataTable<TData, TValue>({
   const hasSelection = columns.some((column) => column.id === "select")
 
   const canPrev = server ? server.page > 1 : table.getCanPreviousPage()
-  const canNext = server ? server.page < (pageCount ?? 1) : table.getCanNextPage()
+  const canNext = server
+    ? server.page < (pageCount ?? 1)
+    : table.getCanNextPage()
   const currentPage = server
     ? server.page
     : table.getState().pagination.pageIndex + 1
@@ -138,7 +145,9 @@ export function DataTable<TData, TValue>({
         <div className="ml-auto flex items-center gap-2">
           {toolbarEnd}
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
+            <DropdownMenuTrigger
+              render={<Button variant="outline" size="sm" />}
+            >
               <Columns3Icon />
               <span className="hidden lg:inline">Customize Columns</span>
               <span className="lg:hidden">Columns</span>
@@ -153,7 +162,9 @@ export function DataTable<TData, TValue>({
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
@@ -239,7 +250,9 @@ export function DataTable<TData, TValue>({
             variant="outline"
             size="sm"
             onClick={() =>
-              server ? server.onPageChange(server.page - 1) : table.previousPage()
+              server
+                ? server.onPageChange(server.page - 1)
+                : table.previousPage()
             }
             disabled={!canPrev}
           >

@@ -79,13 +79,8 @@ export function useUpdateTaxonomyItem(kind: Exclude<TaxonomyKind, "tags">) {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string
-      body: UpdateTaxonomyItemBody
-    }) => updateTaxonomyItem(api, kind, id, body),
+    mutationFn: ({ id, body }: { id: string; body: UpdateTaxonomyItemBody }) =>
+      updateTaxonomyItem(api, kind, id, body),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: taxonomyKeys.list(kind) }),
   })

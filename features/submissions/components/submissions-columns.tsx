@@ -61,7 +61,7 @@ export const submissionColumns: ColumnDef<SubmissionListItem>[] = [
         <div className="text-sm">
           {row.original.user.displayName ?? "Unknown"}
         </div>
-        <div className="text-xs capitalize text-muted-foreground">
+        <div className="text-xs text-muted-foreground capitalize">
           {row.original.user.trustLevel}
         </div>
       </div>

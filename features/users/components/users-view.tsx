@@ -26,12 +26,7 @@ import {
   useUpdateUserTrustLevel,
   useUsers,
 } from "../queries"
-import type {
-  AdminUser,
-  UserRole,
-  UserStatus,
-  UserTrustLevel,
-} from "../types"
+import type { AdminUser, UserRole, UserStatus, UserTrustLevel } from "../types"
 
 const ROLES: UserRole[] = ["user", "business_owner", "editor", "admin"]
 const TRUST_LEVELS: UserTrustLevel[] = ["new", "trusted", "flagged"]

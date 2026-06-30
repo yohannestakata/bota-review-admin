@@ -242,7 +242,11 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
                 </SelectTrigger>
                 <SelectContent>
                   {PLACE_STATUSES.map((status) => (
-                    <SelectItem key={status} value={status} className="capitalize">
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="capitalize"
+                    >
                       {status}
                     </SelectItem>
                   ))}

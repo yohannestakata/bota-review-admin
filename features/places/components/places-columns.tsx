@@ -25,7 +25,7 @@ export const placeColumns: ColumnDef<AdminPlace>[] = [
     id: "type",
     header: "Type",
     cell: ({ row }) => (
-      <Badge variant="outline" className="capitalize text-muted-foreground">
+      <Badge variant="outline" className="text-muted-foreground capitalize">
         {row.original.type}
       </Badge>
     ),

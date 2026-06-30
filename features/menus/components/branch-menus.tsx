@@ -34,7 +34,12 @@ import {
   useUpdateMenuItem,
   useUpdateMenuItemAvailability,
 } from "../queries"
-import type { Menu, MenuFormValues, MenuItem, MenuItemFormValues } from "../types"
+import type {
+  Menu,
+  MenuFormValues,
+  MenuItem,
+  MenuItemFormValues,
+} from "../types"
 
 function emptyMenu(): MenuFormValues {
   return { name: "", displayOrder: "0" }
@@ -432,7 +437,9 @@ export function BranchMenus({ branchId }: { branchId: string }) {
                         <span className="truncate text-sm font-medium">
                           {item.name}
                         </span>
-                        <Badge variant={item.isAvailable ? "default" : "outline"}>
+                        <Badge
+                          variant={item.isAvailable ? "default" : "outline"}
+                        >
                           {item.isAvailable ? "Available" : "Unavailable"}
                         </Badge>
                       </div>

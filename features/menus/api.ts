@@ -1,6 +1,11 @@
 import type { AxiosInstance } from "axios"
 
-import type { Menu, MenuFormValues, MenuItem, MenuItemFormValues } from "./types"
+import type {
+  Menu,
+  MenuFormValues,
+  MenuItem,
+  MenuItemFormValues,
+} from "./types"
 
 function menuBody(values: MenuFormValues) {
   return {
@@ -50,7 +55,10 @@ export async function updateMenu(
   return data
 }
 
-export async function archiveMenu(api: AxiosInstance, id: string): Promise<Menu> {
+export async function archiveMenu(
+  api: AxiosInstance,
+  id: string
+): Promise<Menu> {
   const { data } = await api.delete<Menu>(`/admin/menus/${id}`)
   return data
 }

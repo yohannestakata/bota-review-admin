@@ -69,7 +69,9 @@ function emptyForm(): CollectionFormValues {
   }
 }
 
-function formFromCollection(collection: CollectionDetail): CollectionFormValues {
+function formFromCollection(
+  collection: CollectionDetail
+): CollectionFormValues {
   return {
     name: collection.name,
     description: collection.description ?? "",
@@ -79,7 +81,11 @@ function formFromCollection(collection: CollectionDetail): CollectionFormValues 
   }
 }
 
-export function CollectionDetailView({ collectionId }: { collectionId?: string }) {
+export function CollectionDetailView({
+  collectionId,
+}: {
+  collectionId?: string
+}) {
   const router = useRouter()
   const isNew = !collectionId
   const id = collectionId ?? ""
@@ -173,10 +179,13 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
     if (target < 0 || target >= next.length) return
     const [branch] = next.splice(index, 1)
     next.splice(target, 0, branch)
-    reorderBranches.mutate(next.map((item) => item.id), {
-      onSuccess: () => toast.success("Collection order saved"),
-      onError: (error) => toast.error(apiErrorMessage(error)),
-    })
+    reorderBranches.mutate(
+      next.map((item) => item.id),
+      {
+        onSuccess: () => toast.success("Collection order saved"),
+        onError: (error) => toast.error(apiErrorMessage(error)),
+      }
+    )
   }
 
   if (!isNew && collectionQuery.isError) {
@@ -248,7 +257,11 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
               Archive
             </Button>
           ) : null}
-          <Button size="sm" disabled={busy || !form.name.trim()} onClick={saveMetadata}>
+          <Button
+            size="sm"
+            disabled={busy || !form.name.trim()}
+            onClick={saveMetadata}
+          >
             {create.isPending || update.isPending ? "Saving..." : "Save"}
           </Button>
         </div>
@@ -271,7 +284,9 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="collection-description">Description</FieldLabel>
+                <FieldLabel htmlFor="collection-description">
+                  Description
+                </FieldLabel>
                 <Textarea
                   id="collection-description"
                   rows={4}
@@ -280,7 +295,9 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="collection-cover">Cover image URL</FieldLabel>
+                <FieldLabel htmlFor="collection-cover">
+                  Cover image URL
+                </FieldLabel>
                 <Input
                   id="collection-cover"
                   value={form.coverImageUrl}
@@ -290,12 +307,16 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
               </Field>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
-                  <FieldLabel htmlFor="collection-order">Display order</FieldLabel>
+                  <FieldLabel htmlFor="collection-order">
+                    Display order
+                  </FieldLabel>
                   <Input
                     id="collection-order"
                     inputMode="numeric"
                     value={form.displayOrder}
-                    onChange={(event) => set("displayOrder", event.target.value)}
+                    onChange={(event) =>
+                      set("displayOrder", event.target.value)
+                    }
                   />
                 </Field>
                 <Field>
@@ -311,7 +332,11 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
                     </SelectTrigger>
                     <SelectContent>
                       {COLLECTION_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status} className="capitalize">
+                        <SelectItem
+                          key={status}
+                          value={status}
+                          className="capitalize"
+                        >
                           {status}
                         </SelectItem>
                       ))}
@@ -328,7 +353,8 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
               <FieldSet>
                 <FieldLegend>Add branch</FieldLegend>
                 <FieldDescription>
-                  Search across admin branches, then add the selected branch to this rail.
+                  Search across admin branches, then add the selected branch to
+                  this rail.
                 </FieldDescription>
                 <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
                   <Input
@@ -419,7 +445,9 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        disabled={busy || index === collection.branches.length - 1}
+                        disabled={
+                          busy || index === collection.branches.length - 1
+                        }
                         onClick={() => moveBranch(index, 1)}
                       >
                         <ArrowDownIcon className="size-4" />
@@ -438,7 +466,8 @@ export function CollectionDetailView({ collectionId }: { collectionId?: string }
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
                         {branch.neighborhood?.name ?? "No neighborhood"} ·{" "}
-                        {priceLabel(branch.priceLevel)} · {branch.reviewCount} reviews
+                        {priceLabel(branch.priceLevel)} · {branch.reviewCount}{" "}
+                        reviews
                       </div>
                     </div>
                     <div className="flex justify-end gap-1">

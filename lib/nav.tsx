@@ -58,7 +58,11 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Collections", url: "/collections", icon: <LayoutGridIcon /> },
       { title: "Taxonomy", url: "/taxonomy", icon: <TagsIcon /> },
-      { title: "Neighborhoods", url: "/neighborhoods", icon: <MapPinnedIcon /> },
+      {
+        title: "Neighborhoods",
+        url: "/neighborhoods",
+        icon: <MapPinnedIcon />,
+      },
     ],
   },
   {
@@ -74,7 +78,9 @@ export const NAV_ITEMS = NAV_GROUPS.flatMap((group) => group.items)
 export function filterNavGroupsForRole(role: UserRole): NavGroup[] {
   return NAV_GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter((item) => !item.roles || item.roles.includes(role)),
+    items: group.items.filter(
+      (item) => !item.roles || item.roles.includes(role)
+    ),
   })).filter((group) => group.items.length > 0)
 }
 

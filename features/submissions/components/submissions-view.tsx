@@ -44,9 +44,9 @@ export function SubmissionsView() {
     return () => clearTimeout(timer)
   }, [q])
 
-  const [page, setPage] = useState(1)
-  // Reset to the first page whenever the filters change.
-  useEffect(() => setPage(1), [status, type, debouncedQ])
+  const filterKey = `${status}:${type ?? ""}:${debouncedQ}`
+  const [pagination, setPagination] = useState({ filterKey, page: 1 })
+  const page = pagination.filterKey === filterKey ? pagination.page : 1
 
   const [selected, setSelected] = useState<SubmissionListItem | null>(null)
 
@@ -96,7 +96,8 @@ export function SubmissionsView() {
                 page,
                 pageSize: PAGE_SIZE,
                 total: data.total,
-                onPageChange: setPage,
+                onPageChange: (nextPage) =>
+                  setPagination({ filterKey, page: nextPage }),
               }}
             />
           </div>

@@ -47,7 +47,9 @@ export function BranchesView() {
   const publish = usePublishBranch()
   const archive = useArchiveBranch()
   const visibleBranches = data?.data ?? []
-  const visibleDrafts = visibleBranches.filter((branch) => branch.status === "draft")
+  const visibleDrafts = visibleBranches.filter(
+    (branch) => branch.status === "draft"
+  )
   const visibleArchivable = visibleBranches.filter(
     (branch) => branch.status !== "archived"
   )
@@ -87,7 +89,11 @@ export function BranchesView() {
         onChange={(event) => setQ(event.target.value)}
         className="h-8 max-w-xs"
       />
-      <Button size="sm" nativeButton={false} render={<Link href="/branches/new" />}>
+      <Button
+        size="sm"
+        nativeButton={false}
+        render={<Link href="/branches/new" />}
+      >
         <PlusIcon className="size-4" />
         New branch
       </Button>

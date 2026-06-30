@@ -184,7 +184,9 @@ export function BranchCreateView() {
       const has = prev[key].includes(id)
       return {
         ...prev,
-        [key]: has ? prev[key].filter((value) => value !== id) : [...prev[key], id],
+        [key]: has
+          ? prev[key].filter((value) => value !== id)
+          : [...prev[key], id],
       }
     })
 
@@ -202,7 +204,8 @@ export function BranchCreateView() {
       tagIds: form.tagIds,
       amenityIds: form.amenityIds,
     }
-    if (form.neighborhoodId !== "none") payload.neighborhoodId = form.neighborhoodId
+    if (form.neighborhoodId !== "none")
+      payload.neighborhoodId = form.neighborhoodId
     if (form.latitude.trim()) payload.latitude = form.latitude.trim()
     if (form.longitude.trim()) payload.longitude = form.longitude.trim()
     if (form.phone.trim()) payload.phone = form.phone.trim()
@@ -246,7 +249,11 @@ export function BranchCreateView() {
             <PlusIcon className="size-4" />
             New place
           </Button>
-          <Button size="sm" disabled={create.isPending || !canCreate} onClick={onCreate}>
+          <Button
+            size="sm"
+            disabled={create.isPending || !canCreate}
+            onClick={onCreate}
+          >
             {create.isPending ? "Creating..." : "Create branch"}
           </Button>
         </div>
@@ -311,7 +318,11 @@ export function BranchCreateView() {
                   </SelectTrigger>
                   <SelectContent>
                     {BRANCH_STATUSES.map((status) => (
-                      <SelectItem key={status} value={status} className="capitalize">
+                      <SelectItem
+                        key={status}
+                        value={status}
+                        className="capitalize"
+                      >
                         {status}
                       </SelectItem>
                     ))}
@@ -429,7 +440,9 @@ export function BranchCreateView() {
           <FieldLegend>Classification</FieldLegend>
           <FieldGroup>
             <Field>
-              <FieldLabel>Cuisines{selectedCount(form.cuisineIds.length)}</FieldLabel>
+              <FieldLabel>
+                Cuisines{selectedCount(form.cuisineIds.length)}
+              </FieldLabel>
               <ChipGroup
                 options={cuisines.data ?? []}
                 selected={form.cuisineIds}
@@ -445,7 +458,9 @@ export function BranchCreateView() {
               />
             </Field>
             <Field>
-              <FieldLabel>Amenities{selectedCount(form.amenityIds.length)}</FieldLabel>
+              <FieldLabel>
+                Amenities{selectedCount(form.amenityIds.length)}
+              </FieldLabel>
               <ChipGroup
                 options={amenities.data ?? []}
                 selected={form.amenityIds}

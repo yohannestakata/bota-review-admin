@@ -41,9 +41,7 @@ async function getArray<T>(request: Promise<{ data: T[] }>): Promise<T[]> {
   }
 }
 
-async function getPaginated<T>(
-  request: Promise<{ data: T[] }>
-): Promise<T[]> {
+async function getPaginated<T>(request: Promise<{ data: T[] }>): Promise<T[]> {
   try {
     const response = await request
     return response.data
@@ -73,9 +71,7 @@ function metric(
 function submissionActivity(item: SubmissionListItem): OverviewActivity {
   const details = item.details
   const placeMissing =
-    item.type === "place_missing" &&
-    details !== null &&
-    "placeName" in details
+    item.type === "place_missing" && details !== null && "placeName" in details
   return {
     id: item.id,
     label: placeMissing
@@ -159,10 +155,18 @@ export async function getOverview(api: AxiosInstance): Promise<OverviewData> {
     countArray<AdminReplyPending>(api.get("/admin/reviews/replies/pending")),
     countArray<AdminReplyPending>(api.get("/admin/reviews/replies/reported")),
     countArray<AdminPhoto>(api.get("/admin/photos/pending")),
-    countArray<AdminClaim>(api.get("/admin/claims", { params: { status: "pending" } })),
-    countPaginated(api.get("/admin/branches", { params: { status: "draft", page: 1, limit: 1 } })),
+    countArray<AdminClaim>(
+      api.get("/admin/claims", { params: { status: "pending" } })
+    ),
+    countPaginated(
+      api.get("/admin/branches", {
+        params: { status: "draft", page: 1, limit: 1 },
+      })
+    ),
     countPaginated(api.get("/admin/places", { params: { page: 1, limit: 1 } })),
-    countPaginated(api.get("/admin/collections", { params: { page: 1, limit: 1 } })),
+    countPaginated(
+      api.get("/admin/collections", { params: { page: 1, limit: 1 } })
+    ),
     countPaginated(api.get("/admin/users", { params: { page: 1, limit: 1 } })),
     getPaginated<SubmissionListItem>(
       api.get("/admin/submissions", {
@@ -171,7 +175,9 @@ export async function getOverview(api: AxiosInstance): Promise<OverviewData> {
     ),
     getArray<AdminReview>(api.get("/admin/reviews/pending")),
     getArray<AdminReplyPending>(api.get("/admin/reviews/replies/pending")),
-    getArray<AdminClaim>(api.get("/admin/claims", { params: { status: "pending" } })),
+    getArray<AdminClaim>(
+      api.get("/admin/claims", { params: { status: "pending" } })
+    ),
     getArray<AdminPhoto>(api.get("/admin/photos/pending")),
   ])
 
@@ -187,10 +193,18 @@ export async function getOverview(api: AxiosInstance): Promise<OverviewData> {
     metric(
       "moderation",
       "Review moderation",
-      sumNullable(pendingReviewsCount, spotCheckReviewsCount, reportedReviewsCount),
+      sumNullable(
+        pendingReviewsCount,
+        spotCheckReviewsCount,
+        reportedReviewsCount
+      ),
       "/reviews",
       "Pending, spot-check, and reported reviews",
-      sumNullable(pendingReviewsCount, spotCheckReviewsCount, reportedReviewsCount)
+      sumNullable(
+        pendingReviewsCount,
+        spotCheckReviewsCount,
+        reportedReviewsCount
+      )
         ? "danger"
         : "muted"
     ),
@@ -232,7 +246,9 @@ export async function getOverview(api: AxiosInstance): Promise<OverviewData> {
       sumNullable(pendingRepliesCount, reportedRepliesCount),
       "/review-replies",
       "Owner/user replies waiting for review",
-      sumNullable(pendingRepliesCount, reportedRepliesCount) ? "warning" : "muted"
+      sumNullable(pendingRepliesCount, reportedRepliesCount)
+        ? "warning"
+        : "muted"
     ),
     metric(
       "users",

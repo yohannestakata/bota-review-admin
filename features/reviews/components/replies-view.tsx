@@ -249,7 +249,10 @@ export function RepliesView() {
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-4 p-4 lg:p-6">
-      <Tabs value={queue} onValueChange={(value) => setQueue(value as ReplyQueue)}>
+      <Tabs
+        value={queue}
+        onValueChange={(value) => setQueue(value as ReplyQueue)}
+      >
         <TabsList>
           {QUEUES.map((item) => (
             <TabsTrigger key={item.value} value={item.value}>

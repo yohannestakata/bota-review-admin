@@ -14,7 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { apiErrorMessage } from "@/lib/api-client"
-import { useAssignCover, useBranchPhotos, useUploadBranchPhoto } from "../queries"
+import {
+  useAssignCover,
+  useBranchPhotos,
+  useUploadBranchPhoto,
+} from "../queries"
 import { PHOTO_CATEGORIES, type PhotoCategory } from "../types"
 
 export function BranchPhotos({ branchId }: { branchId: string }) {
@@ -91,12 +95,12 @@ export function BranchPhotos({ branchId }: { branchId: string }) {
                 className="aspect-[4/3] w-full object-cover"
               />
               {photo.isCover ? (
-                <Badge className="absolute left-2 top-2">Cover</Badge>
+                <Badge className="absolute top-2 left-2">Cover</Badge>
               ) : (
                 <Button
                   size="sm"
                   variant="secondary"
-                  className="absolute left-2 top-2 hidden group-hover:inline-flex"
+                  className="absolute top-2 left-2 hidden group-hover:inline-flex"
                   disabled={setCover.isPending}
                   onClick={() =>
                     setCover.mutate(photo.id, {

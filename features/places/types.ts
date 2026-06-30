@@ -1,4 +1,7 @@
-import type { BranchStatus, VerificationStatus } from "@/features/branches/types"
+import type {
+  BranchStatus,
+  VerificationStatus,
+} from "@/features/branches/types"
 
 export type PlaceStatus = "draft" | "published" | "archived"
 

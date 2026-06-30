@@ -63,8 +63,13 @@ export function useCreateMenuItem(branchId: string) {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ menuId, values }: { menuId: string; values: MenuItemFormValues }) =>
-      createMenuItem(api, menuId, values),
+    mutationFn: ({
+      menuId,
+      values,
+    }: {
+      menuId: string
+      values: MenuItemFormValues
+    }) => createMenuItem(api, menuId, values),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: menuKeys.branch(branchId) }),
   })

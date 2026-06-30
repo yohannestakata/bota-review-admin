@@ -5,12 +5,7 @@ import { CircleCheckIcon, LoaderIcon } from "lucide-react"
 
 import { DataTable } from "@/components/data-table"
 import { Badge } from "@/components/ui/badge"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export type OverviewRow = {
   id: number
@@ -73,7 +68,10 @@ const columns: ColumnDef<OverviewRow>[] = [
 
 export function OverviewTable({ data }: { data: OverviewRow[] }) {
   return (
-    <Tabs defaultValue="outline" className="w-full flex-col justify-start gap-4">
+    <Tabs
+      defaultValue="outline"
+      className="w-full flex-col justify-start gap-4"
+    >
       <div className="px-4 lg:px-6">
         <TabsList>
           <TabsTrigger value="outline">Outline</TabsTrigger>

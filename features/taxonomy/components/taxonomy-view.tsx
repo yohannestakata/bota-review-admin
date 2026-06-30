@@ -293,7 +293,11 @@ function TagDialog({
               </SelectTrigger>
               <SelectContent>
                 {TAG_CATEGORIES.map((option) => (
-                  <SelectItem key={option} value={option} className="capitalize">
+                  <SelectItem
+                    key={option}
+                    value={option}
+                    className="capitalize"
+                  >
                     {option}
                   </SelectItem>
                 ))}
@@ -365,7 +369,9 @@ function BasicTaxonomyPanel({
   }
 
   if (isError) {
-    return <div className="text-sm text-destructive">{apiErrorMessage(error)}</div>
+    return (
+      <div className="text-sm text-destructive">{apiErrorMessage(error)}</div>
+    )
   }
 
   return (
@@ -463,7 +469,9 @@ function TagsPanel({
   }
 
   if (isError) {
-    return <div className="text-sm text-destructive">{apiErrorMessage(error)}</div>
+    return (
+      <div className="text-sm text-destructive">{apiErrorMessage(error)}</div>
+    )
   }
 
   return (

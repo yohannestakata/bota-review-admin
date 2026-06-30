@@ -40,7 +40,11 @@ export function PlacesView() {
         onChange={(event) => setQ(event.target.value)}
         className="h-8 max-w-xs"
       />
-      <Button size="sm" nativeButton={false} render={<Link href="/places/new" />}>
+      <Button
+        size="sm"
+        nativeButton={false}
+        render={<Link href="/places/new" />}
+      >
         <PlusIcon className="size-4" />
         New place
       </Button>

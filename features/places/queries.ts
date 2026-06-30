@@ -11,7 +11,11 @@ import { useApi } from "@/lib/use-api"
 import { branchKeys } from "@/features/branches/keys"
 import { createPlace, getPlace, listPlaces, updatePlace } from "./api"
 import { placeKeys } from "./keys"
-import type { CreatePlaceBody, ListPlacesParams, UpdatePlaceBody } from "./types"
+import type {
+  CreatePlaceBody,
+  ListPlacesParams,
+  UpdatePlaceBody,
+} from "./types"
 
 export function usePlaces(params: ListPlacesParams) {
   const api = useApi()

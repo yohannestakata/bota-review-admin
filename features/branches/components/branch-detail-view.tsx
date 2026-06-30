@@ -274,16 +274,13 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
     if (form.neighborhoodId !== "none")
       branchBody.neighborhoodId = form.neighborhoodId
 
-    save.mutate(
-      branchBody,
-      {
-        onSuccess: () => {
-          toast.success("Saved")
-          resolveLinkedSubmission("Resolved by saving branch changes")
-        },
-        onError: (e) => toast.error(apiErrorMessage(e)),
-      }
-    )
+    save.mutate(branchBody, {
+      onSuccess: () => {
+        toast.success("Saved")
+        resolveLinkedSubmission("Resolved by saving branch changes")
+      },
+      onError: (e) => toast.error(apiErrorMessage(e)),
+    })
   }
 
   function resolveLinkedSubmission(note: string) {
@@ -326,7 +323,10 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-6 p-4 lg:p-6">
-      <div id="status" className="flex scroll-mt-6 flex-wrap items-center gap-3">
+      <div
+        id="status"
+        className="flex scroll-mt-6 flex-wrap items-center gap-3"
+      >
         <Button
           variant="outline"
           size="icon"
@@ -391,234 +391,237 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
 
       <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
         <FieldGroup className="max-w-2xl flex-1">
-        <FieldSet id="place" className="scroll-mt-6">
-          <FieldLegend>Place</FieldLegend>
-          <FieldDescription>
-            Shared business profile used by every branch under this place.
-          </FieldDescription>
-          <div className="flex items-center justify-between gap-3 rounded-md border p-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <Building2Icon className="size-5 shrink-0 text-muted-foreground" />
-              <div className="min-w-0">
-                <div className="truncate text-sm font-medium">
-                  {branch.place.name ?? "Untitled place"}
-                </div>
-                <div className="text-xs capitalize text-muted-foreground">
-                  {branch.place.type} · {branch.place.status}
+          <FieldSet id="place" className="scroll-mt-6">
+            <FieldLegend>Place</FieldLegend>
+            <FieldDescription>
+              Shared business profile used by every branch under this place.
+            </FieldDescription>
+            <div className="flex items-center justify-between gap-3 rounded-md border p-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Building2Icon className="size-5 shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">
+                    {branch.place.name ?? "Untitled place"}
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    {branch.place.type} · {branch.place.status}
+                  </div>
                 </div>
               </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              nativeButton={false}
-              render={<Link href={`/places/${branch.place.id}`} />}
-            >
-              <ExternalLinkIcon className="size-4" />
-              Open place
-            </Button>
-          </div>
-        </FieldSet>
-
-        <FieldSeparator />
-
-        <FieldSet id="location" className="scroll-mt-6">
-          <FieldLegend>Location &amp; contact</FieldLegend>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="label">Branch label</FieldLabel>
-              <Input
-                id="label"
-                value={form.label}
-                onChange={(e) => set("label", e.target.value)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="branch-status">Status</FieldLabel>
-              <Select
-                value={form.status}
-                onValueChange={(value) =>
-                  set("status", value as AdminBranch["status"])
-                }
+              <Button
+                variant="outline"
+                size="sm"
+                nativeButton={false}
+                render={<Link href={`/places/${branch.place.id}`} />}
               >
-                <SelectTrigger id="branch-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {BRANCH_STATUSES.map((status) => (
-                    <SelectItem
-                      key={status}
-                      value={status}
-                      className="capitalize"
-                    >
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="neighborhood">Neighborhood</FieldLabel>
-              <Select
-                value={form.neighborhoodId}
-                onValueChange={(v) => set("neighborhoodId", v ?? "none")}
-              >
-                <SelectTrigger id="neighborhood">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">—</SelectItem>
-                  {(neighborhoods.data ?? []).map((n) => (
-                    <SelectItem key={n.id} value={n.id}>
-                      {n.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="address">Address</FieldLabel>
-              <Input
-                id="address"
-                value={form.addressText}
-                onChange={(e) => set("addressText", e.target.value)}
-              />
-            </Field>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="latitude">Latitude</FieldLabel>
-                <Input
-                  id="latitude"
-                  value={form.latitude}
-                  onChange={(e) => set("latitude", e.target.value)}
-                  placeholder="9.0107"
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="longitude">Longitude</FieldLabel>
-                <Input
-                  id="longitude"
-                  value={form.longitude}
-                  onChange={(e) => set("longitude", e.target.value)}
-                  placeholder="38.7975"
-                />
-              </Field>
+                <ExternalLinkIcon className="size-4" />
+                Open place
+              </Button>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+          </FieldSet>
+
+          <FieldSeparator />
+
+          <FieldSet id="location" className="scroll-mt-6">
+            <FieldLegend>Location &amp; contact</FieldLegend>
+            <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="phone">Phone</FieldLabel>
+                <FieldLabel htmlFor="label">Branch label</FieldLabel>
                 <Input
-                  id="phone"
-                  value={form.phone}
-                  onChange={(e) => set("phone", e.target.value)}
+                  id="label"
+                  value={form.label}
+                  onChange={(e) => set("label", e.target.value)}
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="price">Price</FieldLabel>
+                <FieldLabel htmlFor="branch-status">Status</FieldLabel>
                 <Select
-                  value={form.priceLevel}
-                  onValueChange={(v) => set("priceLevel", v ?? "none")}
+                  value={form.status}
+                  onValueChange={(value) =>
+                    set("status", value as AdminBranch["status"])
+                  }
                 >
-                  <SelectTrigger id="price">
+                  <SelectTrigger id="branch-status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {PRICE_LEVELS.map((p) => (
-                      <SelectItem key={p.value} value={p.value}>
-                        {p.label}
+                    {BRANCH_STATUSES.map((status) => (
+                      <SelectItem
+                        key={status}
+                        value={status}
+                        className="capitalize"
+                      >
+                        {status}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </Field>
-            </div>
-          </FieldGroup>
-        </FieldSet>
+              <Field>
+                <FieldLabel htmlFor="neighborhood">Neighborhood</FieldLabel>
+                <Select
+                  value={form.neighborhoodId}
+                  onValueChange={(v) => set("neighborhoodId", v ?? "none")}
+                >
+                  <SelectTrigger id="neighborhood">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">—</SelectItem>
+                    {(neighborhoods.data ?? []).map((n) => (
+                      <SelectItem key={n.id} value={n.id}>
+                        {n.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="address">Address</FieldLabel>
+                <Input
+                  id="address"
+                  value={form.addressText}
+                  onChange={(e) => set("addressText", e.target.value)}
+                />
+              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="latitude">Latitude</FieldLabel>
+                  <Input
+                    id="latitude"
+                    value={form.latitude}
+                    onChange={(e) => set("latitude", e.target.value)}
+                    placeholder="9.0107"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="longitude">Longitude</FieldLabel>
+                  <Input
+                    id="longitude"
+                    value={form.longitude}
+                    onChange={(e) => set("longitude", e.target.value)}
+                    placeholder="38.7975"
+                  />
+                </Field>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="phone">Phone</FieldLabel>
+                  <Input
+                    id="phone"
+                    value={form.phone}
+                    onChange={(e) => set("phone", e.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="price">Price</FieldLabel>
+                  <Select
+                    value={form.priceLevel}
+                    onValueChange={(v) => set("priceLevel", v ?? "none")}
+                  >
+                    <SelectTrigger id="price">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRICE_LEVELS.map((p) => (
+                        <SelectItem key={p.value} value={p.value}>
+                          {p.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </FieldGroup>
+          </FieldSet>
 
-        <FieldSeparator />
+          <FieldSeparator />
 
-        <FieldSet id="hours" className="scroll-mt-6">
-          <FieldLegend>Hours</FieldLegend>
-          <FieldDescription>
-            Opening hours per day. Leave a day with no times to mark it closed.
-          </FieldDescription>
-          <BranchHoursEditor
-            value={form.hours}
-            onChange={(hours) => set("hours", hours)}
-          />
-        </FieldSet>
-
-        <FieldSeparator />
-
-        <FieldSet id="verification" className="scroll-mt-6">
-          <FieldLegend>Verification</FieldLegend>
-          <FieldDescription>
-            When this branch&apos;s information was last confirmed accurate.
-          </FieldDescription>
-          <Field className="max-w-xs">
-            <FieldLabel htmlFor="verified-at">Last verified</FieldLabel>
-            <NaturalDatePicker
-              id="verified-at"
-              value={form.verifiedAt}
-              onChange={(date) => set("verifiedAt", date)}
+          <FieldSet id="hours" className="scroll-mt-6">
+            <FieldLegend>Hours</FieldLegend>
+            <FieldDescription>
+              Opening hours per day. Leave a day with no times to mark it
+              closed.
+            </FieldDescription>
+            <BranchHoursEditor
+              value={form.hours}
+              onChange={(hours) => set("hours", hours)}
             />
-          </Field>
-        </FieldSet>
+          </FieldSet>
 
-        <FieldSeparator />
+          <FieldSeparator />
 
-        <FieldSet id="classification" className="scroll-mt-6">
-          <FieldLegend>Classification</FieldLegend>
-          <FieldGroup>
-            <Field>
-              <FieldLabel>Cuisines{selectedCount(form.cuisineIds.length)}</FieldLabel>
-              <ChipGroup
-                options={cuisines.data ?? []}
-                selected={form.cuisineIds}
-                onToggle={(id) => toggle("cuisineIds", id)}
+          <FieldSet id="verification" className="scroll-mt-6">
+            <FieldLegend>Verification</FieldLegend>
+            <FieldDescription>
+              When this branch&apos;s information was last confirmed accurate.
+            </FieldDescription>
+            <Field className="max-w-xs">
+              <FieldLabel htmlFor="verified-at">Last verified</FieldLabel>
+              <NaturalDatePicker
+                id="verified-at"
+                value={form.verifiedAt}
+                onChange={(date) => set("verifiedAt", date)}
               />
             </Field>
-            <Field>
-              <FieldLabel>Tags{selectedCount(form.tagIds.length)}</FieldLabel>
-              <TagChips
-                tags={tags.data ?? []}
-                selected={form.tagIds}
-                onToggle={(id) => toggle("tagIds", id)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel>
-                Amenities{selectedCount(form.amenityIds.length)}
-              </FieldLabel>
-              <ChipGroup
-                options={amenities.data ?? []}
-                selected={form.amenityIds}
-                onToggle={(id) => toggle("amenityIds", id)}
-              />
-            </Field>
-          </FieldGroup>
-        </FieldSet>
+          </FieldSet>
 
-        <FieldSeparator />
+          <FieldSeparator />
 
-        <FieldSet id="menus" className="scroll-mt-6">
-          <FieldLegend>Menus</FieldLegend>
-          <FieldDescription>
-            Menu sections and items shown on the branch menu screen.
-          </FieldDescription>
-          <BranchMenus branchId={branchId} />
-        </FieldSet>
+          <FieldSet id="classification" className="scroll-mt-6">
+            <FieldLegend>Classification</FieldLegend>
+            <FieldGroup>
+              <Field>
+                <FieldLabel>
+                  Cuisines{selectedCount(form.cuisineIds.length)}
+                </FieldLabel>
+                <ChipGroup
+                  options={cuisines.data ?? []}
+                  selected={form.cuisineIds}
+                  onToggle={(id) => toggle("cuisineIds", id)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Tags{selectedCount(form.tagIds.length)}</FieldLabel>
+                <TagChips
+                  tags={tags.data ?? []}
+                  selected={form.tagIds}
+                  onToggle={(id) => toggle("tagIds", id)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel>
+                  Amenities{selectedCount(form.amenityIds.length)}
+                </FieldLabel>
+                <ChipGroup
+                  options={amenities.data ?? []}
+                  selected={form.amenityIds}
+                  onToggle={(id) => toggle("amenityIds", id)}
+                />
+              </Field>
+            </FieldGroup>
+          </FieldSet>
 
-        <FieldSeparator />
+          <FieldSeparator />
 
-        <FieldSet id="photos" className="scroll-mt-6">
-          <FieldLegend>Photos</FieldLegend>
-          <FieldDescription>
-            At least one photo is required to publish. Uploads here are
-            auto-approved.
-          </FieldDescription>
-          <BranchPhotos branchId={branchId} />
-        </FieldSet>
+          <FieldSet id="menus" className="scroll-mt-6">
+            <FieldLegend>Menus</FieldLegend>
+            <FieldDescription>
+              Menu sections and items shown on the branch menu screen.
+            </FieldDescription>
+            <BranchMenus branchId={branchId} />
+          </FieldSet>
+
+          <FieldSeparator />
+
+          <FieldSet id="photos" className="scroll-mt-6">
+            <FieldLegend>Photos</FieldLegend>
+            <FieldDescription>
+              At least one photo is required to publish. Uploads here are
+              auto-approved.
+            </FieldDescription>
+            <BranchPhotos branchId={branchId} />
+          </FieldSet>
         </FieldGroup>
 
         <aside className="w-full shrink-0 xl:w-80">

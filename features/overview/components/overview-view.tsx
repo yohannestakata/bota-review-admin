@@ -158,7 +158,9 @@ export function OverviewView() {
               Nothing needs attention right now.
             </div>
           ) : (
-            data.workQueue.map((item) => <ActivityRow key={item.id} item={item} />)
+            data.workQueue.map((item) => (
+              <ActivityRow key={item.id} item={item} />
+            ))
           )}
         </CardContent>
       </Card>

@@ -251,7 +251,7 @@ function ClaimCard({
                     href={externalUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 inline-flex items-center gap-1 break-all font-medium underline underline-offset-2"
+                    className="mt-1 inline-flex items-center gap-1 font-medium break-all underline underline-offset-2"
                   >
                     {evidence}
                     <ExternalLinkIcon className="size-3 shrink-0" />
@@ -259,12 +259,12 @@ function ClaimCard({
                 ) : mailto ? (
                   <a
                     href={mailto}
-                    className="mt-1 break-all font-medium underline underline-offset-2"
+                    className="mt-1 font-medium break-all underline underline-offset-2"
                   >
                     {evidence}
                   </a>
                 ) : (
-                  <div className="mt-1 break-all font-medium">{evidence}</div>
+                  <div className="mt-1 font-medium break-all">{evidence}</div>
                 )
               ) : null}
             </div>
