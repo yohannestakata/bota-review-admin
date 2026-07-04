@@ -267,6 +267,24 @@ export function SubmissionDetailDialog({
                   </span>
                 </Row>
               ) : null}
+              {details?.hours?.length ? (
+                <Row label="Hours">
+                  {details.hours.length} day
+                  {details.hours.length === 1 ? "" : "s"} provided
+                </Row>
+              ) : null}
+              {details?.menu?.length ? (
+                <Row label="Menu">
+                  {details.menu.length} item
+                  {details.menu.length === 1 ? "" : "s"}
+                </Row>
+              ) : null}
+              {details?.tags?.length ? (
+                <Row label="Tags">{details.tags.join(", ")}</Row>
+              ) : null}
+              {details?.amenities?.length ? (
+                <Row label="Amenities">{details.amenities.join(", ")}</Row>
+              ) : null}
             </>
           ) : null}
 

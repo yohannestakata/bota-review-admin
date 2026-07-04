@@ -101,6 +101,10 @@ const AUTO_APPLIED_FIELDS = [
   "address text",
   "price",
   "price level",
+  // Structured corrections — approve applies the typed details to the branch.
+  "hours",
+  "menu/prices",
+  "tags/amenities",
 ]
 
 export function normalizedField(fieldName: string | null): string {
@@ -119,6 +123,12 @@ export function fieldCorrectionEffect(fieldName: string | null): string {
     case "price":
     case "price level":
       return "Applies to the branch price level."
+    case "hours":
+      return "Applies the submitted hours to the branch."
+    case "menu/prices":
+      return "Replaces the branch menu with the submitted items (old one archived)."
+    case "tags/amenities":
+      return "Replaces the branch's tags & amenities with the submitted set."
     default:
       return "Open the branch to resolve this, or close it without changes."
   }
