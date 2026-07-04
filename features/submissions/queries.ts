@@ -50,8 +50,8 @@ export function useReviewSubmission() {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (vars: { id: string; note?: string }) =>
-      reviewSubmission(api, vars.id, vars.note),
+    mutationFn: (vars: { id: string; note?: string; placeId?: string }) =>
+      reviewSubmission(api, vars.id, vars.note, vars.placeId),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: submissionKeys.all }),
   })

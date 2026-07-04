@@ -28,16 +28,21 @@ export async function getSubmission(
   return data
 }
 
-// Approving a field_correction applies its suggested value to the branch and
-// records an audit entry (handled server-side).
+// Approving applies the submission server-side: a field_correction writes its
+// value to the branch; a place_missing creates a draft place + branch (attached
+// to `placeId` when deduping against an existing place, otherwise brand-new).
 export async function reviewSubmission(
   api: AxiosInstance,
   id: string,
-  note?: string
+  note?: string,
+  placeId?: string
 ): Promise<Submission> {
   const { data } = await api.patch<Submission>(
     `/admin/submissions/${id}/review`,
-    note ? { note } : {}
+    {
+      ...(note ? { note } : {}),
+      ...(placeId ? { placeId } : {}),
+    }
   )
   return data
 }

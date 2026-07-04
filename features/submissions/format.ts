@@ -132,10 +132,9 @@ export function isManualReview(submission: SubmissionListItem): boolean {
   if (submission.type === "field_correction") {
     return !isAutoAppliedField(submission.fieldName)
   }
-  return (
-    submission.type === "place_missing" ||
-    submission.type === "temporarily_closed"
-  )
+  // place_missing now applies on approve (creates a draft place + branch), so it
+  // is handled by its own resolver, not the generic manual-review flow.
+  return submission.type === "temporarily_closed"
 }
 
 export function reviewAction(submission: SubmissionListItem): ReviewAction {
@@ -156,11 +155,11 @@ export function reviewAction(submission: SubmissionListItem): ReviewAction {
           }
     case "place_missing":
       return {
-        label: "Resolve without changes",
-        pendingLabel: "Resolving…",
+        label: "Create place",
+        pendingLabel: "Creating…",
         effect:
-          "Enrich and publish the branch on this page, or close it without changes.",
-        success: "Resolved",
+          "Creates a draft place + branch from this tip. Add a location & photo, then publish.",
+        success: "Draft place created",
       }
     case "temporarily_closed":
       return {
