@@ -275,8 +275,25 @@ export function SubmissionDetailDialog({
               ) : null}
               {details?.menu?.length ? (
                 <Row label="Menu">
-                  {details.menu.length} item
-                  {details.menu.length === 1 ? "" : "s"}
+                  <span>
+                    {details.menu.length} item
+                    {details.menu.length === 1 ? "" : "s"}
+                  </span>
+                  {details.menu.some((item) => item.imageUrl) ? (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {details.menu
+                        .filter((item) => item.imageUrl)
+                        .map((item) => (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            alt={item.name}
+                            className="h-12 w-12 rounded object-cover"
+                            key={item.publicId ?? item.imageUrl}
+                            src={item.imageUrl}
+                          />
+                        ))}
+                    </div>
+                  ) : null}
                 </Row>
               ) : null}
               {details?.tags?.length ? (
@@ -326,8 +343,25 @@ export function SubmissionDetailDialog({
               ) : null}
               {details?.menu?.length ? (
                 <Row label="Menu">
-                  {details.menu.length} item
-                  {details.menu.length === 1 ? "" : "s"}
+                  <span>
+                    {details.menu.length} item
+                    {details.menu.length === 1 ? "" : "s"}
+                  </span>
+                  {details.menu.some((item) => item.imageUrl) ? (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {details.menu
+                        .filter((item) => item.imageUrl)
+                        .map((item) => (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            alt={item.name}
+                            className="h-12 w-12 rounded object-cover"
+                            key={item.publicId ?? item.imageUrl}
+                            src={item.imageUrl}
+                          />
+                        ))}
+                    </div>
+                  ) : null}
                 </Row>
               ) : null}
               {details?.amenities?.length ? (

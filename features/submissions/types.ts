@@ -16,7 +16,12 @@ export type SubmissionHoursEntry = {
   close: string
 }
 
-export type SubmissionMenuItem = { name: string; price?: number }
+export type SubmissionMenuItem = {
+  name: string
+  price?: number
+  imageUrl?: string
+  publicId?: string
+}
 
 export type PlaceMissingDetails = {
   placeName: string
