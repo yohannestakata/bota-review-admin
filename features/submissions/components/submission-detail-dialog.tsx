@@ -89,8 +89,8 @@ function DuplicateFinder({
         ) : null}
       </div>
       <p className="text-xs text-muted-foreground">
-        Attach as a new branch of an existing place to avoid duplicates, or leave
-        empty to create a brand-new place.
+        Attach as a new branch of an existing place to avoid duplicates, or
+        leave empty to create a brand-new place.
       </p>
       <Input
         value={q}
@@ -105,9 +105,7 @@ function DuplicateFinder({
               key={place.id}
               type="button"
               onClick={() =>
-                onSelect(
-                  isSelected ? null : { id: place.id, name: place.name }
-                )
+                onSelect(isSelected ? null : { id: place.id, name: place.name })
               }
               className={cn(
                 "flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-left",
@@ -164,7 +162,9 @@ export function SubmissionDetailDialog({
   const [resolutionNote, setResolutionNote] = useState("")
   // For place_missing: the existing place to attach this branch to (dedupe),
   // or null to create a brand-new place on approve.
-  const [attach, setAttach] = useState<{ id: string; name: string } | null>(null)
+  const [attach, setAttach] = useState<{ id: string; name: string } | null>(
+    null
+  )
   const busy = review.isPending || dismiss.isPending
   const isPending = submission.status === "pending"
   const details = submission.details as PlaceMissingDetails | null
@@ -279,6 +279,17 @@ export function SubmissionDetailDialog({
                     {details.menu.length} item
                     {details.menu.length === 1 ? "" : "s"}
                   </span>
+                  {details.menu.some((item) => item.category) ? (
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {Array.from(
+                        new Set(
+                          details.menu
+                            .map((item) => item.category)
+                            .filter(Boolean)
+                        )
+                      ).join(", ")}
+                    </span>
+                  ) : null}
                   {details.menu.some((item) => item.imageUrl) ? (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {details.menu
@@ -301,6 +312,40 @@ export function SubmissionDetailDialog({
               ) : null}
               {details?.amenities?.length ? (
                 <Row label="Amenities">{details.amenities.join(", ")}</Row>
+              ) : null}
+              {details?.photos?.length ? (
+                <Row label="Photos to add">
+                  <div className="flex flex-wrap gap-2">
+                    {details.photos.map((photo) => (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        alt="Submitted"
+                        className="h-20 w-20 rounded-md object-cover"
+                        key={photo.publicId}
+                        src={photo.url}
+                      />
+                    ))}
+                  </div>
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    Approval sends these to the photo moderation queue.
+                  </span>
+                </Row>
+              ) : null}
+              {details?.reportedPhotoId ? (
+                <Row label="Photo to remove">
+                  {details.reportedPhotoUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      alt="Reported"
+                      className="h-28 w-28 rounded-md object-cover"
+                      src={details.reportedPhotoUrl}
+                    />
+                  ) : (
+                    <span className="font-mono text-xs">
+                      {details.reportedPhotoId}
+                    </span>
+                  )}
+                </Row>
               ) : null}
             </>
           ) : null}
@@ -347,6 +392,17 @@ export function SubmissionDetailDialog({
                     {details.menu.length} item
                     {details.menu.length === 1 ? "" : "s"}
                   </span>
+                  {details.menu.some((item) => item.category) ? (
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {Array.from(
+                        new Set(
+                          details.menu
+                            .map((item) => item.category)
+                            .filter(Boolean)
+                        )
+                      ).join(", ")}
+                    </span>
+                  ) : null}
                   {details.menu.some((item) => item.imageUrl) ? (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {details.menu
@@ -420,9 +476,7 @@ export function SubmissionDetailDialog({
         {isPending ? (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
             <p className="text-xs text-muted-foreground">
-              {attach
-                ? `Adds a new branch to ${attach.name}.`
-                : action.effect}
+              {attach ? `Adds a new branch to ${attach.name}.` : action.effect}
             </p>
             <div className="flex gap-2">
               {manual && editHref ? (

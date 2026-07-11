@@ -105,6 +105,7 @@ const AUTO_APPLIED_FIELDS = [
   "hours",
   "menu/prices",
   "tags/amenities",
+  "photos",
 ]
 
 export function normalizedField(fieldName: string | null): string {
@@ -129,6 +130,8 @@ export function fieldCorrectionEffect(fieldName: string | null): string {
       return "Replaces the branch menu with the submitted items (old one archived)."
     case "tags/amenities":
       return "Replaces the branch's tags & amenities with the submitted set."
+    case "photos":
+      return "Adds submitted photos to moderation or removes the specifically reported photo."
     default:
       return "Open the branch to resolve this, or close it without changes."
   }

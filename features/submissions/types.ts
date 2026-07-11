@@ -18,6 +18,7 @@ export type SubmissionHoursEntry = {
 
 export type SubmissionMenuItem = {
   name: string
+  category?: string
   price?: number
   imageUrl?: string
   publicId?: string
@@ -41,6 +42,8 @@ export type PlaceMissingDetails = {
   tags?: string[]
   amenities?: string[]
   photos?: { publicId: string; url: string; width: number; height: number }[]
+  reportedPhotoId?: string
+  reportedPhotoUrl?: string
 }
 
 // Raw submission row (returned by review/dismiss).
