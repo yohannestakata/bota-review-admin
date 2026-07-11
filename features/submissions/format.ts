@@ -125,11 +125,11 @@ export function fieldCorrectionEffect(fieldName: string | null): string {
     case "price level":
       return "Applies to the branch price level."
     case "hours":
-      return "Applies the submitted hours to the branch."
+      return "Applies only the submitted day-level opening-hours changes."
     case "menu/prices":
-      return "Replaces the branch menu with the submitted items (old one archived)."
+      return "Applies only the submitted menu item additions, edits, or removals."
     case "tags/amenities":
-      return "Replaces the branch's tags & amenities with the submitted set."
+      return "Adds or removes only the submitted tags and amenities."
     case "photos":
       return "Adds submitted photos to moderation or removes the specifically reported photo."
     default:

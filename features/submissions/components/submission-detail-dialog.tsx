@@ -273,6 +273,18 @@ export function SubmissionDetailDialog({
                   {details.hours.length === 1 ? "" : "s"} provided
                 </Row>
               ) : null}
+              {details?.hourChanges?.length ? (
+                <Row label="Hour changes">
+                  {details.hourChanges.map((change) => (
+                    <div key={change.day} className="capitalize">
+                      {change.day}:{" "}
+                      {change.operation === "close"
+                        ? "Closed"
+                        : `${change.open} to ${change.close}`}
+                    </div>
+                  ))}
+                </Row>
+              ) : null}
               {details?.menu?.length ? (
                 <Row label="Menu">
                   <span>
@@ -307,11 +319,77 @@ export function SubmissionDetailDialog({
                   ) : null}
                 </Row>
               ) : null}
+              {details?.menuChanges?.length ? (
+                <Row label="Menu changes">
+                  <div className="space-y-2">
+                    {details.menuChanges.map((change, index) => (
+                      <div
+                        className="flex items-center gap-2"
+                        key={`${change.operation}-${"itemId" in change ? change.itemId : index}`}
+                      >
+                        <Badge variant="outline" className="capitalize">
+                          {change.operation}
+                        </Badge>
+                        {"item" in change ? (
+                          <>
+                            <span className="font-medium">
+                              {change.item.name}
+                            </span>
+                            {change.item.category ? (
+                              <span className="text-muted-foreground">
+                                {change.item.category}
+                              </span>
+                            ) : null}
+                            {change.item.imageUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img
+                                alt={change.item.name}
+                                className="h-10 w-10 rounded object-cover"
+                                src={change.item.imageUrl}
+                              />
+                            ) : null}
+                          </>
+                        ) : (
+                          <span className="font-medium">{change.itemName}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Row>
+              ) : null}
               {details?.tags?.length ? (
                 <Row label="Tags">{details.tags.join(", ")}</Row>
               ) : null}
               {details?.amenities?.length ? (
                 <Row label="Amenities">{details.amenities.join(", ")}</Row>
+              ) : null}
+              {details?.tagChanges ? (
+                <Row label="Tag changes">
+                  {details.tagChanges.add.length
+                    ? `Add: ${details.tagChanges.add.join(", ")}`
+                    : ""}
+                  {details.tagChanges.add.length &&
+                  details.tagChanges.remove.length
+                    ? " · "
+                    : ""}
+                  {details.tagChanges.remove.length
+                    ? `Remove: ${details.tagChanges.remove.join(", ")}`
+                    : ""}
+                </Row>
+              ) : null}
+              {details?.amenityChanges ? (
+                <Row label="Amenity changes">
+                  {details.amenityChanges.add.length
+                    ? `Add: ${details.amenityChanges.add.join(", ")}`
+                    : ""}
+                  {details.amenityChanges.add.length &&
+                  details.amenityChanges.remove.length
+                    ? " · "
+                    : ""}
+                  {details.amenityChanges.remove.length
+                    ? `Remove: ${details.amenityChanges.remove.join(", ")}`
+                    : ""}
+                </Row>
               ) : null}
               {details?.photos?.length ? (
                 <Row label="Photos to add">

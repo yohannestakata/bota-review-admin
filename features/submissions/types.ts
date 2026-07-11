@@ -16,13 +16,33 @@ export type SubmissionHoursEntry = {
   close: string
 }
 
+export type SubmissionHourChange =
+  | {
+      operation: "set"
+      day: SubmissionHoursEntry["day"]
+      open: string
+      close: string
+    }
+  | { operation: "close"; day: SubmissionHoursEntry["day"] }
+
+export type SubmissionTaxonomyChanges = {
+  add: string[]
+  remove: string[]
+}
+
 export type SubmissionMenuItem = {
   name: string
   category?: string
   price?: number
   imageUrl?: string
   publicId?: string
+  photoIsNew?: boolean
 }
+
+export type SubmissionMenuChange =
+  | { operation: "add"; item: SubmissionMenuItem }
+  | { operation: "update"; itemId: string; item: SubmissionMenuItem }
+  | { operation: "remove"; itemId: string; itemName: string }
 
 export type PlaceMissingDetails = {
   placeName: string
@@ -37,10 +57,14 @@ export type PlaceMissingDetails = {
   longitude?: number
   type?: "restaurant" | "cafe" | "bakery" | "bar"
   hours?: SubmissionHoursEntry[]
+  hourChanges?: SubmissionHourChange[]
   menu?: SubmissionMenuItem[]
+  menuChanges?: SubmissionMenuChange[]
   cuisines?: string[]
   tags?: string[]
   amenities?: string[]
+  tagChanges?: SubmissionTaxonomyChanges
+  amenityChanges?: SubmissionTaxonomyChanges
   photos?: { publicId: string; url: string; width: number; height: number }[]
   reportedPhotoId?: string
   reportedPhotoUrl?: string
