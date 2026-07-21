@@ -39,6 +39,7 @@ import type { SubmissionListItem } from "@/features/submissions"
 import {
   useAmenities,
   useCuisines,
+  useFoodCategories,
   useNeighborhoods,
   useTags,
 } from "@/features/taxonomy"
@@ -76,6 +77,7 @@ type FormState = {
   status: AdminBranch["status"]
   neighborhoodId: string
   cuisineIds: string[]
+  foodCategoryIds: string[]
   tagIds: string[]
   amenityIds: string[]
 }
@@ -95,6 +97,7 @@ function initForm(branch: AdminBranch): FormState {
     status: branch.status,
     neighborhoodId: branch.neighborhood?.id ?? "none",
     cuisineIds: branch.cuisines.map((c) => c.id),
+    foodCategoryIds: branch.foodCategories.map((category) => category.id),
     tagIds: branch.tags.map((t) => t.id),
     amenityIds: branch.amenities.map((a) => a.id),
   }
@@ -200,6 +203,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
   }, [resolveParam])
   const { data: branch, isPending, isError, error } = useBranch(branchId)
   const cuisines = useCuisines()
+  const foodCategories = useFoodCategories()
   const tags = useTags()
   const amenities = useAmenities()
   const neighborhoods = useNeighborhoods()
@@ -242,7 +246,10 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev))
 
-  const toggle = (key: "cuisineIds" | "tagIds" | "amenityIds", id: string) =>
+  const toggle = (
+    key: "cuisineIds" | "foodCategoryIds" | "tagIds" | "amenityIds",
+    id: string
+  ) =>
     setForm((prev) => {
       if (!prev) return prev
       const has = prev[key].includes(id)
@@ -252,32 +259,56 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
       }
     })
 
+  function buildBranchBody(formState: FormState): UpdateBranchBody {
+    const branchBody: UpdateBranchBody = {
+      label: formState.label.trim(),
+      addressText: formState.addressText.trim(),
+      hours: normalizeHours(formState.hours),
+      informationLastVerifiedAt: formState.verifiedAt
+        ? formState.verifiedAt.toISOString()
+        : null,
+      cuisineIds: formState.cuisineIds,
+      foodCategoryIds: formState.foodCategoryIds,
+      tagIds: formState.tagIds,
+      amenityIds: formState.amenityIds,
+      status: formState.status,
+    }
+    if (formState.phone.trim()) branchBody.phone = formState.phone.trim()
+    if (formState.latitude.trim()) branchBody.latitude = formState.latitude.trim()
+    if (formState.longitude.trim())
+      branchBody.longitude = formState.longitude.trim()
+    if (formState.priceLevel !== "none")
+      branchBody.priceLevel = Number(formState.priceLevel)
+    if (formState.neighborhoodId !== "none")
+      branchBody.neighborhoodId = formState.neighborhoodId
+    return branchBody
+  }
+
   function onSave() {
     if (!form) return
-    const branchBody: UpdateBranchBody = {
-      label: form.label.trim(),
-      addressText: form.addressText.trim(),
-      hours: normalizeHours(form.hours),
-      informationLastVerifiedAt: form.verifiedAt
-        ? form.verifiedAt.toISOString()
-        : null,
-      cuisineIds: form.cuisineIds,
-      tagIds: form.tagIds,
-      amenityIds: form.amenityIds,
-      status: form.status,
-    }
-    if (form.phone.trim()) branchBody.phone = form.phone.trim()
-    if (form.latitude.trim()) branchBody.latitude = form.latitude.trim()
-    if (form.longitude.trim()) branchBody.longitude = form.longitude.trim()
-    if (form.priceLevel !== "none")
-      branchBody.priceLevel = Number(form.priceLevel)
-    if (form.neighborhoodId !== "none")
-      branchBody.neighborhoodId = form.neighborhoodId
-
-    save.mutate(branchBody, {
+    save.mutate(buildBranchBody(form), {
       onSuccess: () => {
         toast.success("Saved")
         resolveLinkedSubmission("Resolved by saving branch changes")
+      },
+      onError: (e) => toast.error(apiErrorMessage(e)),
+    })
+  }
+
+  // Publish validates against the persisted branch, so save the current form
+  // first — otherwise selections made but not yet saved (e.g. cuisines) fail
+  // with BRANCH_INCOMPLETE.
+  function onPublish() {
+    if (!form) return
+    save.mutate(buildBranchBody(form), {
+      onSuccess: () => {
+        publish.mutate(branchId, {
+          onSuccess: () => {
+            toast.success("Published")
+            resolveLinkedSubmission("Resolved by publishing the branch")
+          },
+          onError: (e: unknown) => toast.error(apiErrorMessage(e)),
+        })
       },
       onError: (e) => toast.error(apiErrorMessage(e)),
     })
@@ -345,13 +376,7 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
               variant="outline"
               size="sm"
               disabled={busy}
-              onClick={() =>
-                runStatus(
-                  publish,
-                  "Published",
-                  "Resolved by publishing the branch"
-                )
-              }
+              onClick={onPublish}
             >
               Publish
             </Button>
@@ -579,6 +604,16 @@ export function BranchDetailView({ branchId }: { branchId: string }) {
                   options={cuisines.data ?? []}
                   selected={form.cuisineIds}
                   onToggle={(id) => toggle("cuisineIds", id)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel>
+                  Food categories{selectedCount(form.foodCategoryIds.length)}
+                </FieldLabel>
+                <ChipGroup
+                  options={foodCategories.data ?? []}
+                  selected={form.foodCategoryIds}
+                  onToggle={(id) => toggle("foodCategoryIds", id)}
                 />
               </Field>
               <Field>
