@@ -8,6 +8,7 @@ import {
   createTaxonomyItem,
   listAmenities,
   listCuisines,
+  listFoodCategories,
   listNeighborhoods,
   listTags,
   updateTag,
@@ -33,6 +34,15 @@ export function useCuisines() {
   return useQuery({
     queryKey: taxonomyKeys.list("cuisines"),
     queryFn: () => listCuisines(api),
+    staleTime: TAXONOMY_STALE_TIME,
+  })
+}
+
+export function useFoodCategories() {
+  const api = useApi()
+  return useQuery({
+    queryKey: taxonomyKeys.list("food-categories"),
+    queryFn: () => listFoodCategories(api),
     staleTime: TAXONOMY_STALE_TIME,
   })
 }

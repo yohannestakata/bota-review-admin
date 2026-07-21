@@ -30,6 +30,7 @@ import { usePlaces } from "@/features/places"
 import {
   useAmenities,
   useCuisines,
+  useFoodCategories,
   useNeighborhoods,
   useTags,
 } from "@/features/taxonomy"
@@ -71,6 +72,7 @@ type FormState = {
   status: AdminBranch["status"]
   neighborhoodId: string
   cuisineIds: string[]
+  foodCategoryIds: string[]
   tagIds: string[]
   amenityIds: string[]
 }
@@ -156,6 +158,7 @@ export function BranchCreateView() {
   const create = useCreateBranch()
   const places = usePlaces({ page: 1, limit: 50 })
   const cuisines = useCuisines()
+  const foodCategories = useFoodCategories()
   const tags = useTags()
   const amenities = useAmenities()
   const neighborhoods = useNeighborhoods()
@@ -172,6 +175,7 @@ export function BranchCreateView() {
     status: "draft",
     neighborhoodId: searchParams.get("neighborhoodId") ?? "none",
     cuisineIds: [],
+    foodCategoryIds: [],
     tagIds: [],
     amenityIds: [],
   })
@@ -179,7 +183,10 @@ export function BranchCreateView() {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
-  const toggle = (key: "cuisineIds" | "tagIds" | "amenityIds", id: string) =>
+  const toggle = (
+    key: "cuisineIds" | "foodCategoryIds" | "tagIds" | "amenityIds",
+    id: string
+  ) =>
     setForm((prev) => {
       const has = prev[key].includes(id)
       return {
@@ -201,6 +208,7 @@ export function BranchCreateView() {
         ? form.verifiedAt.toISOString()
         : null,
       cuisineIds: form.cuisineIds,
+      foodCategoryIds: form.foodCategoryIds,
       tagIds: form.tagIds,
       amenityIds: form.amenityIds,
     }
@@ -447,6 +455,16 @@ export function BranchCreateView() {
                 options={cuisines.data ?? []}
                 selected={form.cuisineIds}
                 onToggle={(id) => toggle("cuisineIds", id)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>
+                Food categories{selectedCount(form.foodCategoryIds.length)}
+              </FieldLabel>
+              <ChipGroup
+                options={foodCategories.data ?? []}
+                selected={form.foodCategoryIds}
+                onToggle={(id) => toggle("foodCategoryIds", id)}
               />
             </Field>
             <Field>

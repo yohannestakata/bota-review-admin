@@ -11,11 +11,17 @@ export type TaxonomyItem = {
 }
 
 export type Cuisine = TaxonomyItem
+export type FoodCategory = TaxonomyItem
 export type Amenity = TaxonomyItem
 export type Neighborhood = TaxonomyItem
 export type Tag = TaxonomyItem & { category: TagCategory }
 
-export type TaxonomyKind = "neighborhoods" | "cuisines" | "tags" | "amenities"
+export type TaxonomyKind =
+  | "neighborhoods"
+  | "cuisines"
+  | "food-categories"
+  | "tags"
+  | "amenities"
 
 export type CreateTaxonomyItemBody = {
   name: string

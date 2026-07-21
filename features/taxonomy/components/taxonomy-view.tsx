@@ -38,6 +38,7 @@ import {
   useCreateTag,
   useCreateTaxonomyItem,
   useCuisines,
+  useFoodCategories,
   useNeighborhoods,
   useTags,
   useUpdateTag,
@@ -59,6 +60,7 @@ const STATUSES: TaxonomyStatus[] = ["active", "archived"]
 const SINGULAR_LABELS: Record<BasicKind, string> = {
   neighborhoods: "neighborhood",
   cuisines: "cuisine",
+  "food-categories": "food category",
   amenities: "amenity",
 }
 
@@ -555,6 +557,7 @@ export function TaxonomyView({
 }) {
   const neighborhoods = useNeighborhoods()
   const cuisines = useCuisines()
+  const foodCategories = useFoodCategories()
   const tags = useTags()
   const amenities = useAmenities()
 
@@ -563,6 +566,7 @@ export function TaxonomyView({
       <Tabs defaultValue={defaultValue}>
         <TabsList>
           <TabsTrigger value="cuisines">Cuisines</TabsTrigger>
+          <TabsTrigger value="food-categories">Food categories</TabsTrigger>
           <TabsTrigger value="tags">Tags</TabsTrigger>
           <TabsTrigger value="amenities">Amenities</TabsTrigger>
           <TabsTrigger value="neighborhoods">Neighborhoods</TabsTrigger>
@@ -574,6 +578,15 @@ export function TaxonomyView({
             isPending={cuisines.isPending}
             isError={cuisines.isError}
             error={cuisines.error}
+          />
+        </TabsContent>
+        <TabsContent value="food-categories">
+          <BasicTaxonomyPanel
+            kind="food-categories"
+            items={foodCategories.data}
+            isPending={foodCategories.isPending}
+            isError={foodCategories.isError}
+            error={foodCategories.error}
           />
         </TabsContent>
         <TabsContent value="tags">

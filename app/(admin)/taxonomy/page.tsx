@@ -7,6 +7,7 @@ import {
 import {
   listAmenities,
   listCuisines,
+  listFoodCategories,
   listNeighborhoods,
   listTags,
   TaxonomyView,
@@ -22,6 +23,10 @@ export default async function TaxonomyPage() {
       queryClient.prefetchQuery({
         queryKey: taxonomyKeys.list("cuisines"),
         queryFn: () => listCuisines(api),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: taxonomyKeys.list("food-categories"),
+        queryFn: () => listFoodCategories(api),
       }),
       queryClient.prefetchQuery({
         queryKey: taxonomyKeys.list("tags"),

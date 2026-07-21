@@ -40,6 +40,7 @@ export type AdminBranch = {
   }
   neighborhood: { id: string; name: string | null; slug: string | null } | null
   cuisines: TaxonomyRef[]
+  foodCategories: TaxonomyRef[]
   tags: (TaxonomyRef & { category: string })[]
   amenities: TaxonomyRef[]
 }
@@ -65,6 +66,7 @@ export type UpdateBranchBody = {
   status?: BranchStatus
   neighborhoodId?: string
   cuisineIds?: string[]
+  foodCategoryIds?: string[]
   tagIds?: string[]
   amenityIds?: string[]
 }
@@ -82,6 +84,7 @@ export type CreateBranchBody = {
   status?: BranchStatus
   neighborhoodId?: string
   cuisineIds?: string[]
+  foodCategoryIds?: string[]
   tagIds?: string[]
   amenityIds?: string[]
 }
