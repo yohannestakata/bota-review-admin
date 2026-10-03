@@ -132,10 +132,20 @@ export function InboxPage() {
   const index = selected ? visible.indexOf(selected) : -1
 
   function run(item: InboxItem, chosen: Decision) {
+    // "A new place" over the submitter's suggestion must be said explicitly
+    // (null), or the API falls back to their pick.
+    const suggested =
+      item.kind === "submission" &&
+      (item.data.details as { existingPlaceId?: string } | null)
+        ?.existingPlaceId
     const decision: Decision =
-      chosen.action === "approve" && attachFor(item)
-        ? { ...chosen, placeId: attachFor(item) }
-        : chosen
+      chosen.action !== "approve"
+        ? chosen
+        : attachFor(item)
+          ? { ...chosen, placeId: attachFor(item) }
+          : suggested
+            ? { ...chosen, placeId: null }
+            : chosen
     setRejectOpen(false)
     const next = visible[index + 1] ?? visible[index - 1] ?? null
     const restore = () =>

@@ -191,7 +191,8 @@ export type Decision =
       action: "approve"
       note?: string
       /** A new-place submission: add it as a branch of this place. */
-      placeId?: string
+      /** A place to add it to; null = a new place despite a suggestion. */
+      placeId?: string | null
     }
   | { action: "reject"; reason?: RejectionReason; note?: string }
 
@@ -222,7 +223,9 @@ function endpoint(item: InboxItem, decision: Decision) {
             path: `/admin/submissions/${item.data.id}/review`,
             body: {
               ...(decision.note ? { note: decision.note } : {}),
-              ...(decision.placeId ? { placeId: decision.placeId } : {}),
+              ...(decision.placeId !== undefined
+                ? { placeId: decision.placeId }
+                : {}),
             },
           }
         : {
