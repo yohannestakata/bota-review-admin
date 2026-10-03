@@ -234,7 +234,11 @@ export function useUpdatePlace(placeId: string) {
       description?: string | null
     }) =>
       (await api(`/admin/places/${placeId}`, { method: "PATCH", body })).data,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: placesKey }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: placesKey }),
+        queryClient.invalidateQueries({ queryKey: ["quality"] }),
+      ]),
   })
 }
 
