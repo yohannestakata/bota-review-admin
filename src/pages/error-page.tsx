@@ -27,7 +27,9 @@ export function ErrorPage() {
   return (
     <Empty className="min-h-[60svh]">
       <EmptyHeader>
-        <EmptyTitle>{staleChunk ? "Admin was updated" : "This page hit a problem"}</EmptyTitle>
+        <EmptyTitle>
+          {staleChunk ? "Admin was updated" : "This page hit a problem"}
+        </EmptyTitle>
         <EmptyDescription>
           {staleChunk ? "Reload to get the latest version." : message}
         </EmptyDescription>

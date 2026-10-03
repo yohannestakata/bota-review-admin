@@ -55,7 +55,7 @@ export function PlacesPage() {
         <SearchInput
           value={q}
           onChange={(value) => set("q", value)}
-          placeholder="Search places"
+          placeholder="Search places…"
           className="w-72"
         />
         <ToggleGroup

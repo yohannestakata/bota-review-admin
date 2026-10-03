@@ -14,7 +14,9 @@ export function NotFoundPage() {
     <Empty className="flex-1">
       <EmptyHeader>
         <EmptyTitle>Page not found</EmptyTitle>
-        <EmptyDescription>That address doesn't match anything here.</EmptyDescription>
+        <EmptyDescription>
+          That address doesn't match anything here.
+        </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button render={<Link to="/" />}>Back to Inbox</Button>

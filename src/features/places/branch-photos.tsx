@@ -136,12 +136,18 @@ export function BranchPhotos({ branchId }: { branchId: string }) {
                   {/* Shown while the photo loads, or if it never does. */}
                   <Empty className="absolute inset-0 border">
                     <EmptyMedia>
-                      <HugeiconsIcon icon={Image01Icon} strokeWidth={2} />
+                      <HugeiconsIcon
+                        aria-hidden="true"
+                        icon={Image01Icon}
+                        strokeWidth={2}
+                      />
                     </EmptyMedia>
                   </Empty>
                   <img
                     src={thumbnail(photo.url, 600)}
-                    alt=""
+                    width={600}
+                    height={600}
+                    alt={`Photo by ${photo.uploader.displayName}`}
                     loading="lazy"
                     className="absolute inset-0 size-full rounded-lg object-cover"
                   />

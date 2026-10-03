@@ -252,6 +252,7 @@ export function InboxPage() {
                 >
                   <ItemMedia variant="icon">
                     <HugeiconsIcon
+                      aria-hidden="true"
                       icon={
                         item.reason === "reported"
                           ? Flag02Icon
@@ -339,7 +340,11 @@ export function InboxPage() {
           <Empty className="flex-1">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <HugeiconsIcon icon={InboxCheckIcon} strokeWidth={2} />
+                <HugeiconsIcon
+                  aria-hidden="true"
+                  icon={InboxCheckIcon}
+                  strokeWidth={2}
+                />
               </EmptyMedia>
               <EmptyTitle>All clear</EmptyTitle>
               <EmptyDescription>

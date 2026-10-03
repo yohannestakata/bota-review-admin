@@ -35,14 +35,16 @@ export function AuthGate() {
     queryKey: ["auth-check"],
     queryFn: async () => (await api<AuthCheck>("/admin/auth-check")).data,
     enabled: isLoaded && isSignedIn === true,
-    retry: false,
+    // Ride out a restarting API; a real "not an admin" (4xx) answer is final.
+    retry: (count, error) =>
+      count < 3 && !(error instanceof ApiError && error.status < 500),
     staleTime: 5 * 60_000,
   })
 
   if (!isLoaded || (isSignedIn && check.isPending)) {
     return (
       <FullScreen>
-        <Spinner />
+        <Spinner role="status" aria-label="Loading…" />
       </FullScreen>
     )
   }

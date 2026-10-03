@@ -97,6 +97,7 @@ export function ItemActions({
             render={<Button variant="outline" disabled={busy} />}
           >
             <HugeiconsIcon
+              aria-hidden="true"
               icon={Cancel01Icon}
               strokeWidth={2}
               data-icon="inline-start"
@@ -104,6 +105,7 @@ export function ItemActions({
             {reject}
             <Kbd>R</Kbd>
             <HugeiconsIcon
+              aria-hidden="true"
               icon={ArrowDown01Icon}
               strokeWidth={2}
               data-icon="inline-end"
@@ -133,6 +135,7 @@ export function ItemActions({
             onClick={() => onRejectOpenChange(true)}
           >
             <HugeiconsIcon
+              aria-hidden="true"
               icon={Cancel01Icon}
               strokeWidth={2}
               data-icon="inline-start"
@@ -210,6 +213,7 @@ export function ItemActions({
           onClick={() => onDecide({ action: "reject" })}
         >
           <HugeiconsIcon
+            aria-hidden="true"
             icon={Cancel01Icon}
             strokeWidth={2}
             data-icon="inline-start"
@@ -228,6 +232,7 @@ export function ItemActions({
         }
       >
         <HugeiconsIcon
+          aria-hidden="true"
           icon={Tick02Icon}
           strokeWidth={2}
           data-icon="inline-start"

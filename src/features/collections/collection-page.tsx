@@ -9,6 +9,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { UnsavedChanges } from "@/components/unsaved-changes"
 import { StatusBadge } from "@/components/status-badge"
@@ -82,6 +83,7 @@ import {
 export function CollectionPage() {
   const { id = "" } = useParams()
   const collection = useCollection(id)
+  useDocumentTitle(collection.data?.name)
 
   if (collection.isPending) {
     return (
@@ -206,7 +208,11 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                 <Button variant="outline" size="icon" aria-label="More" />
               }
             >
-              <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} />
+              <HugeiconsIcon
+                aria-hidden="true"
+                icon={MoreHorizontalIcon}
+                strokeWidth={2}
+              />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
@@ -293,7 +299,11 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                 {/* Shown when there's no cover, or while it loads. */}
                 <Empty className="absolute inset-0">
                   <EmptyMedia>
-                    <HugeiconsIcon icon={Image01Icon} strokeWidth={2} />
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      icon={Image01Icon}
+                      strokeWidth={2}
+                    />
                   </EmptyMedia>
                 </Empty>
                 {cover.trim() && coverOk ? (
@@ -358,7 +368,11 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                   </ItemMedia>
                 ) : (
                   <ItemMedia variant="icon">
-                    <HugeiconsIcon icon={Image01Icon} strokeWidth={2} />
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      icon={Image01Icon}
+                      strokeWidth={2}
+                    />
                   </ItemMedia>
                 )}
                 <ItemContent>
@@ -385,7 +399,11 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                     disabled={i === 0 || act.isPending}
                     onClick={() => move(i, -1)}
                   >
-                    <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      icon={ArrowUp01Icon}
+                      strokeWidth={2}
+                    />
                   </Button>
                   <Button
                     variant="ghost"
@@ -394,7 +412,11 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                     disabled={i === ids.length - 1 || act.isPending}
                     onClick={() => move(i, 1)}
                   >
-                    <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      icon={ArrowDown01Icon}
+                      strokeWidth={2}
+                    />
                   </Button>
                   <Button
                     variant="ghost"
@@ -420,7 +442,11 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                       })
                     }}
                   >
-                    <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      icon={Cancel01Icon}
+                      strokeWidth={2}
+                    />
                   </Button>
                 </ItemActions>
               </Item>

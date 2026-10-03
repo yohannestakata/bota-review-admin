@@ -36,7 +36,7 @@ export function SearchInput({
   return (
     <InputGroup className={className}>
       <InputGroupAddon>
-        <HugeiconsIcon icon={Search01Icon} strokeWidth={2} />
+        <HugeiconsIcon aria-hidden="true" icon={Search01Icon} strokeWidth={2} />
       </InputGroupAddon>
       <InputGroupInput
         type="search"

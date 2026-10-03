@@ -220,7 +220,11 @@ function StatusCard({
         <CardContent className="flex flex-col gap-4">
           {missing.length > 0 ? (
             <Alert>
-              <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} />
+              <HugeiconsIcon
+                aria-hidden="true"
+                icon={Alert02Icon}
+                strokeWidth={2}
+              />
               <AlertTitle>
                 {live ? "Live, but missing" : "Needed to publish"}
               </AlertTitle>

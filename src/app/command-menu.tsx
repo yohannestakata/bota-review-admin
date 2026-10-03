@@ -24,7 +24,9 @@ function usePlaceSearch(q: string) {
   const api = useApi()
   return useQuery({
     queryKey: ["command-places", q],
-    queryFn: async () => (await api<PlaceListItem[]>("/admin/places", { query: { q, limit: 8 } })).data,
+    queryFn: async () =>
+      (await api<PlaceListItem[]>("/admin/places", { query: { q, limit: 8 } }))
+        .data,
     enabled: q.length >= 2,
     staleTime: 30_000,
   })
@@ -60,16 +62,30 @@ export function CommandMenu({
     void navigate(to)
   }
 
-  const pages = NAV.filter((item) => item.label.toLowerCase().includes(search.trim().toLowerCase()))
+  const pages = NAV.filter((item) =>
+    item.label.toLowerCase().includes(search.trim().toLowerCase())
+  )
   // Typing, waiting for the pause, or fetching: don't flash "Nothing matches".
   const typed = search.trim()
-  const searching = typed.length >= 2 && pages.length === 0 && (typed !== q || places.isFetching)
+  const searching =
+    typed.length >= 2 &&
+    pages.length === 0 &&
+    (typed !== q || places.isFetching)
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange} title="Go to" description="Jump to a page or a place">
+    <CommandDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Go to"
+      description="Jump to a page or a place"
+    >
       {/* Places are matched by the API, so cmdk's own filtering is off. */}
       <Command shouldFilter={false}>
-        <CommandInput placeholder="Go to a page or place…" value={search} onValueChange={setSearch} />
+        <CommandInput
+          placeholder="Go to a page or place…"
+          value={search}
+          onValueChange={setSearch}
+        />
         <CommandList>
           {searching ? (
             <div className="flex justify-center py-6">
@@ -81,8 +97,16 @@ export function CommandMenu({
           {pages.length > 0 ? (
             <CommandGroup heading="Pages">
               {pages.map((item) => (
-                <CommandItem key={item.to} value={`page:${item.to}`} onSelect={() => go(item.to)}>
-                  <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                <CommandItem
+                  key={item.to}
+                  value={`page:${item.to}`}
+                  onSelect={() => go(item.to)}
+                >
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    icon={item.icon}
+                    strokeWidth={2}
+                  />
                   {item.label}
                 </CommandItem>
               ))}
@@ -91,11 +115,21 @@ export function CommandMenu({
           {q.length >= 2 && places.data?.length ? (
             <CommandGroup heading="Places">
               {places.data.map((place) => (
-                <CommandItem key={place.id} value={`place:${place.id}`} onSelect={() => go(`/places/${place.id}`)}>
-                  <HugeiconsIcon icon={Store01Icon} strokeWidth={2} />
+                <CommandItem
+                  key={place.id}
+                  value={`place:${place.id}`}
+                  onSelect={() => go(`/places/${place.id}`)}
+                >
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    icon={Store01Icon}
+                    strokeWidth={2}
+                  />
                   {place.name}
                   {place.branchCount > 1 ? (
-                    <span className="ml-auto text-xs text-muted-foreground">{place.branchCount} branches</span>
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {place.branchCount} branches
+                    </span>
                   ) : null}
                 </CommandItem>
               ))}

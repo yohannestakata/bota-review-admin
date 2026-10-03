@@ -141,7 +141,7 @@ export function TaxonomyEditor() {
               aria-label={`New ${meta.singular}`}
               required
               autoComplete="off"
-              placeholder={`New ${meta.singular}`}
+              placeholder={`New ${meta.singular}…`}
               className="w-64"
               maxLength={120}
               value={name}

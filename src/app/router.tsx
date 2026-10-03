@@ -22,33 +22,52 @@ export const router = createBrowserRouter([
               { index: true, element: <InboxPage /> },
               {
                 path: "places",
-                lazy: () => import("@/features/places/places-page").then((m) => ({ Component: m.PlacesPage })),
+                lazy: () =>
+                  import("@/features/places/places-page").then((m) => ({
+                    Component: m.PlacesPage,
+                  })),
               },
               {
                 path: "places/:id",
-                lazy: () => import("@/features/places/place-page").then((m) => ({ Component: m.PlacePage })),
+                lazy: () =>
+                  import("@/features/places/place-page").then((m) => ({
+                    Component: m.PlacePage,
+                  })),
               },
               {
                 path: "fix",
-                lazy: () => import("@/features/fix/fix-page").then((m) => ({ Component: m.FixPage })),
+                lazy: () =>
+                  import("@/features/fix/fix-page").then((m) => ({
+                    Component: m.FixPage,
+                  })),
               },
               {
                 path: "collections",
                 lazy: () =>
-                  import("@/features/collections/collections-page").then((m) => ({ Component: m.CollectionsPage })),
+                  import("@/features/collections/collections-page").then(
+                    (m) => ({ Component: m.CollectionsPage })
+                  ),
               },
               {
                 path: "collections/:id",
                 lazy: () =>
-                  import("@/features/collections/collection-page").then((m) => ({ Component: m.CollectionPage })),
+                  import("@/features/collections/collection-page").then(
+                    (m) => ({ Component: m.CollectionPage })
+                  ),
               },
               {
                 path: "people",
-                lazy: () => import("@/features/people/people-page").then((m) => ({ Component: m.PeoplePage })),
+                lazy: () =>
+                  import("@/features/people/people-page").then((m) => ({
+                    Component: m.PeoplePage,
+                  })),
               },
               {
                 path: "settings",
-                lazy: () => import("@/features/settings/settings-page").then((m) => ({ Component: m.SettingsPage })),
+                lazy: () =>
+                  import("@/features/settings/settings-page").then((m) => ({
+                    Component: m.SettingsPage,
+                  })),
               },
               { path: "*", element: <NotFoundPage /> },
             ],

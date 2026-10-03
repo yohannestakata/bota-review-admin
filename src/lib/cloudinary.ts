@@ -4,6 +4,9 @@
  */
 export function thumbnail(url: string, size: number) {
   return url.includes("res.cloudinary.com") && url.includes("/upload/")
-    ? url.replace("/upload/", `/upload/c_fill,w_${size},h_${size},f_auto,q_auto/`)
+    ? url.replace(
+        "/upload/",
+        `/upload/c_fill,w_${size},h_${size},f_auto,q_auto/`
+      )
     : url
 }

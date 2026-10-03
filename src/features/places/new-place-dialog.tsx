@@ -33,6 +33,7 @@ export function NewPlaceDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <HugeiconsIcon
+          aria-hidden="true"
           icon={Add01Icon}
           strokeWidth={2}
           data-icon="inline-start"

@@ -113,7 +113,7 @@ export function PeoplePage() {
         <SearchInput
           value={q}
           onChange={(v) => set("q", v)}
-          placeholder="Search name or email"
+          placeholder="Search name or email…"
           className="w-72"
         />
         <ToggleGroup
@@ -220,6 +220,7 @@ export function PeoplePage() {
                               }
                             >
                               <HugeiconsIcon
+                                aria-hidden="true"
                                 icon={MoreHorizontalIcon}
                                 strokeWidth={2}
                               />

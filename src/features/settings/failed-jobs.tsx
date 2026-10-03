@@ -65,7 +65,7 @@ export function FailedJobs() {
               runPending.mutate(undefined, {
                 onSuccess: (result) =>
                   toast.add({
-                    title: `${result.processed} waiting jobs processed`,
+                    title: `${result.processed} waiting ${result.processed === 1 ? "job" : "jobs"} processed`,
                     type: "success",
                   }),
                 onError,
@@ -85,7 +85,11 @@ export function FailedJobs() {
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} />
+                <HugeiconsIcon
+                  aria-hidden="true"
+                  icon={CheckmarkCircle02Icon}
+                  strokeWidth={2}
+                />
               </EmptyMedia>
               <EmptyTitle>Nothing failed</EmptyTitle>
               <EmptyDescription>

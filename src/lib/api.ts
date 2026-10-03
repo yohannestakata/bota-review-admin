@@ -37,19 +37,26 @@ export function useApi() {
   const { getToken } = useAuth()
 
   return useCallback(
-    async <T>(path: string, options: RequestOptions = {}): Promise<ApiResult<T>> => {
+    async <T>(
+      path: string,
+      options: RequestOptions = {}
+    ): Promise<ApiResult<T>> => {
       const url = new URL(`${BASE_URL}${path}`)
       for (const [key, value] of Object.entries(options.query ?? {})) {
-        if (value !== undefined && value !== "") url.searchParams.set(key, String(value))
+        if (value !== undefined && value !== "")
+          url.searchParams.set(key, String(value))
       }
       const token = await getToken()
       const response = await fetch(url, {
         method: options.method ?? "GET",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          ...(options.body !== undefined ? { "Content-Type": "application/json" } : {}),
+          ...(options.body !== undefined
+            ? { "Content-Type": "application/json" }
+            : {}),
         },
-        body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+        body:
+          options.body !== undefined ? JSON.stringify(options.body) : undefined,
       })
       const text = await response.text()
       const parsed = text ? JSON.parse(text) : null

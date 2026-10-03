@@ -61,6 +61,7 @@ export function CollectionsPage() {
         <ItemActions>
           <Button onClick={() => setCreating(true)}>
             <HugeiconsIcon
+              aria-hidden="true"
               icon={Add01Icon}
               strokeWidth={2}
               data-icon="inline-start"

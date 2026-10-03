@@ -32,7 +32,11 @@ export function Pager({
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
         >
-          <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
+          <HugeiconsIcon
+            aria-hidden="true"
+            icon={ArrowLeft01Icon}
+            strokeWidth={2}
+          />
         </Button>
         <Button
           variant="outline"
@@ -41,7 +45,11 @@ export function Pager({
           disabled={page >= pages}
           onClick={() => onPageChange(page + 1)}
         >
-          <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
+          <HugeiconsIcon
+            aria-hidden="true"
+            icon={ArrowRight01Icon}
+            strokeWidth={2}
+          />
         </Button>
       </div>
     </div>

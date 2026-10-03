@@ -37,6 +37,7 @@ function Stars({ rating }: { rating: number }) {
     >
       {Array.from({ length: 5 }, (_, i) => (
         <HugeiconsIcon
+          aria-hidden="true"
           key={i}
           icon={StarIcon}
           strokeWidth={2}
@@ -106,7 +107,7 @@ function ReviewDetail({
         <CardTitle>{placeLabel(review.branch)}</CardTitle>
         <CardDescription>
           {reason === "reported"
-            ? `Reported by ${review.reportCount} people`
+            ? `Reported by ${review.reportCount} ${review.reportCount === 1 ? "person" : "people"}`
             : reason === "spot-check"
               ? "Published automatically. Spot check it."
               : "Waiting to be published"}
@@ -139,7 +140,7 @@ function ReplyDetail({
         <CardTitle>{placeLabel(reply.branch)}</CardTitle>
         <CardDescription>
           {reason === "reported"
-            ? `Reply reported by ${reply.reportCount} people`
+            ? `Reply reported by ${reply.reportCount} ${reply.reportCount === 1 ? "person" : "people"}`
             : reply.authorRole === "owner"
               ? "Owner's reply to a review"
               : "Reply to a review"}
@@ -287,6 +288,7 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
                     {details.latitude.toFixed(5)},{" "}
                     {details.longitude.toFixed(5)}
                     <HugeiconsIcon
+                      aria-hidden="true"
                       icon={LinkSquare02Icon}
                       strokeWidth={2}
                       className="size-3.5"

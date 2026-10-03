@@ -96,7 +96,7 @@ export function FixPage() {
                 <SearchInput
                   value={q}
                   onChange={(v) => set("q", v)}
-                  placeholder="Search"
+                  placeholder="Search places…"
                   className="w-60"
                 />
               </CardAction>
@@ -111,6 +111,7 @@ export function FixPage() {
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
                       <HugeiconsIcon
+                        aria-hidden="true"
                         icon={CheckmarkCircle02Icon}
                         strokeWidth={2}
                       />

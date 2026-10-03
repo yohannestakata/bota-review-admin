@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 import { useParams, useSearchParams } from "react-router"
 
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { StatusBadge } from "@/components/status-badge"
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +37,7 @@ import { usePlace } from "./queries"
 export function PlacePage() {
   const { id = "" } = useParams()
   const place = usePlace(id)
+  useDocumentTitle(place.data?.name)
   const [params, setParams] = useSearchParams()
   const [dialog, setDialog] = useState<"edit" | "archive" | "branch" | null>(
     null
@@ -88,7 +90,9 @@ export function PlacePage() {
           branchId={selected?.id}
         />
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold">{place.data.name}</h1>
+          <h2 className="text-2xl font-semibold text-balance">
+            {place.data.name}
+          </h2>
           <StatusBadge status={place.data.status} />
           <span className="text-muted-foreground">
             {typeLabel(place.data.type)}
@@ -103,7 +107,11 @@ export function PlacePage() {
                   <Button variant="outline" size="icon" aria-label="More" />
                 }
               >
-                <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} />
+                <HugeiconsIcon
+                  aria-hidden="true"
+                  icon={MoreHorizontalIcon}
+                  strokeWidth={2}
+                />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
@@ -146,6 +154,7 @@ export function PlacePage() {
             </ToggleGroup>
             <Button variant="ghost" onClick={() => setDialog("branch")}>
               <HugeiconsIcon
+                aria-hidden="true"
                 icon={Add01Icon}
                 strokeWidth={2}
                 data-icon="inline-start"

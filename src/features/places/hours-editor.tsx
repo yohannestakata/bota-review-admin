@@ -89,7 +89,11 @@ export function HoursEditor({
                       )
                     }
                   >
-                    <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      icon={Cancel01Icon}
+                      strokeWidth={2}
+                    />
                   </Button>
                 </ButtonGroup>
               ))}
@@ -105,6 +109,7 @@ export function HoursEditor({
               }
             >
               <HugeiconsIcon
+                aria-hidden="true"
                 icon={Add01Icon}
                 strokeWidth={2}
                 data-icon="inline-start"

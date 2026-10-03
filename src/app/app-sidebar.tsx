@@ -55,11 +55,17 @@ export function AppSidebar() {
                       tooltip={item.label}
                       render={<NavLink to={item.to} />}
                     >
-                      <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                      <HugeiconsIcon
+                        aria-hidden="true"
+                        icon={item.icon}
+                        strokeWidth={2}
+                      />
                       <span>{item.label}</span>
                     </SidebarMenuButton>
                     {item.to === "/" && inbox.total > 0 ? (
-                      <SidebarMenuBadge>{inbox.total}</SidebarMenuBadge>
+                      <SidebarMenuBadge aria-label={`${inbox.total} waiting`}>
+                        {inbox.total}
+                      </SidebarMenuBadge>
                     ) : null}
                   </SidebarMenuItem>
                 )
