@@ -63,28 +63,26 @@ export function useQualityRows(
   })
 }
 
-/** Folds a duplicate place into its chain (see the place page's Merge). */
-export function useMergeIntoChain() {
+/** "Not a problem": keeps a branch off a check, or puts it back. */
+export function useDismissal(issue: string) {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({
-      placeId,
-      intoPlaceId,
+      branchId,
+      undo,
     }: {
-      placeId: string
-      intoPlaceId: string
+      branchId: string
+      undo?: boolean
     }) =>
-      (
-        await api<{ moved: number }>(`/admin/places/${placeId}/merge`, {
-          method: "POST",
-          body: { intoPlaceId },
-        })
-      ).data,
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["quality"] }),
-        queryClient.invalidateQueries({ queryKey: ["places"] }),
-      ]),
+      undo
+        ? api(`/admin/quality/${issue}/dismissals/${branchId}`, {
+            method: "DELETE",
+          })
+        : api(`/admin/quality/${issue}/dismissals`, {
+            method: "POST",
+            body: { branchId },
+          }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["quality"] }),
   })
 }

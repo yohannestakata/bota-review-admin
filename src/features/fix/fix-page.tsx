@@ -37,7 +37,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 
-import { MergeRowButton } from "./merge-row-button"
+import { RowActions } from "./row-actions"
 import { useQualityIssues, useQualityRows } from "./queries"
 
 export function FixPage() {
@@ -175,19 +175,14 @@ export function FixPage() {
                               </Link>
                             </TableCell>
                             <TableCell>{row.label}</TableCell>
-                            <TableCell className="whitespace-normal">{row.note}</TableCell>
+                            <TableCell className="whitespace-normal">
+                              {row.note}
+                            </TableCell>
                             <TableCell>
                               <StatusBadge status={row.status} />
                             </TableCell>
                             <TableCell className="text-right">
-                              {row.relatedPlaceId ? (
-                                <MergeRowButton
-                                  row={{
-                                    ...row,
-                                    relatedPlaceId: row.relatedPlaceId,
-                                  }}
-                                />
-                              ) : null}
+                              <RowActions row={row} issue={issue.key} />
                             </TableCell>
                           </TableRow>
                         ))}

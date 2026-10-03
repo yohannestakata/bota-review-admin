@@ -24,6 +24,8 @@ export type PlaceBranchSummary = {
   rating: string
   reviewCount: number
   neighborhood: Taxon | null
+  latitude: string | null
+  longitude: string | null
 }
 
 export type PlaceDetail = PlaceListItem & { branches: PlaceBranchSummary[] }

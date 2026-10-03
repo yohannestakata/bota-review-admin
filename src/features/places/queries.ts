@@ -46,11 +46,12 @@ export function usePlaces(params: {
   })
 }
 
-export function usePlace(id: string) {
+export function usePlace(id: string | undefined) {
   const api = useApi()
   return useQuery({
     queryKey: [...placesKey, "detail", id],
     queryFn: async () => (await api<PlaceDetail>(`/admin/places/${id}`)).data,
+    enabled: Boolean(id),
   })
 }
 
@@ -284,17 +285,25 @@ export function useBranchIssues(id: string) {
 }
 
 /** Moves this place's branches into another place and archives this one. */
-export function useMergePlace(placeId: string) {
+export type MergePlan = {
+  sourceId: string
+  intoPlaceId: string
+  /** Branches folded into an existing branch; the rest become new branches. */
+  branches: { branchId: string; intoBranchId: string | null }[]
+}
+
+/** Moves one place's branches into another and archives the first. */
+export function useMergePlace() {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (intoPlaceId: string) =>
+    mutationFn: async ({ sourceId, ...body }: MergePlan) =>
       (
-        await api<{ moved: number; place: PlaceDetail }>(
-          `/admin/places/${placeId}/merge`,
+        await api<{ moved: number; merged: number }>(
+          `/admin/places/${sourceId}/merge`,
           {
             method: "POST",
-            body: { intoPlaceId },
+            body,
           }
         )
       ).data,

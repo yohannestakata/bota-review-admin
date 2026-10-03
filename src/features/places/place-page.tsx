@@ -1,7 +1,7 @@
 import { Add01Icon, MoreHorizontalIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
-import { useParams, useSearchParams } from "react-router"
+import { useNavigate, useParams, useSearchParams } from "react-router"
 
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ApiErrorAlert } from "@/components/api-error-alert"
@@ -38,6 +38,7 @@ import { usePlace } from "./queries"
 export function PlacePage() {
   const { id = "" } = useParams()
   const place = usePlace(id)
+  const navigate = useNavigate()
   useDocumentTitle(place.data?.name)
   const [params, setParams] = useSearchParams()
   const [dialog, setDialog] = useState<
@@ -201,7 +202,8 @@ export function PlacePage() {
       ) : null}
       {dialog === "merge" || params.get("merge") !== null ? (
         <MergePlaceDialog
-          place={place.data}
+          placeId={place.data.id}
+          onMerged={(keptId) => void navigate(`/places/${keptId}`)}
           open
           initialQuery={params.get("merge") ?? ""}
           onOpenChange={(o) => {
