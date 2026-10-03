@@ -193,11 +193,22 @@ export function PlacePage() {
         </Empty>
       )}
 
-      {dialog === "edit" ? (
+      {dialog === "edit" || params.get("edit") !== null ? (
         <EditPlaceDialog
           place={place.data}
           open
-          onOpenChange={(o) => !o && setDialog(null)}
+          onOpenChange={(o) => {
+            if (o) return
+            setDialog(null)
+            setParams(
+              (prev) => {
+                const next = new URLSearchParams(prev)
+                next.delete("edit")
+                return next
+              },
+              { replace: true }
+            )
+          }}
         />
       ) : null}
       {dialog === "merge" || params.get("merge") !== null ? (

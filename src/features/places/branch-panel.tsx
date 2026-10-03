@@ -52,13 +52,15 @@ import type { Branch, BranchPhoto } from "./types"
 // Where each problem is fixed: a field to scroll to, or a tab to open.
 const FIX_TARGET: Record<
   string,
-  { field?: string; tab?: string; merge?: boolean }
+  { field?: string; tab?: string; merge?: boolean; edit?: boolean }
 > = {
   "placeholder-location": { field: "branch-location" },
   "outside-addis": { field: "branch-location" },
   "no-location": { field: "branch-location" },
   "no-cuisine": { field: "branch-cuisines" },
   "no-photo": { tab: "photos" },
+  // The name belongs to the place, not the branch.
+  "odd-name": { edit: true },
   // Only chain duplicates ("Looks like …") can be fixed here, by merging.
   "possible-duplicate": { merge: true },
 }
@@ -97,6 +99,10 @@ export function BranchPanel({ branchId }: { branchId: string }) {
   const fix = (key: string, note?: string | null) => {
     const target = FIX_TARGET[key]
     if (!target) return
+    if (target.edit) {
+      set("edit", "name")
+      return
+    }
     if (target.merge) {
       // The note reads "Looks like <chain>": search for that chain.
       set("merge", note?.replace(/^Looks like /, "") ?? " ")
