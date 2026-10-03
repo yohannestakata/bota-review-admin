@@ -58,7 +58,7 @@ export function summary(item: InboxItem): string {
     case "reply":
       return item.data.body
     case "photo":
-      return `${item.data.category} photo`
+      return `${item.data.category[0]?.toUpperCase() ?? ""}${item.data.category.slice(1)} photo`
     case "submission": {
       const s = item.data
       if (s.type === "place_missing") {
@@ -66,7 +66,14 @@ export function summary(item: InboxItem): string {
         return name ? `Add “${name}”` : "Add a new place"
       }
       if (s.type === "field_correction" && s.fieldName) {
-        return `${s.fieldName}: ${s.suggestedValue ?? "—"}`
+        if (s.suggestedValue !== null)
+          return `${s.fieldName}: ${s.suggestedValue}`
+        // A photo suggestion has photos instead of a text value.
+        const photos =
+          (s.details as { photos?: unknown[] } | null)?.photos?.length ?? 0
+        return photos > 0
+          ? `${s.fieldName}: ${photos === 1 ? "1 photo" : `${photos} photos`} suggested`
+          : `${s.fieldName}: suggested removal`
       }
       return SUBMISSION_LABEL[s.type]
     }

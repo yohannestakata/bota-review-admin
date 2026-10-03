@@ -1,3 +1,4 @@
+import { TimeAgo } from "@/components/time-ago"
 import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
@@ -28,7 +29,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
-import { ago } from "@/features/inbox/format"
 
 import { useFailedJobs, useRetryJob, useRunPendingJobs } from "./queries"
 
@@ -130,7 +130,7 @@ export function FailedJobs() {
                   </TableCell>
                   <TableCell className="tabular-nums">{job.attempts}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {ago(job.updatedAt)}
+                    <TimeAgo iso={job.updatedAt} />
                   </TableCell>
                   <TableCell>
                     <Button

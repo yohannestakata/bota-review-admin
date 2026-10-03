@@ -1,3 +1,4 @@
+import { TimeAgo } from "@/components/time-ago"
 import { LinkSquare02Icon, StarIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/item"
 import { Separator } from "@/components/ui/separator"
 
-import { ago, initials, placeLabel, SUBMISSION_LABEL } from "./format"
+import { initials, placeLabel, SUBMISSION_LABEL } from "./format"
 import type {
   ClaimRow,
   InboxItem,
@@ -52,7 +53,7 @@ function Stars({ rating }: { rating: number }) {
   )
 }
 
-function Author({ person, meta }: { person: Person; meta: string }) {
+function Author({ person, meta }: { person: Person; meta: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <Avatar>
@@ -114,7 +115,7 @@ function ReviewDetail({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Author person={review.user} meta={ago(review.createdAt)} />
+        <Author person={review.user} meta={<TimeAgo iso={review.createdAt} />} />
         <Stars rating={review.rating} />
         <p className="leading-relaxed whitespace-pre-wrap">{review.text}</p>
         {review.visitDate ? (
@@ -159,7 +160,7 @@ function ReplyDetail({
         </Item>
         <Author
           person={reply.user}
-          meta={`${reply.authorRole === "owner" ? "Owner" : "User"} · ${ago(reply.createdAt)}`}
+          meta={`${reply.authorRole === "owner" ? "Owner" : "User"} · $<TimeAgo iso={reply.createdAt} />`}
         />
         <p className="leading-relaxed whitespace-pre-wrap">{reply.body}</p>
       </CardContent>
@@ -184,7 +185,7 @@ function PhotoDetail({ photo }: { photo: PhotoRow }) {
         />
         <Author
           person={photo.uploader}
-          meta={`Uploaded ${ago(photo.createdAt)}`}
+          meta={`Uploaded $<TimeAgo iso={photo.createdAt} />`}
         />
       </CardContent>
     </Card>
@@ -236,7 +237,7 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
       <CardContent className="flex flex-col gap-4">
         <Author
           person={submission.user}
-          meta={`Suggested ${ago(submission.createdAt)}`}
+          meta={`Suggested $<TimeAgo iso={submission.createdAt} />`}
         />
         <Separator />
         <div className="flex flex-col gap-3">
@@ -404,7 +405,9 @@ function ClaimDetail({ claim }: { claim: ClaimRow }) {
           {claim.claimant.displayName}
           {claim.claimant.email ? ` · ${claim.claimant.email}` : ""}
         </Row>
-        <Row label="Requested">{ago(claim.createdAt)}</Row>
+        <Row label="Requested">
+          <TimeAgo iso={claim.createdAt} />
+        </Row>
       </CardContent>
     </Card>
   )

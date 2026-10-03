@@ -1,3 +1,4 @@
+import { TimeAgo } from "@/components/time-ago"
 import { Alert02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
@@ -35,7 +36,6 @@ import { Spinner } from "@/components/ui/spinner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/toast"
 
-import { ago } from "@/features/inbox/format"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 
 import { BranchForm } from "./branch-form"
@@ -183,7 +183,7 @@ function StatusCard({
         </CardTitle>
         <CardDescription>
           {branch.reviewCount} {branch.reviewCount === 1 ? "review" : "reviews"}{" "}
-          · updated {ago(branch.updatedAt)}
+          · updated <TimeAgo iso={branch.updatedAt} />
         </CardDescription>
         <CardAction>
           <ButtonGroup>

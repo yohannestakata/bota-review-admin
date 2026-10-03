@@ -1,3 +1,4 @@
+import { TimeAgo } from "@/components/time-ago"
 import { Link } from "react-router"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
@@ -21,7 +22,6 @@ import {
 } from "@/components/ui/table"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
-import { ago } from "@/features/inbox/format"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 
 import { PLACE_TYPES, typeLabel } from "./labels"
@@ -133,7 +133,7 @@ export function PlacesPage() {
                       <StatusBadge status={place.status} />
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
-                      {ago(place.updatedAt)}
+                      <TimeAgo iso={place.updatedAt} />
                     </TableCell>
                   </TableRow>
                 ))}

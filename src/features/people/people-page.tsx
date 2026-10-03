@@ -1,3 +1,4 @@
+import { TimeAgo } from "@/components/time-ago"
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
@@ -57,7 +58,7 @@ import {
 } from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { ago, initials } from "@/features/inbox/format"
+import { initials } from "@/features/inbox/format"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 
 import {
@@ -96,15 +97,34 @@ export function PeoplePage() {
   // Role changes and suspensions are confirmed first; trust changes are not.
   const [pending, setPending] = useState<Pending | null>(null)
 
-  const run = (input: Parameters<typeof act.mutate>[0], done: string) =>
+  const onError = (error: Error) =>
+    toast.add({
+      title: "That didn't go through",
+      description: error.message,
+      type: "error",
+    })
+
+  // `undo` is the change that puts things back, offered on the toast.
+  const run = (
+    input: Parameters<typeof act.mutate>[0],
+    done: string,
+    undo?: Parameters<typeof act.mutate>[0]
+  ) =>
     act.mutate(input, {
-      onSuccess: () => toast.add({ title: done, type: "success" }),
-      onError: (error) =>
+      onSuccess: () =>
         toast.add({
-          title: "That didn't go through",
-          description: error.message,
-          type: "error",
+          title: done,
+          type: "success",
+          ...(undo
+            ? {
+                actionProps: {
+                  children: "Undo",
+                  onClick: () => act.mutate(undo, { onError }),
+                },
+              }
+            : {}),
         }),
+      onError,
     })
 
   return (
@@ -205,7 +225,7 @@ export function PeoplePage() {
                         {trustLabel(user.trustLevel)}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {ago(user.createdAt)}
+                        <TimeAgo iso={user.createdAt} />
                       </TableCell>
                       <TableCell>
                         {isMe ? null : (
@@ -272,7 +292,12 @@ export function PeoplePage() {
                                             action: "trust",
                                             trustLevel: value,
                                           },
-                                          `${user.displayName} is now ${trustLabel(value).toLowerCase()}`
+                                          `${user.displayName} is now ${trustLabel(value).toLowerCase()}`,
+                                          {
+                                            id: user.id,
+                                            action: "trust",
+                                            trustLevel: user.trustLevel,
+                                          }
                                         )
                                       }
                                     >

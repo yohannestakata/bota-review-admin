@@ -1,3 +1,4 @@
+import { TimeAgo } from "@/components/time-ago"
 import {
   CheckmarkBadge01Icon,
   Edit02Icon,
@@ -37,7 +38,7 @@ import { useUrlFilters } from "@/hooks/use-url-filters"
 import { undoable } from "@/lib/undoable"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
-import { ago, KIND_LABEL, summary, title } from "./format"
+import { KIND_LABEL, summary, title } from "./format"
 import { ItemActions } from "./item-actions"
 import { ItemDetail } from "./item-details"
 import { useDecide, useInbox, type Decision } from "./queries"
@@ -284,7 +285,9 @@ export function InboxPage() {
                     </div>
                   </ItemContent>
                   <UiItemActions className="self-start">
-                    <ItemDescription>{ago(item.createdAt)}</ItemDescription>
+                    <ItemDescription>
+                      <TimeAgo iso={item.createdAt} />
+                    </ItemDescription>
                   </UiItemActions>
                 </Item>
               ))}

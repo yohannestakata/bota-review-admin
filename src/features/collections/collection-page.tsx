@@ -396,7 +396,7 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                     variant="ghost"
                     size="icon-sm"
                     aria-label="Move up"
-                    disabled={i === 0 || act.isPending}
+                    disabled={i === 0}
                     onClick={() => move(i, -1)}
                   >
                     <HugeiconsIcon
@@ -409,7 +409,7 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                     variant="ghost"
                     size="icon-sm"
                     aria-label="Move down"
-                    disabled={i === ids.length - 1 || act.isPending}
+                    disabled={i === ids.length - 1}
                     onClick={() => move(i, 1)}
                   >
                     <HugeiconsIcon

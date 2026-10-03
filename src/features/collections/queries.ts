@@ -138,6 +138,27 @@ export function useCollectionAction(id: string) {
           })
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
+    // Reordering shows at once; a refused move snaps back.
+    onMutate: async (input) => {
+      if (input.action !== "order") return
+      const detailKey = [...key, "detail", id]
+      await queryClient.cancelQueries({ queryKey: detailKey })
+      const before = queryClient.getQueryData<CollectionDetail>(detailKey)
+      if (before) {
+        const byId = new Map(before.branches.map((b) => [b.id, b]))
+        queryClient.setQueryData<CollectionDetail>(detailKey, {
+          ...before,
+          branches: input.branchIds
+            .map((bid) => byId.get(bid))
+            .filter((b) => b !== undefined),
+        })
+      }
+      return { before, detailKey }
+    },
+    onError: (_error, _input, context) => {
+      if (context?.before)
+        queryClient.setQueryData(context.detailKey, context.before)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
   })
 }
