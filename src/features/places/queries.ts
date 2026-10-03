@@ -282,3 +282,41 @@ export function useBranchIssues(id: string) {
       (await api<BranchIssue[]>(`/admin/quality/branches/${id}`)).data,
   })
 }
+
+/** Moves this place's branches into another place and archives this one. */
+export function useMergePlace(placeId: string) {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (intoPlaceId: string) =>
+      (
+        await api<{ moved: number; place: PlaceDetail }>(
+          `/admin/places/${placeId}/merge`,
+          {
+            method: "POST",
+            body: { intoPlaceId },
+          }
+        )
+      ).data,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: placesKey }),
+        queryClient.invalidateQueries({ queryKey: ["quality"] }),
+      ]),
+  })
+}
+
+export function usePlaceSearch(q: string) {
+  const api = useApi()
+  return useQuery({
+    queryKey: [...placesKey, "search", q],
+    queryFn: async () =>
+      (
+        await api<PlaceListItem[]>("/admin/places", {
+          query: { q, status: "published", limit: 20 },
+        })
+      ).data,
+    enabled: q.trim().length >= 2,
+    placeholderData: keepPreviousData,
+  })
+}

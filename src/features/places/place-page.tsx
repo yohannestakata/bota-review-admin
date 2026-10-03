@@ -25,6 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { BranchPanel } from "./branch-panel"
+import { MergePlaceDialog } from "./merge-place-dialog"
 import { PlaceBreadcrumb } from "./place-breadcrumb"
 import { typeLabel } from "./labels"
 import {
@@ -39,9 +40,9 @@ export function PlacePage() {
   const place = usePlace(id)
   useDocumentTitle(place.data?.name)
   const [params, setParams] = useSearchParams()
-  const [dialog, setDialog] = useState<"edit" | "archive" | "branch" | null>(
-    null
-  )
+  const [dialog, setDialog] = useState<
+    "edit" | "archive" | "branch" | "merge" | null
+  >(null)
   const [showArchived, setShowArchived] = useState(false)
 
   if (place.isPending) {
@@ -114,6 +115,9 @@ export function PlacePage() {
                 />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setDialog("merge")}>
+                  Merge into another place…
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => setDialog("archive")}
@@ -193,6 +197,25 @@ export function PlacePage() {
           place={place.data}
           open
           onOpenChange={(o) => !o && setDialog(null)}
+        />
+      ) : null}
+      {dialog === "merge" || params.get("merge") !== null ? (
+        <MergePlaceDialog
+          place={place.data}
+          open
+          initialQuery={params.get("merge") ?? ""}
+          onOpenChange={(o) => {
+            if (o) return
+            setDialog(null)
+            setParams(
+              (prev) => {
+                const next = new URLSearchParams(prev)
+                next.delete("merge")
+                return next
+              },
+              { replace: true }
+            )
+          }}
         />
       ) : null}
       <ArchivePlaceDialog

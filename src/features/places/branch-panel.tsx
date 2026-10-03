@@ -50,12 +50,16 @@ import {
 import type { Branch, BranchPhoto } from "./types"
 
 // Where each problem is fixed: a field to scroll to, or a tab to open.
-const FIX_TARGET: Record<string, { field?: string; tab?: string }> = {
+const FIX_TARGET: Record<
+  string,
+  { field?: string; tab?: string; merge?: boolean }
+> = {
   "placeholder-location": { field: "branch-location" },
   "outside-addis": { field: "branch-location" },
   "no-location": { field: "branch-location" },
   "no-cuisine": { field: "branch-cuisines" },
   "no-photo": { tab: "photos" },
+  "same-chain": { merge: true },
 }
 
 /** Mirrors the server's publish rules, so the gaps are visible before trying. */
@@ -89,9 +93,14 @@ export function BranchPanel({ branchId }: { branchId: string }) {
   const tab = get("tab", "details")
 
   // Take the editor straight to where a problem is fixed.
-  const fix = (key: string) => {
+  const fix = (key: string, note?: string | null) => {
     const target = FIX_TARGET[key]
     if (!target) return
+    if (target.merge) {
+      // The note reads "Looks like <chain>": search for that chain.
+      set("merge", note?.replace(/^Looks like /, "") ?? " ")
+      return
+    }
     set("tab", target.tab ?? "")
     if (target.field) {
       const field = target.field
@@ -152,7 +161,7 @@ function StatusCard({
 }: {
   branch: Branch
   photos: BranchPhoto[] | undefined
-  onFix: (key: string) => void
+  onFix: (key: string, note?: string | null) => void
 }) {
   const status = useBranchStatus(branch.id)
   const [confirmArchive, setConfirmArchive] = useState(false)
@@ -260,7 +269,7 @@ function StatusCard({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onFix(problem.key)}
+                    onClick={() => onFix(problem.key, problem.note)}
                   >
                     Fix
                   </Button>
