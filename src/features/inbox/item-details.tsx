@@ -167,7 +167,12 @@ function ReplyDetail({
         </Item>
         <Author
           person={reply.user}
-          meta={`${reply.authorRole === "owner" ? "Owner" : "User"} · $<TimeAgo iso={reply.createdAt} />`}
+          meta={
+            <>
+              {reply.authorRole === "owner" ? "Owner" : "User"} ·{" "}
+              <TimeAgo iso={reply.createdAt} />
+            </>
+          }
         />
         <p className="leading-relaxed whitespace-pre-wrap">{reply.body}</p>
       </CardContent>
@@ -194,7 +199,11 @@ function PhotoDetail({ photo }: { photo: PhotoRow }) {
         />
         <Author
           person={photo.uploader}
-          meta={`Uploaded $<TimeAgo iso={photo.createdAt} />`}
+          meta={
+            <>
+              Uploaded <TimeAgo iso={photo.createdAt} />
+            </>
+          }
         />
       </CardContent>
     </Card>
@@ -253,6 +262,7 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
   const isNew = submission.type === "place_missing"
   const photos = Array.isArray(details.photos) ? details.photos : []
   const taxon = useTaxonNames()
+  const placeTypes = useLookup("place-types")
   // Corrections: taxonomy picks get their own rows; the rest stays raw.
   const { tagChanges, amenityChanges } = details as {
     tagChanges?: Changes
@@ -283,7 +293,11 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
       <CardContent className="flex flex-col gap-4">
         <Author
           person={submission.user}
-          meta={`Suggested $<TimeAgo iso={submission.createdAt} />`}
+          meta={
+            <>
+              Suggested <TimeAgo iso={submission.createdAt} />
+            </>
+          }
         />
         <Separator />
         <div className="flex flex-col gap-3">
@@ -311,7 +325,9 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
           ) : null}
           {isNew ? (
             <>
-              {details.type ? <Row label="Type">{details.type}</Row> : null}
+              {details.type ? (
+                <Row label="Type">{placeTypes.nameOf(details.type)}</Row>
+              ) : null}
               {details.neighborhood ? (
                 <Row label="Area">{details.neighborhood}</Row>
               ) : null}
