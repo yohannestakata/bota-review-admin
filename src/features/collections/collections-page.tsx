@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardAction,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -111,17 +112,17 @@ export function CollectionsPage() {
                   <StatusBadge status={c.status} />
                 </CardAction>
               </CardHeader>
-              <CardFooter className="mt-auto justify-between gap-2">
-                <CardDescription>
-                  {c.publishedBranchCount} live of {c.branchCount}
-                  {c.status !== "published" &&
-                  c.publishedBranchCount < MIN_PUBLISHED
-                    ? `, needs ${MIN_PUBLISHED - c.publishedBranchCount} more`
-                    : ""}
-                </CardDescription>
+              <CardContent>
+                {c.publishedBranchCount} live of {c.branchCount}
+                {c.status !== "published" &&
+                c.publishedBranchCount < MIN_PUBLISHED
+                  ? `, needs ${MIN_PUBLISHED - c.publishedBranchCount} more to publish`
+                  : ""}
+              </CardContent>
+              <CardFooter>
                 <Button
                   variant="outline"
-                  size="sm"
+                  className="w-full"
                   render={<Link to={`/collections/${c.id}`} />}
                   nativeButton={false}
                 >
