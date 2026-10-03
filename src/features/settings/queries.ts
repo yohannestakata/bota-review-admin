@@ -3,9 +3,37 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useApi } from "@/lib/api"
 
 import type { TaxonomyKind } from "@/features/places/queries"
+import type { TaxonRow } from "@/features/places/types"
 
 /** A tag group's key; the groups are editable in Settings. */
 export type TagCategory = string
+
+/**
+ * Saves a new order for a lookup list (tag groups, photo categories). The
+ * list shows the new order at once and snaps back if the save fails.
+ */
+export function useReorderLookup(kind: TaxonomyKind) {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  const key = ["taxonomy", kind]
+  return useMutation({
+    mutationFn: async (rows: TaxonRow[]) =>
+      api(`/admin/${kind}/order`, {
+        method: "PATCH",
+        body: { keys: rows.map((r) => r.id) },
+      }),
+    onMutate: async (rows) => {
+      await queryClient.cancelQueries({ queryKey: key })
+      const before = queryClient.getQueryData<TaxonRow[]>(key)
+      queryClient.setQueryData(key, rows)
+      return { before }
+    },
+    onError: (_error, _rows, context) => {
+      if (context?.before) queryClient.setQueryData(key, context.before)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+  })
+}
 
 export function useTaxonomyAction(kind: TaxonomyKind) {
   const api = useApi()

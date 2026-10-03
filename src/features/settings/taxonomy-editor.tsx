@@ -1,3 +1,5 @@
+import { ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
@@ -35,13 +37,18 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { SearchInput } from "@/components/search-input"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 import {
+  LOOKUP_KINDS,
   useLookup,
   useTaxonomy,
   type TaxonomyKind,
 } from "@/features/places/queries"
 import type { TaxonRow } from "@/features/places/types"
 
-import { useTaxonomyAction, type TagCategory } from "./queries"
+import {
+  useReorderLookup,
+  useTaxonomyAction,
+  type TagCategory,
+} from "./queries"
 
 const KINDS: { value: TaxonomyKind; label: string; singular: string }[] = [
   { value: "neighborhoods", label: "Neighborhoods", singular: "neighborhood" },
@@ -75,6 +82,23 @@ export function TaxonomyEditor() {
     row.name.toLowerCase().includes(q)
   )
   const act = useTaxonomyAction(kind)
+  // Tag groups and photo categories have an order; the rest are A to Z.
+  // Moving is off while a search narrows the list.
+  const reorder = useReorderLookup(kind)
+  const canReorder = LOOKUP_KINDS.includes(kind) && !q
+  const move = (index: number, by: -1 | 1) => {
+    const next = [...rows]
+    const [moved] = next.splice(index, 1)
+    next.splice(index + by, 0, moved)
+    reorder.mutate(next, {
+      onError: (error) =>
+        toast.add({
+          title: "Couldn't save the order",
+          description: error.message,
+          type: "error",
+        }),
+    })
+  }
   const [name, setName] = useState("")
   // Tag groups are their own list now; new tags default to the first one.
   const groups = useLookup("tag-groups")
@@ -199,13 +223,24 @@ export function TaxonomyEditor() {
                     </TableCell>
                   </TableRow>
                 ))
-              : rows.map((row) => (
+              : rows.map((row, i) => (
                   <TaxonRowView
                     key={row.id}
                     row={row}
                     isTags={isTags}
                     kind={kind}
                     groupName={groups.nameOf}
+                    move={
+                      canReorder
+                        ? {
+                            up: i > 0 ? () => move(i, -1) : undefined,
+                            down:
+                              i < rows.length - 1
+                                ? () => move(i, 1)
+                                : undefined,
+                          }
+                        : undefined
+                    }
                   />
                 ))}
           </TableBody>
@@ -220,11 +255,14 @@ function TaxonRowView({
   isTags,
   kind,
   groupName,
+  move,
 }: {
   row: TaxonRow
   isTags: boolean
   kind: TaxonomyKind
   groupName: (key: string | null | undefined) => string
+  /** Present for ordered lists; a missing direction is at the edge. */
+  move?: { up?: () => void; down?: () => void }
 }) {
   const act = useTaxonomyAction(kind)
   const [editing, setEditing] = useState(false)
@@ -288,6 +326,36 @@ function TaxonRowView({
       <TableCell className="text-right">
         {editing ? null : (
           <div className="flex justify-end gap-1">
+            {move ? (
+              <>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label={`Move ${row.name} up`}
+                  disabled={!move.up}
+                  onClick={move.up}
+                >
+                  <HugeiconsIcon
+                    icon={ArrowUp01Icon}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </Button>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label={`Move ${row.name} down`}
+                  disabled={!move.down}
+                  onClick={move.down}
+                >
+                  <HugeiconsIcon
+                    icon={ArrowDown01Icon}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </Button>
+              </>
+            ) : null}
             <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
               Rename
             </Button>
