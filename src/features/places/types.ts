@@ -1,5 +1,6 @@
 export type ContentStatus = "draft" | "published" | "archived"
-export type PlaceType = "restaurant" | "cafe" | "bakery" | "bar" | "other"
+/** A place type's key; the types are an editable list (Settings). */
+export type PlaceType = string
 export type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"
 export type Hours = Partial<Record<DayKey, [string, string][]>>
 

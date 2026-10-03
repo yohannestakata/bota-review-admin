@@ -27,17 +27,17 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { BranchPanel } from "./branch-panel"
 import { MergePlaceDialog } from "./merge-place-dialog"
 import { PlaceBreadcrumb } from "./place-breadcrumb"
-import { typeLabel } from "./labels"
 import {
   AddBranchDialog,
   ArchivePlaceDialog,
   EditPlaceDialog,
 } from "./place-dialogs"
-import { usePlace } from "./queries"
+import { useLookup, usePlace } from "./queries"
 
 export function PlacePage() {
   const { id = "" } = useParams()
   const place = usePlace(id)
+  const placeTypes = useLookup("place-types")
   const navigate = useNavigate()
   useDocumentTitle(place.data?.name)
   const [params, setParams] = useSearchParams()
@@ -97,7 +97,7 @@ export function PlacePage() {
           </h2>
           <StatusBadge status={place.data.status} />
           <span className="text-muted-foreground">
-            {typeLabel(place.data.type)}
+            {placeTypes.nameOf(place.data.type)}
           </span>
           <div className="ml-auto flex gap-2">
             <Button variant="outline" onClick={() => setDialog("edit")}>

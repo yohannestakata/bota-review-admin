@@ -18,14 +18,15 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
-import { PLACE_TYPES } from "./labels"
-import { useCreatePlace } from "./queries"
+import { useCreatePlace, useLookup } from "./queries"
 import type { PlaceType } from "./types"
 
 export function NewPlaceDialog() {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
-  const [type, setType] = useState<PlaceType>("restaurant")
+  const placeTypes = useLookup("place-types")
+  const [pickedType, setType] = useState<PlaceType | null>(null)
+  const type = pickedType ?? placeTypes.active[0]?.id ?? ""
   const create = useCreatePlace()
   const navigate = useNavigate()
 
@@ -92,9 +93,9 @@ export function NewPlaceDialog() {
                   spacing={1}
                   className="flex-wrap"
                 >
-                  {PLACE_TYPES.map((t) => (
-                    <ToggleGroupItem key={t.value} value={t.value}>
-                      {t.label}
+                  {placeTypes.active.map((t) => (
+                    <ToggleGroupItem key={t.id} value={t.id}>
+                      {t.name}
                     </ToggleGroupItem>
                   ))}
                 </ToggleGroup>

@@ -1,15 +1,4 @@
-import type { DayKey, PlaceType } from "./types"
-
-export const PLACE_TYPES: { value: PlaceType; label: string }[] = [
-  { value: "restaurant", label: "Restaurant" },
-  { value: "cafe", label: "Café" },
-  { value: "bakery", label: "Bakery" },
-  { value: "bar", label: "Bar" },
-  { value: "other", label: "Other" },
-]
-
-export const typeLabel = (type: PlaceType) =>
-  PLACE_TYPES.find((t) => t.value === type)?.label ?? type
+import type { DayKey } from "./types"
 
 export const DAYS: { key: DayKey; label: string }[] = [
   { key: "mon", label: "Monday" },

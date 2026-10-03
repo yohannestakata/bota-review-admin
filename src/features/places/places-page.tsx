@@ -26,10 +26,9 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { useUrlFilters } from "@/hooks/use-url-filters"
 
-import { PLACE_TYPES, typeLabel } from "./labels"
 import { NewPlaceDialog } from "./new-place-dialog"
-import { usePlaces } from "./queries"
-import type { ContentStatus, PlaceType } from "./types"
+import { useLookup, usePlaces } from "./queries"
+import type { ContentStatus } from "./types"
 
 const STATUSES: { value: "all" | ContentStatus; label: string }[] = [
   { value: "all", label: "All" },
@@ -42,7 +41,8 @@ export function PlacesPage() {
   const { get, set, page } = useUrlFilters()
   const q = get("q")
   const status = get("status", "all") as "all" | ContentStatus
-  const type = get("type", "all") as "all" | PlaceType
+  const type = get("type", "all")
+  const placeTypes = useLookup("place-types")
 
   const places = usePlaces({
     q,
@@ -81,9 +81,9 @@ export function PlacesPage() {
           spacing={1}
         >
           <ToggleGroupItem value="all">Any type</ToggleGroupItem>
-          {PLACE_TYPES.map((t) => (
-            <ToggleGroupItem key={t.value} value={t.value}>
-              {t.label}
+          {placeTypes.active.map((t) => (
+            <ToggleGroupItem key={t.id} value={t.id}>
+              {t.name}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
@@ -126,7 +126,7 @@ export function PlacesPage() {
                       </Link>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {typeLabel(place.type)}
+                      {placeTypes.nameOf(place.type)}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {place.branchCount}

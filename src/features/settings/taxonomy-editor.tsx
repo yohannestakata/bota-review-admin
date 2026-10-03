@@ -67,6 +67,7 @@ const KINDS: { value: TaxonomyKind; label: string; singular: string }[] = [
     label: "Photo categories",
     singular: "photo category",
   },
+  { value: "place-types", label: "Place types", singular: "place type" },
 ]
 
 export function TaxonomyEditor() {

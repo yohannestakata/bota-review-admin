@@ -33,8 +33,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
-import { PLACE_TYPES } from "./labels"
-import { useArchivePlace, useCreateBranch, useUpdatePlace } from "./queries"
+import {
+  useArchivePlace,
+  useCreateBranch,
+  useLookup,
+  useUpdatePlace,
+} from "./queries"
 import type { PlaceDetail, PlaceType } from "./types"
 
 type DialogProps = { open: boolean; onOpenChange: (open: boolean) => void }
@@ -46,6 +50,14 @@ export function EditPlaceDialog({
 }: DialogProps & { place: PlaceDetail }) {
   const [name, setName] = useState(place.name)
   const [type, setType] = useState(place.type)
+  const placeTypes = useLookup("place-types")
+  // An archived type stays selectable for places that already have it.
+  const typeOptions = placeTypes.active.some((t) => t.id === place.type)
+    ? placeTypes.active
+    : [
+        ...placeTypes.active,
+        { id: place.type, name: placeTypes.nameOf(place.type) },
+      ]
   const [description, setDescription] = useState(place.description ?? "")
   const update = useUpdatePlace(place.id)
 
@@ -96,9 +108,9 @@ export function EditPlaceDialog({
                 spacing={1}
                 className="flex-wrap"
               >
-                {PLACE_TYPES.map((t) => (
-                  <ToggleGroupItem key={t.value} value={t.value}>
-                    {t.label}
+                {typeOptions.map((t) => (
+                  <ToggleGroupItem key={t.id} value={t.id}>
+                    {t.name}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>

@@ -21,8 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
-import { PLACE_TYPES } from "@/features/places/labels"
-import { useTaxonomy } from "@/features/places/queries"
+import { useLookup, useTaxonomy } from "@/features/places/queries"
 import { TaxonMultiPicker } from "@/features/places/taxon-picker"
 import type { PlaceType, Taxon } from "@/features/places/types"
 
@@ -73,6 +72,7 @@ export function MealTimes() {
 function SlotFields({ slot }: { slot: MealTime }) {
   const tags = useTaxonomy("tags")
   const categories = useTaxonomy("food-categories")
+  const placeTypes = useLookup("place-types")
   const save = useSetMealTime()
   const pick = (ids: string[], list: Taxon[] | undefined) =>
     ids.flatMap((id) => list?.find((t) => t.id === id) ?? [])
@@ -140,9 +140,9 @@ function SlotFields({ slot }: { slot: MealTime }) {
             spacing={1}
             className="flex-wrap"
           >
-            {PLACE_TYPES.map((t) => (
-              <ToggleGroupItem key={t.value} value={t.value}>
-                {t.label}
+            {placeTypes.active.map((t) => (
+              <ToggleGroupItem key={t.id} value={t.id}>
+                {t.name}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
