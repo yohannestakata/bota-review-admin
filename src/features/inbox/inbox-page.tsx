@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router"
 import { TimeAgo } from "@/components/time-ago"
 import {
   CheckmarkBadge01Icon,
@@ -92,6 +93,17 @@ export function InboxPage() {
   // Decided items leave the list at once, before the server confirms.
   const [decided, setDecided] = useState<Set<string>>(() => new Set())
   const [rejectOpen, setRejectOpen] = useState(false)
+  // New-place submissions: add as a branch of this place ("" = a new place).
+  // Starts at the place the submitter picked, if any.
+  const [attachChoice, setAttachChoice] = useState<Record<string, string>>({})
+  const attachFor = (item: InboxItem) =>
+    item.kind === "submission"
+      ? (attachChoice[item.key] ??
+        ((item.data.details as { existingPlaceId?: string } | null)
+          ?.existingPlaceId ||
+          ""))
+      : ""
+  const navigate = useNavigate()
 
   const open = useMemo(
     () => inbox.items.filter((item) => !decided.has(item.key)),
@@ -119,7 +131,11 @@ export function InboxPage() {
     visible.find((item) => item.key === selectedKey) ?? visible[0] ?? null
   const index = selected ? visible.indexOf(selected) : -1
 
-  function run(item: InboxItem, decision: Decision) {
+  function run(item: InboxItem, chosen: Decision) {
+    const decision: Decision =
+      chosen.action === "approve" && attachFor(item)
+        ? { ...chosen, placeId: attachFor(item) }
+        : chosen
     setRejectOpen(false)
     const next = visible[index + 1] ?? visible[index - 1] ?? null
     const restore = () =>
@@ -142,6 +158,27 @@ export function InboxPage() {
         decide.mutate(
           { item, decision },
           {
+            onSuccess: (result) => {
+              if (!result?.draftPlaceId) return
+              // Its submitter is waiting to hear it's live: finish it now.
+              toast.add({
+                title: "Draft ready to finish",
+                description: `${
+                  item.kind === "submission"
+                    ? ((item.data.details as { placeName?: string } | null)
+                        ?.placeName ?? "The new place")
+                    : title(item)
+                } needs whatever's missing (map pin, photo) to go live.`,
+                timeout: 15000,
+                actionProps: {
+                  children: "Open draft",
+                  onClick: () =>
+                    void navigate(
+                      `/places/${result.draftPlaceId}?branch=${result.branchId}`
+                    ),
+                },
+              })
+            },
             onError: (error) => {
               restore()
               toast.add({
@@ -324,7 +361,17 @@ export function InboxPage() {
           <>
             <ScrollArea className="min-h-0 flex-1">
               <div className="mx-auto flex max-w-2xl flex-col gap-4 p-6">
-                <ItemDetail key={selected.key} item={selected} />
+                <ItemDetail
+                  key={selected.key}
+                  item={selected}
+                  attachTo={attachFor(selected)}
+                  onAttachChange={(placeId) =>
+                    setAttachChoice((prev) => ({
+                      ...prev,
+                      [selected.key]: placeId,
+                    }))
+                  }
+                />
               </div>
             </ScrollArea>
             <footer className="flex items-center gap-3 border-t px-6 py-3">

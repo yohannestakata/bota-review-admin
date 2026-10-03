@@ -18,11 +18,13 @@ import {
   ItemDescription,
   ItemTitle,
 } from "@/components/ui/item"
+import { FieldLegend, FieldSet } from "@/components/ui/field"
 import { Separator } from "@/components/ui/separator"
 
 import { useLookup, useTaxonomy } from "@/features/places/queries"
 import type { TaxonRow } from "@/features/places/types"
 
+import { AttachChooser } from "./attach-chooser"
 import { initials, placeLabel, SUBMISSION_LABEL } from "./format"
 import type {
   ClaimRow,
@@ -212,7 +214,10 @@ function PhotoDetail({ photo }: { photo: PhotoRow }) {
 
 type PlaceMissing = {
   placeName?: string
+  existingPlaceId?: string
+  neighborhoodId?: string
   neighborhood?: string
+  near?: string
   description?: string
   type?: string
   contactPhone?: string
@@ -256,13 +261,26 @@ function useTaxonNames() {
   }
 }
 
-function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
+function SubmissionDetail({
+  submission,
+  attachTo,
+  onAttachChange,
+}: {
+  submission: SubmissionRow
+  /** A place to add this as a branch of ("" = a new place). */
+  attachTo?: string
+  onAttachChange?: (placeId: string) => void
+}) {
   const details = (submission.details ?? {}) as PlaceMissing &
     Record<string, unknown>
   const isNew = submission.type === "place_missing"
   const photos = Array.isArray(details.photos) ? details.photos : []
   const taxon = useTaxonNames()
   const placeTypes = useLookup("place-types")
+  const neighborhoods = useTaxonomy("neighborhoods").data
+  const areaName =
+    neighborhoods?.find((n) => n.id === details.neighborhoodId)?.name ??
+    details.neighborhood
   // Corrections: taxonomy picks get their own rows; the rest stays raw.
   const { tagChanges, amenityChanges } = details as {
     tagChanges?: Changes
@@ -325,69 +343,85 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
           ) : null}
           {isNew ? (
             <>
-              {details.type ? (
-                <Row label="Type">{placeTypes.nameOf(details.type)}</Row>
+              <AttachChooser
+                placeName={details.placeName ?? ""}
+                suggestedId={details.existingPlaceId}
+                value={attachTo ?? ""}
+                onChange={(placeId) => onAttachChange?.(placeId)}
+              />
+              {/* Only for a new place: a branch keeps its place as it is. */}
+              {!attachTo && (details.type || details.description) ? (
+                <FieldSet>
+                  <FieldLegend variant="label">Place</FieldLegend>
+                  {details.type ? (
+                    <Row label="Type">{placeTypes.nameOf(details.type)}</Row>
+                  ) : null}
+                  {details.description ? (
+                    <Row label="About">{details.description}</Row>
+                  ) : null}
+                </FieldSet>
               ) : null}
-              {details.neighborhood ? (
-                <Row label="Area">{details.neighborhood}</Row>
-              ) : null}
-              {details.description ? (
-                <Row label="About">{details.description}</Row>
-              ) : null}
-              {details.contactPhone ? (
-                <Row label="Phone">{details.contactPhone}</Row>
-              ) : null}
-              {details.contactEmail ? (
-                <Row label="Email">{details.contactEmail}</Row>
-              ) : null}
-              {details.latitude != null && details.longitude != null ? (
-                <Row label="Location">
-                  <a
-                    className="inline-flex items-center gap-1 underline-offset-4 hover:underline"
-                    href={`https://www.google.com/maps/search/?api=1&query=${details.latitude},${details.longitude}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {details.latitude.toFixed(5)},{" "}
-                    {details.longitude.toFixed(5)}
-                    <HugeiconsIcon
-                      aria-hidden="true"
-                      icon={LinkSquare02Icon}
-                      strokeWidth={2}
-                      className="size-3.5"
-                    />
-                  </a>
+              <FieldSet>
+                <FieldLegend variant="label">Branch</FieldLegend>
+                <Row label="Area">
+                  {areaName ?? "Not given, the branch needs a name"}
                 </Row>
-              ) : null}
-              {list(taxon.cuisines(details.cuisines)) ? (
-                <Row label="Cuisines">
-                  {list(taxon.cuisines(details.cuisines))}
-                </Row>
-              ) : null}
-              {list(taxon.tags(details.tags)) ? (
-                <Row label="Tags">{list(taxon.tags(details.tags))}</Row>
-              ) : null}
-              {list(taxon.amenities(details.amenities)) ? (
-                <Row label="Amenities">
-                  {list(taxon.amenities(details.amenities))}
-                </Row>
-              ) : null}
-              {details.hours?.length ? (
-                <Row label="Hours">
-                  {details.hours
-                    .map((h) => `${h.day} ${h.open}–${h.close}`)
-                    .join(", ")}
-                </Row>
-              ) : null}
-              {details.menu?.length ? (
-                <Row label="Menu">
-                  {details.menu
-                    .map((m) =>
-                      m.price != null ? `${m.name} (${m.price} Br)` : m.name
-                    )
-                    .join(", ")}
-                </Row>
-              ) : null}
+                {details.near ? <Row label="Near">{details.near}</Row> : null}
+                {details.contactPhone ? (
+                  <Row label="Phone">{details.contactPhone}</Row>
+                ) : null}
+                {details.contactEmail ? (
+                  <Row label="Email">{details.contactEmail}</Row>
+                ) : null}
+                {details.latitude != null && details.longitude != null ? (
+                  <Row label="Location">
+                    <a
+                      className="inline-flex items-center gap-1 underline-offset-4 hover:underline"
+                      href={`https://www.google.com/maps/search/?api=1&query=${details.latitude},${details.longitude}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {details.latitude.toFixed(5)},{" "}
+                      {details.longitude.toFixed(5)}
+                      <HugeiconsIcon
+                        aria-hidden="true"
+                        icon={LinkSquare02Icon}
+                        strokeWidth={2}
+                        className="size-3.5"
+                      />
+                    </a>
+                  </Row>
+                ) : null}
+                {list(taxon.cuisines(details.cuisines)) ? (
+                  <Row label="Cuisines">
+                    {list(taxon.cuisines(details.cuisines))}
+                  </Row>
+                ) : null}
+                {list(taxon.tags(details.tags)) ? (
+                  <Row label="Tags">{list(taxon.tags(details.tags))}</Row>
+                ) : null}
+                {list(taxon.amenities(details.amenities)) ? (
+                  <Row label="Amenities">
+                    {list(taxon.amenities(details.amenities))}
+                  </Row>
+                ) : null}
+                {details.hours?.length ? (
+                  <Row label="Hours">
+                    {details.hours
+                      .map((h) => `${h.day} ${h.open}–${h.close}`)
+                      .join(", ")}
+                  </Row>
+                ) : null}
+                {details.menu?.length ? (
+                  <Row label="Menu">
+                    {details.menu
+                      .map((m) =>
+                        m.price != null ? `${m.name} (${m.price} Br)` : m.name
+                      )
+                      .join(", ")}
+                  </Row>
+                ) : null}
+              </FieldSet>
             </>
           ) : null}
           {!isNew &&
@@ -509,7 +543,15 @@ function ClaimDetail({ claim }: { claim: ClaimRow }) {
   )
 }
 
-export function ItemDetail({ item }: { item: InboxItem }) {
+export function ItemDetail({
+  item,
+  attachTo,
+  onAttachChange,
+}: {
+  item: InboxItem
+  attachTo?: string
+  onAttachChange?: (placeId: string) => void
+}) {
   switch (item.kind) {
     case "review":
       return <ReviewDetail review={item.data} reason={item.reason} />
@@ -518,7 +560,13 @@ export function ItemDetail({ item }: { item: InboxItem }) {
     case "photo":
       return <PhotoDetail photo={item.data} />
     case "submission":
-      return <SubmissionDetail submission={item.data} />
+      return (
+        <SubmissionDetail
+          submission={item.data}
+          attachTo={attachTo}
+          onAttachChange={onAttachChange}
+        />
+      )
     case "claim":
       return <ClaimDetail claim={item.data} />
   }

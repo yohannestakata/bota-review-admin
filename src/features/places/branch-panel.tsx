@@ -188,7 +188,11 @@ function StatusCard({
   // Fix-list checks beyond the publish rules (those are listed above).
   const issues = useBranchIssues(branch.id)
   const problems = (issues.data ?? []).filter(
-    (i) => !["no-photo", "no-cuisine", "no-location"].includes(i.key)
+    // The checklist above covers these (and a draft from a submission).
+    (i) =>
+      !["no-photo", "no-cuisine", "no-location", "from-submission"].includes(
+        i.key
+      )
   )
 
   return (

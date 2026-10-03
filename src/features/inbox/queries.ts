@@ -187,7 +187,12 @@ export function useInbox() {
 }
 
 export type Decision =
-  | { action: "approve"; note?: string }
+  | {
+      action: "approve"
+      note?: string
+      /** A new-place submission: add it as a branch of this place. */
+      placeId?: string
+    }
   | { action: "reject"; reason?: RejectionReason; note?: string }
 
 function endpoint(item: InboxItem, decision: Decision) {
@@ -215,7 +220,10 @@ function endpoint(item: InboxItem, decision: Decision) {
       return approve
         ? {
             path: `/admin/submissions/${item.data.id}/review`,
-            body: decision.note ? { note: decision.note } : {},
+            body: {
+              ...(decision.note ? { note: decision.note } : {}),
+              ...(decision.placeId ? { placeId: decision.placeId } : {}),
+            },
           }
         : {
             path: `/admin/submissions/${item.data.id}/dismiss`,
@@ -247,7 +255,13 @@ export function useDecide() {
         path: string
         body?: unknown
       }
-      await api(path, { method: "PATCH", body })
+      // An approved new place comes back with its draft to finish.
+      return (
+        await api<{ draftPlaceId?: string | null; branchId?: string | null }>(
+          path,
+          { method: "PATCH", body }
+        )
+      ).data
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: inboxKey }),
   })

@@ -75,7 +75,9 @@ export function RowActions({ row, issue }: { row: QualityRow; issue: string }) {
           Photos
         </Button>
       ) : null}
-      {issue === "stuck-draft" ? <DraftActions row={row} /> : null}
+      {issue === "stuck-draft" || issue === "from-submission" ? (
+        <DraftActions row={row} />
+      ) : null}
 
       {open === "merge" && row.relatedPlaceId ? (
         <MergePlaceDialog
