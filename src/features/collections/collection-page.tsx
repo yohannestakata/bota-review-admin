@@ -50,6 +50,7 @@ import {
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
@@ -67,6 +68,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
+import { useHidden } from "@/hooks/use-hidden"
+import { undoable } from "@/lib/undoable"
 
 import { BranchAdder } from "./branch-adder"
 import {
@@ -117,7 +120,9 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
     cover.trim() !== (collection.coverImageUrl ?? "")
   const coverOk = !cover.trim() || /^https:\/\/\S+$/.test(cover.trim())
   const short = MIN_PUBLISHED - collection.publishedBranchCount
-  const ids = collection.branches.map((b) => b.id)
+  const { hidden, hide, unhide } = useHidden()
+  const shown = collection.branches.filter((b) => !hidden.has(b.id))
+  const ids = shown.map((b) => b.id)
 
   const onError = (error: Error) =>
     toast.add({
@@ -244,6 +249,8 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                 <FieldLabel htmlFor="collection-name">Name</FieldLabel>
                 <Input
                   id="collection-name"
+                  required
+                  autoComplete="off"
                   value={name}
                   maxLength={120}
                   onChange={(e) => setName(e.target.value)}
@@ -271,11 +278,16 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                   placeholder="https://"
                   value={cover}
                   aria-invalid={!coverOk || undefined}
+                  pattern="https://.+"
+                  title="A link starting with https://"
                   onChange={(e) => setCover(e.target.value)}
                 />
                 <FieldDescription>
                   Optional. A wide photo works best.
                 </FieldDescription>
+                {!coverOk ? (
+                  <FieldError>Use a link that starts with https://</FieldError>
+                ) : null}
               </Field>
               <AspectRatio ratio={16 / 9}>
                 {/* Shown when there's no cover, or while it loads. */}
@@ -299,10 +311,7 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
               <ApiErrorAlert error={act.error} title="Couldn't save" />
             ) : null}
             <Field orientation="horizontal" className="justify-end">
-              <Button
-                type="submit"
-                disabled={!dirty || !name.trim() || !coverOk || act.isPending}
-              >
+              <Button type="submit" disabled={!dirty || act.isPending}>
                 {act.isPending && act.variables.action === "update" ? (
                   <Spinner data-icon="inline-start" />
                 ) : null}
@@ -341,7 +350,7 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
             }
           />
           <ItemGroup>
-            {collection.branches.map((b, i) => (
+            {shown.map((b, i) => (
               <Item key={b.id} variant="outline" size="sm">
                 {b.coverPhotoUrl ? (
                   <ItemMedia variant="image">
@@ -392,12 +401,24 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                     size="icon-sm"
                     aria-label={`Remove ${b.placeName}`}
                     disabled={act.isPending}
-                    onClick={() =>
-                      act.mutate(
-                        { action: "remove", branchId: b.id },
-                        { onError }
-                      )
-                    }
+                    onClick={() => {
+                      hide(b.id)
+                      undoable({
+                        title: "Removed from the collection",
+                        description: b.placeName,
+                        onUndo: () => unhide(b.id),
+                        action: () =>
+                          act.mutate(
+                            { action: "remove", branchId: b.id },
+                            {
+                              onError: (error) => {
+                                unhide(b.id)
+                                onError(error)
+                              },
+                            }
+                          ),
+                      })
+                    }}
                   >
                     <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
                   </Button>

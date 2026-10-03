@@ -184,6 +184,8 @@ function NewCollectionDialog({
               <FieldLabel htmlFor="collection-name">Name</FieldLabel>
               <Input
                 id="collection-name"
+                required
+                autoComplete="off"
                 placeholder="Best coffee in Bole"
                 value={name}
                 maxLength={120}
@@ -201,7 +203,7 @@ function NewCollectionDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || create.isPending}>
+            <Button type="submit" disabled={create.isPending}>
               {create.isPending ? <Spinner data-icon="inline-start" /> : null}
               Create
             </Button>

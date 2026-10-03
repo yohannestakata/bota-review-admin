@@ -23,6 +23,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
+import { useHidden } from "@/hooks/use-hidden"
+import { undoable } from "@/lib/undoable"
 
 import { useBranchMenus, useMenuItemAction } from "./queries"
 import type { Menu } from "./types"
@@ -57,10 +59,12 @@ export function BranchMenus({ branchId }: { branchId: string }) {
           >
             <Input
               aria-label="Menu name"
+              required
+              autoComplete="off"
               value={menuName}
               onChange={(e) => setMenuName(e.target.value)}
             />
-            <Button type="submit" disabled={!menuName.trim() || act.isPending}>
+            <Button type="submit" disabled={act.isPending}>
               Start menu
             </Button>
           </form>
@@ -94,10 +98,10 @@ function MenuTable({
   showName: boolean
 }) {
   const act = useMenuItemAction(branchId)
+  const { hidden, hide, unhide } = useHidden()
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
   const [category, setCategory] = useState("")
-  const priceOk = Number(price) > 0
 
   const onError = (error: Error) =>
     toast.add({
@@ -121,48 +125,62 @@ function MenuTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {menu.items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {item.category}
-                </TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {birr.format(Number(item.price))}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Switch
-                    aria-label={`${item.name} available`}
-                    checked={item.isAvailable}
-                    onCheckedChange={(checked) =>
-                      act.mutate(
-                        {
-                          action: "availability",
-                          itemId: item.id,
-                          isAvailable: checked,
-                        },
-                        { onError }
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Remove ${item.name}`}
-                    onClick={() =>
-                      act.mutate(
-                        { action: "remove", itemId: item.id },
-                        { onError }
-                      )
-                    }
-                  >
-                    <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {menu.items
+              .filter((item) => !hidden.has(item.id))
+              .map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {item.category}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {birr.format(Number(item.price))}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Switch
+                      aria-label={`${item.name} available`}
+                      checked={item.isAvailable}
+                      onCheckedChange={(checked) =>
+                        act.mutate(
+                          {
+                            action: "availability",
+                            itemId: item.id,
+                            isAvailable: checked,
+                          },
+                          { onError }
+                        )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Remove ${item.name}`}
+                      onClick={() => {
+                        hide(item.id)
+                        undoable({
+                          title: "Dish removed",
+                          description: item.name,
+                          onUndo: () => unhide(item.id),
+                          action: () =>
+                            act.mutate(
+                              { action: "remove", itemId: item.id },
+                              {
+                                onError: (error) => {
+                                  unhide(item.id)
+                                  onError(error)
+                                },
+                              }
+                            ),
+                        })
+                      }}
+                    >
+                      <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>
@@ -190,6 +208,8 @@ function MenuTable({
       >
         <Input
           aria-label="Dish"
+          required
+          autoComplete="off"
           placeholder="Dish"
           className="w-56"
           maxLength={160}
@@ -205,17 +225,17 @@ function MenuTable({
         />
         <Input
           aria-label="Price in birr"
+          required
+          autoComplete="off"
+          pattern="[0-9]+([.][0-9]{1,2})?"
+          title="A price in birr, like 120 or 89.50"
           placeholder="Price"
           inputMode="decimal"
           className="w-28"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={!name.trim() || !priceOk || act.isPending}
-        >
+        <Button type="submit" variant="outline" disabled={act.isPending}>
           Add dish
         </Button>
       </form>

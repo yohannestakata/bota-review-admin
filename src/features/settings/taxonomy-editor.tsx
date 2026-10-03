@@ -32,6 +32,7 @@ import {
 import { toast } from "@/components/ui/toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
+import { SearchInput } from "@/components/search-input"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 import { useTaxonomy, type TaxonomyKind } from "@/features/places/queries"
 import type { TaxonRow } from "@/features/places/types"
@@ -60,10 +61,16 @@ const TAG_CATEGORIES: { value: TagCategory; label: string }[] = [
 export function TaxonomyEditor() {
   const { get, set } = useUrlFilters()
   const kind = get("list", "neighborhoods") as TaxonomyKind
-  const setKind = (next: TaxonomyKind) =>
+  const setKind = (next: TaxonomyKind) => {
     set("list", next === "neighborhoods" ? "" : next)
+    set("q", "")
+  }
   const meta = KINDS.find((k) => k.value === kind) ?? KINDS[0]
   const list = useTaxonomy(kind)
+  const q = get("q").toLowerCase()
+  const rows = (list.data ?? []).filter((row) =>
+    row.name.toLowerCase().includes(q)
+  )
   const act = useTaxonomyAction(kind)
   const [name, setName] = useState("")
   const [category, setCategory] = useState<TagCategory>("vibe")
@@ -100,6 +107,12 @@ export function TaxonomyEditor() {
           ))}
         </ToggleGroup>
 
+        <SearchInput
+          value={get("q")}
+          onChange={(value) => set("q", value)}
+          placeholder={`Find a ${meta.singular}…`}
+          className="w-64"
+        />
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -126,6 +139,8 @@ export function TaxonomyEditor() {
           <Field orientation="horizontal">
             <Input
               aria-label={`New ${meta.singular}`}
+              required
+              autoComplete="off"
               placeholder={`New ${meta.singular}`}
               className="w-64"
               maxLength={120}
@@ -152,11 +167,7 @@ export function TaxonomyEditor() {
                 </SelectContent>
               </Select>
             ) : null}
-            <Button
-              type="submit"
-              variant="outline"
-              disabled={!name.trim() || act.isPending}
-            >
+            <Button type="submit" variant="outline" disabled={act.isPending}>
               Add
             </Button>
           </Field>
@@ -181,7 +192,7 @@ export function TaxonomyEditor() {
                     </TableCell>
                   </TableRow>
                 ))
-              : list.data?.map((row) => (
+              : rows.map((row) => (
                   <TaxonRowView
                     key={row.id}
                     row={row}
@@ -233,17 +244,15 @@ function TaxonRowView({
           >
             <Input
               aria-label="Name"
+              required
+              autoComplete="off"
               className="w-56"
               value={name}
               maxLength={120}
               onChange={(e) => setName(e.target.value)}
               autoFocus
             />
-            <Button
-              type="submit"
-              size="sm"
-              disabled={!name.trim() || act.isPending}
-            >
+            <Button type="submit" size="sm" disabled={act.isPending}>
               Save
             </Button>
             <Button
@@ -285,7 +294,29 @@ function TaxonRowView({
                     id: row.id,
                     status: archived ? "active" : "archived",
                   },
-                  { onError }
+                  {
+                    onError,
+                    // Archiving hides it from every picker and filter; offer a way back.
+                    onSuccess: () =>
+                      archived
+                        ? undefined
+                        : toast.add({
+                            title: "Archived",
+                            description: row.name,
+                            actionProps: {
+                              children: "Undo",
+                              onClick: () =>
+                                act.mutate(
+                                  {
+                                    action: "update",
+                                    id: row.id,
+                                    status: "active",
+                                  },
+                                  { onError }
+                                ),
+                            },
+                          }),
+                  }
                 )
               }
             >

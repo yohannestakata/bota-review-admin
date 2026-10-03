@@ -80,6 +80,8 @@ export function EditPlaceDialog({
               <FieldLabel htmlFor="place-name">Name</FieldLabel>
               <Input
                 id="place-name"
+                required
+                autoComplete="off"
                 value={name}
                 maxLength={160}
                 onChange={(e) => setName(e.target.value)}
@@ -123,7 +125,7 @@ export function EditPlaceDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || update.isPending}>
+            <Button type="submit" disabled={update.isPending}>
               {update.isPending ? <Spinner data-icon="inline-start" /> : null}
               Save
             </Button>
@@ -224,6 +226,8 @@ export function AddBranchDialog({
               <FieldLabel htmlFor="new-branch-label">Branch name</FieldLabel>
               <Input
                 id="new-branch-label"
+                required
+                autoComplete="off"
                 placeholder="Bole"
                 value={label}
                 maxLength={120}
@@ -235,6 +239,8 @@ export function AddBranchDialog({
               <FieldLabel htmlFor="new-branch-address">Address</FieldLabel>
               <Input
                 id="new-branch-address"
+                required
+                autoComplete="off"
                 value={address}
                 maxLength={240}
                 onChange={(e) => setAddress(e.target.value)}
@@ -250,10 +256,7 @@ export function AddBranchDialog({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={!label.trim() || !address.trim() || create.isPending}
-            >
+            <Button type="submit" disabled={create.isPending}>
               {create.isPending ? <Spinner data-icon="inline-start" /> : null}
               Add branch
             </Button>

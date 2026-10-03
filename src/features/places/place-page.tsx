@@ -1,7 +1,4 @@
-import {
-  Add01Icon,
-  MoreHorizontalIcon,
-} from "@hugeicons/core-free-icons"
+import { Add01Icon, MoreHorizontalIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 import { useParams, useSearchParams } from "react-router"

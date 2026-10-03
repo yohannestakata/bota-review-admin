@@ -71,11 +71,11 @@ function isTyping(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false
   const el = target
   return (
-    (el.tagName === "INPUT" ||
-      el.tagName === "TEXTAREA" ||
-      el.tagName === "SELECT" ||
-      el.getAttribute("role") === "combobox" ||
-      el.isContentEditable)
+    el.tagName === "INPUT" ||
+    el.tagName === "TEXTAREA" ||
+    el.tagName === "SELECT" ||
+    el.getAttribute("role") === "combobox" ||
+    el.isContentEditable
   )
 }
 

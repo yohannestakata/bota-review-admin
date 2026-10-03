@@ -21,6 +21,12 @@ export function SearchInput({
   className?: string
 }) {
   const [draft, setDraft] = useState(value)
+  // Follow outside changes (Back/Forward, cleared filters) without fighting typing.
+  const [lastValue, setLastValue] = useState(value)
+  if (value !== lastValue) {
+    setLastValue(value)
+    if (value !== draft.trim()) setDraft(value)
+  }
   useEffect(() => {
     if (draft === value) return
     const t = setTimeout(() => onChange(draft.trim()), 300)
@@ -34,6 +40,8 @@ export function SearchInput({
       </InputGroupAddon>
       <InputGroupInput
         type="search"
+        autoComplete="off"
+        spellCheck={false}
         value={draft}
         placeholder={placeholder}
         aria-label={placeholder}

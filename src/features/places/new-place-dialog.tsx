@@ -111,7 +111,7 @@ export function NewPlaceDialog() {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={!name.trim() || create.isPending}>
+              <Button type="submit" disabled={create.isPending}>
                 {create.isPending ? <Spinner data-icon="inline-start" /> : null}
                 Create
               </Button>

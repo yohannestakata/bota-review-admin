@@ -119,11 +119,20 @@ export function BranchForm({ branch }: { branch: Branch }) {
   const dirty = Object.keys(patch).length > 0
   const coordsOk =
     validCoordinate(draft.latitude, 90) && validCoordinate(draft.longitude, 180)
-  const canSave =
-    dirty &&
-    coordsOk &&
-    hoursComplete(draft.hours) &&
-    Boolean(draft.label.trim() && draft.addressText.trim())
+  // Problems, keyed by the field's id so Save can focus the first one.
+  const errors: Record<string, string> = {}
+  if (!draft.label.trim())
+    errors["branch-label"] = "Give the branch a name, like Bole."
+  if (!draft.addressText.trim()) errors["branch-address"] = "Add an address."
+  if (!validCoordinate(draft.latitude, 90))
+    errors["branch-lat"] = "Must be a number between -90 and 90."
+  if (!validCoordinate(draft.longitude, 180))
+    errors["branch-lng"] = "Must be a number between -180 and 180."
+  if (!hoursComplete(draft.hours))
+    errors["branch-hours"] = "Fill in both times for every opening range."
+  // Errors on untouched-but-invalid fields show only after a save attempt.
+  const [tried, setTried] = useState(false)
+  const shown = (id: string) => (tried ? errors[id] : undefined)
 
   const lat = Number(draft.latitude)
   const lng = Number(draft.longitude)
@@ -132,6 +141,7 @@ export function BranchForm({ branch }: { branch: Branch }) {
 
   return (
     <form
+      noValidate
       // Enter in a picker picks an option; it must never save the whole form.
       onKeyDown={(e) => {
         if (
@@ -142,6 +152,12 @@ export function BranchForm({ branch }: { branch: Branch }) {
       }}
       onSubmit={(e) => {
         e.preventDefault()
+        const first = Object.keys(errors)[0]
+        if (first) {
+          setTried(true)
+          document.getElementById(first)?.focus()
+          return
+        }
         update.mutate(patch, {
           onSuccess: (saved) => {
             setDraft(toDraft(saved))
@@ -157,14 +173,19 @@ export function BranchForm({ branch }: { branch: Branch }) {
               <FieldLegend>Where it is</FieldLegend>
               <FieldGroup>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field>
+                  <Field data-invalid={!!shown("branch-label") || undefined}>
                     <FieldLabel htmlFor="branch-label">Branch name</FieldLabel>
                     <Input
                       id="branch-label"
+                      name="label"
+                      autoComplete="off"
+                      required
                       value={draft.label}
                       maxLength={120}
+                      aria-invalid={!!shown("branch-label") || undefined}
                       onChange={(e) => set("label", e.target.value)}
                     />
+                    <FieldError>{shown("branch-label")}</FieldError>
                     <FieldDescription>
                       Usually the area, like Bole or Piassa. Changes the link.
                     </FieldDescription>
@@ -178,18 +199,24 @@ export function BranchForm({ branch }: { branch: Branch }) {
                       kind="neighborhoods"
                       value={draft.neighborhood}
                       onChange={(v) => set("neighborhood", v)}
-                      placeholder="Pick a neighborhood"
+                      placeholder="Pick a neighborhood…"
                     />
                   </Field>
                 </div>
-                <Field>
+                <Field data-invalid={!!shown("branch-address") || undefined}>
                   <FieldLabel htmlFor="branch-address">Address</FieldLabel>
                   <Input
                     id="branch-address"
+                    name="address"
+                    autoComplete="off"
+                    required
+                    placeholder="Cameroon St, Bole…"
                     value={draft.addressText}
                     maxLength={240}
+                    aria-invalid={!!shown("branch-address") || undefined}
                     onChange={(e) => set("addressText", e.target.value)}
                   />
+                  <FieldError>{shown("branch-address")}</FieldError>
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="branch-directions">
@@ -380,10 +407,13 @@ export function BranchForm({ branch }: { branch: Branch }) {
             <FieldSeparator />
             <FieldSet>
               <FieldLegend>Opening hours</FieldLegend>
-              <HoursEditor
-                value={draft.hours}
-                onChange={(v) => set("hours", v)}
-              />
+              <div id="branch-hours" tabIndex={-1}>
+                <HoursEditor
+                  value={draft.hours}
+                  onChange={(v) => set("hours", v)}
+                />
+              </div>
+              <FieldError>{shown("branch-hours")}</FieldError>
             </FieldSet>
           </FieldGroup>
         </CardContent>
@@ -403,7 +433,7 @@ export function BranchForm({ branch }: { branch: Branch }) {
             >
               Discard
             </Button>
-            <Button type="submit" disabled={!canSave || update.isPending}>
+            <Button type="submit" disabled={!dirty || update.isPending}>
               {update.isPending ? <Spinner data-icon="inline-start" /> : null}
               Save changes
             </Button>
