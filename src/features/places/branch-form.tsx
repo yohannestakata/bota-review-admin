@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { lazy, Suspense, useState } from "react"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { UnsavedChanges } from "@/components/unsaved-changes"
@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldLegend,
@@ -14,6 +15,7 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
@@ -23,6 +25,9 @@ import { HoursEditor, hoursComplete } from "./hours-editor"
 import { useUpdateBranch } from "./queries"
 import { TaxonMultiPicker, TaxonPicker } from "./taxon-picker"
 import type { Branch, BranchPatch, Hours, Taxon } from "./types"
+
+// MapLibre is heavy; load it only when the form shows.
+const LocationPicker = lazy(() => import("./location-picker"))
 
 type Draft = {
   label: string
@@ -207,6 +212,21 @@ export function BranchForm({ branch }: { branch: Branch }) {
                       : "How to find it once you're close."}
                   </FieldDescription>
                 </Field>
+                <Field id="branch-location">
+                  <FieldLabel>Location</FieldLabel>
+                  <Suspense fallback={<Skeleton className="aspect-video" />}>
+                    <LocationPicker
+                      latitude={draft.latitude}
+                      longitude={draft.longitude}
+                      onChange={(latitude, longitude) =>
+                        setDraft((d) => ({ ...d, latitude, longitude }))
+                      }
+                    />
+                  </Suspense>
+                  <FieldDescription>
+                    Click the map or drag the pin. Or paste coordinates below.
+                  </FieldDescription>
+                </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field
                     data-invalid={
@@ -216,13 +236,21 @@ export function BranchForm({ branch }: { branch: Branch }) {
                     <FieldLabel htmlFor="branch-lat">Latitude</FieldLabel>
                     <Input
                       id="branch-lat"
+                      name="latitude"
                       inputMode="decimal"
+                      autoComplete="off"
+                      placeholder="9.0108…"
                       value={draft.latitude}
                       aria-invalid={
                         !validCoordinate(draft.latitude, 90) || undefined
                       }
                       onChange={(e) => set("latitude", e.target.value)}
                     />
+                    {!validCoordinate(draft.latitude, 90) ? (
+                      <FieldError>
+                        Must be a number between -90 and 90.
+                      </FieldError>
+                    ) : null}
                   </Field>
                   <Field
                     data-invalid={
@@ -232,13 +260,21 @@ export function BranchForm({ branch }: { branch: Branch }) {
                     <FieldLabel htmlFor="branch-lng">Longitude</FieldLabel>
                     <Input
                       id="branch-lng"
+                      name="longitude"
                       inputMode="decimal"
+                      autoComplete="off"
+                      placeholder="38.7613…"
                       value={draft.longitude}
                       aria-invalid={
                         !validCoordinate(draft.longitude, 180) || undefined
                       }
                       onChange={(e) => set("longitude", e.target.value)}
                     />
+                    {!validCoordinate(draft.longitude, 180) ? (
+                      <FieldError>
+                        Must be a number between -180 and 180.
+                      </FieldError>
+                    ) : null}
                   </Field>
                 </div>
                 {hasPin ? (

@@ -1,11 +1,10 @@
 import {
   Add01Icon,
-  ArrowLeft01Icon,
   MoreHorizontalIcon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
-import { Link, useParams, useSearchParams } from "react-router"
+import { useParams, useSearchParams } from "react-router"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { StatusBadge } from "@/components/status-badge"
@@ -28,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { BranchPanel } from "./branch-panel"
+import { PlaceBreadcrumb } from "./place-breadcrumb"
 import { typeLabel } from "./labels"
 import {
   AddBranchDialog,
@@ -85,19 +85,11 @@ export function PlacePage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6">
       <div className="flex flex-col gap-3">
-        <Button
-          variant="link"
-          className="self-start px-0"
-          render={<Link to="/places" />}
-          nativeButton={false}
-        >
-          <HugeiconsIcon
-            icon={ArrowLeft01Icon}
-            strokeWidth={2}
-            data-icon="inline-start"
-          />
-          Places
-        </Button>
+        <PlaceBreadcrumb
+          name={place.data.name}
+          fix={params.get("fix")}
+          branchId={selected?.id}
+        />
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold">{place.data.name}</h1>
           <StatusBadge status={place.data.status} />

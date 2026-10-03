@@ -270,3 +270,15 @@ export function useCreateBranch() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: placesKey }),
   })
 }
+
+export type BranchIssue = { key: string; title: string; note: string | null }
+
+/** The Fix-list checks this branch fails. */
+export function useBranchIssues(id: string) {
+  const api = useApi()
+  return useQuery({
+    queryKey: ["quality", "branch", id],
+    queryFn: async () =>
+      (await api<BranchIssue[]>(`/admin/quality/branches/${id}`)).data,
+  })
+}
