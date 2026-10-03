@@ -333,3 +333,68 @@ export function usePlaceSearch(q: string) {
     placeholderData: keepPreviousData,
   })
 }
+
+export const PHOTO_CATEGORIES = ["food", "drink", "interior", "exterior", "menu", "ambience"] as const
+export type PhotoCategory = (typeof PHOTO_CATEGORIES)[number]
+
+type PhotoSignature = {
+  signature: string
+  timestamp: number
+  cloudName: string
+  apiKey: string
+  uploadPreset?: string
+  folder: string
+}
+
+/**
+ * Uploads photos straight to Cloudinary (signed by the API), then adds them
+ * to the branch. Admin uploads are approved at once; the first becomes the
+ * cover if the branch has none.
+ */
+export function useUploadPhotos(branchId: string) {
+  const api = useApi()
+  const invalidate = useInvalidateBranch()
+  return useMutation({
+    mutationFn: async ({ files, category }: { files: File[]; category: PhotoCategory }) => {
+      let added = 0
+      for (const file of files) {
+        const sig = (await api<PhotoSignature>("/photos/sign", { method: "POST" })).data
+        const form = new FormData()
+        form.append("file", file)
+        form.append("api_key", sig.apiKey)
+        form.append("timestamp", String(sig.timestamp))
+        form.append("signature", sig.signature)
+        form.append("folder", sig.folder)
+        if (sig.uploadPreset) form.append("upload_preset", sig.uploadPreset)
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, {
+          method: "POST",
+          body: form,
+        })
+        if (!response.ok) {
+          const body = (await response.json().catch(() => null)) as { error?: { message?: string } } | null
+          throw new Error(`${file.name} didn't upload: ${body?.error?.message ?? `status ${response.status}`}`)
+        }
+        const uploaded = (await response.json()) as {
+          public_id: string
+          secure_url: string
+          width: number
+          height: number
+        }
+        await api(`/branches/${branchId}/photos`, {
+          method: "POST",
+          body: {
+            publicId: uploaded.public_id,
+            url: uploaded.secure_url,
+            width: uploaded.width,
+            height: uploaded.height,
+            category,
+          },
+        })
+        added += 1
+      }
+      return added
+    },
+    // Refresh even after a partial failure, so the ones that made it show.
+    onSettled: () => invalidate(branchId),
+  })
+}
