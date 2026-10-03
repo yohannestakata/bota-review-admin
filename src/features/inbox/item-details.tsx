@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/item"
 import { Separator } from "@/components/ui/separator"
 
+import { useTaxonomy } from "@/features/places/queries"
+import type { TaxonRow } from "@/features/places/types"
+
 import { initials, placeLabel, SUBMISSION_LABEL } from "./format"
 import type {
   ClaimRow,
@@ -219,11 +222,48 @@ function list(values?: string[]) {
   return values && values.length > 0 ? values.join(", ") : null
 }
 
+type Changes = { add?: string[]; remove?: string[] }
+
+/**
+ * Names for the cuisines, tags and amenities a submission picked. Newer apps
+ * send ids, older ones slugs; anything unknown shows as sent.
+ */
+function useTaxonNames() {
+  const cuisines = useTaxonomy("cuisines").data
+  const tags = useTaxonomy("tags").data
+  const amenities = useTaxonomy("amenities").data
+  const names = (rows: TaxonRow[] | undefined, values?: string[]) =>
+    values?.map((v) => rows?.find((r) => r.id === v || r.slug === v)?.name ?? v)
+  const changes = (rows: TaxonRow[] | undefined, c?: Changes) => [
+    ...(names(rows, c?.add) ?? []).map((n) => `+ ${n}`),
+    ...(names(rows, c?.remove) ?? []).map((n) => `− ${n}`),
+  ]
+  return {
+    cuisines: (v?: string[]) => names(cuisines, v),
+    tags: (v?: string[]) => names(tags, v),
+    amenities: (v?: string[]) => names(amenities, v),
+    tagChanges: (c?: Changes) => changes(tags, c),
+    amenityChanges: (c?: Changes) => changes(amenities, c),
+  }
+}
+
 function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
   const details = (submission.details ?? {}) as PlaceMissing &
     Record<string, unknown>
   const isNew = submission.type === "place_missing"
   const photos = Array.isArray(details.photos) ? details.photos : []
+  const taxon = useTaxonNames()
+  // Corrections: taxonomy picks get their own rows; the rest stays raw.
+  const { tagChanges, amenityChanges } = details as {
+    tagChanges?: Changes
+    amenityChanges?: Changes
+  }
+  const otherChanges = Object.fromEntries(
+    Object.entries(details).filter(
+      ([key]) =>
+        !["cuisines", "tagChanges", "amenityChanges", "photos"].includes(key)
+    )
+  )
 
   return (
     <Card>
@@ -303,14 +343,18 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
                   </a>
                 </Row>
               ) : null}
-              {list(details.cuisines) ? (
-                <Row label="Cuisines">{list(details.cuisines)}</Row>
+              {list(taxon.cuisines(details.cuisines)) ? (
+                <Row label="Cuisines">
+                  {list(taxon.cuisines(details.cuisines))}
+                </Row>
               ) : null}
-              {list(details.tags) ? (
-                <Row label="Tags">{list(details.tags)}</Row>
+              {list(taxon.tags(details.tags)) ? (
+                <Row label="Tags">{list(taxon.tags(details.tags))}</Row>
               ) : null}
-              {list(details.amenities) ? (
-                <Row label="Amenities">{list(details.amenities)}</Row>
+              {list(taxon.amenities(details.amenities)) ? (
+                <Row label="Amenities">
+                  {list(taxon.amenities(details.amenities))}
+                </Row>
               ) : null}
               {details.hours?.length ? (
                 <Row label="Hours">
@@ -333,11 +377,28 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
           {!isNew &&
           submission.type === "field_correction" &&
           !submission.fieldName ? (
-            <Row label="Changes">
-              <pre className="font-mono text-xs whitespace-pre-wrap">
-                {JSON.stringify(submission.details, null, 2)}
-              </pre>
-            </Row>
+            <>
+              {list(taxon.cuisines(details.cuisines)) ? (
+                <Row label="Cuisines">
+                  {list(taxon.cuisines(details.cuisines))}
+                </Row>
+              ) : null}
+              {list(taxon.tagChanges(tagChanges)) ? (
+                <Row label="Tags">{list(taxon.tagChanges(tagChanges))}</Row>
+              ) : null}
+              {list(taxon.amenityChanges(amenityChanges)) ? (
+                <Row label="Amenities">
+                  {list(taxon.amenityChanges(amenityChanges))}
+                </Row>
+              ) : null}
+              {Object.keys(otherChanges).length > 0 ? (
+                <Row label="Changes">
+                  <pre className="font-mono text-xs whitespace-pre-wrap">
+                    {JSON.stringify(otherChanges, null, 2)}
+                  </pre>
+                </Row>
+              ) : null}
+            </>
           ) : null}
           {submission.note ? <Row label="Note">{submission.note}</Row> : null}
         </div>
