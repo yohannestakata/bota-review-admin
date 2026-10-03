@@ -1,4 +1,22 @@
-import { ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons"
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type Announcements,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { DragDropVerticalIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 
@@ -86,11 +104,32 @@ export function TaxonomyEditor() {
   // Moving is off while a search narrows the list.
   const reorder = useReorderLookup(kind)
   const canReorder = LOOKUP_KINDS.includes(kind) && !q
-  const move = (index: number, by: -1 | 1) => {
-    const next = [...rows]
-    const [moved] = next.splice(index, 1)
-    next.splice(index + by, 0, moved)
-    reorder.mutate(next, {
+  const sensors = useSensors(
+    // A small move starts a drag, so clicks on the handle still work.
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    // Keyboard: Space to pick up, arrows to move, Space to drop.
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+  // Screen readers hear names ("Menu"), not internal keys ("menu").
+  const nameOf = (id: string | number) =>
+    rows.find((row) => row.id === id)?.name ?? String(id)
+  const announcements: Announcements = {
+    onDragStart: ({ active }) => `Picked up ${nameOf(active.id)}.`,
+    onDragOver: ({ active, over }) =>
+      over
+        ? `${nameOf(active.id)} is over ${nameOf(over.id)}.`
+        : `${nameOf(active.id)} isn't over a row.`,
+    onDragEnd: ({ active, over }) =>
+      over
+        ? `${nameOf(active.id)} dropped at ${nameOf(over.id)}.`
+        : `${nameOf(active.id)} dropped.`,
+    onDragCancel: ({ active }) => `Moving ${nameOf(active.id)} was cancelled.`,
+  }
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return
+    const from = rows.findIndex((row) => row.id === active.id)
+    const to = rows.findIndex((row) => row.id === over.id)
+    reorder.mutate(arrayMove(rows, from, to), {
       onError: (error) =>
         toast.add({
           title: "Couldn't save the order",
@@ -206,45 +245,47 @@ export function TaxonomyEditor() {
 
         <ApiErrorAlert error={list.error} title="Couldn't load the list" />
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              {isTags ? <TableHead>Group</TableHead> : null}
-              <TableHead className="w-40 text-right" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {list.isPending
-              ? Array.from({ length: 6 }, (_, i) => (
-                  <TableRow key={i}>
-                    <TableCell colSpan={3}>
-                      <Skeleton className="h-5" />
-                    </TableCell>
-                  </TableRow>
-                ))
-              : rows.map((row, i) => (
-                  <TaxonRowView
-                    key={row.id}
-                    row={row}
-                    isTags={isTags}
-                    kind={kind}
-                    groupName={groups.nameOf}
-                    move={
-                      canReorder
-                        ? {
-                            up: i > 0 ? () => move(i, -1) : undefined,
-                            down:
-                              i < rows.length - 1
-                                ? () => move(i, 1)
-                                : undefined,
-                          }
-                        : undefined
-                    }
-                  />
-                ))}
-          </TableBody>
-        </Table>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={onDragEnd}
+          accessibility={{ announcements }}
+        >
+          <SortableContext
+            items={rows.map((row) => row.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  {isTags ? <TableHead>Group</TableHead> : null}
+                  <TableHead className="w-40 text-right" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {list.isPending
+                  ? Array.from({ length: 6 }, (_, i) => (
+                      <TableRow key={i}>
+                        <TableCell colSpan={3}>
+                          <Skeleton className="h-5" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  : rows.map((row) => (
+                      <TaxonRowView
+                        key={row.id}
+                        row={row}
+                        isTags={isTags}
+                        kind={kind}
+                        groupName={groups.nameOf}
+                        sortable={canReorder}
+                      />
+                    ))}
+              </TableBody>
+            </Table>
+          </SortableContext>
+        </DndContext>
       </CardContent>
     </Card>
   )
@@ -255,15 +296,24 @@ function TaxonRowView({
   isTags,
   kind,
   groupName,
-  move,
+  sortable,
 }: {
   row: TaxonRow
   isTags: boolean
   kind: TaxonomyKind
   groupName: (key: string | null | undefined) => string
-  /** Present for ordered lists; a missing direction is at the edge. */
-  move?: { up?: () => void; down?: () => void }
+  /** Ordered lists get a drag handle. */
+  sortable: boolean
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: row.id, disabled: !sortable })
   const act = useTaxonomyAction(kind)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(row.name)
@@ -277,7 +327,14 @@ function TaxonRowView({
     })
 
   return (
-    <TableRow>
+    <TableRow
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        transition: transition,
+      }}
+      className={isDragging ? "relative z-10 bg-background" : undefined}
+    >
       <TableCell>
         {editing ? (
           <form
@@ -317,6 +374,23 @@ function TaxonRowView({
           </form>
         ) : (
           <span className="flex items-center gap-2">
+            {sortable ? (
+              <Button
+                ref={setActivatorNodeRef}
+                size="icon-sm"
+                variant="ghost"
+                className="cursor-grab touch-none"
+                aria-label={`Drag to reorder ${row.name}`}
+                {...attributes}
+                {...listeners}
+              >
+                <HugeiconsIcon
+                  icon={DragDropVerticalIcon}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              </Button>
+            ) : null}
             {row.name}
             {archived ? <Badge variant="outline">Archived</Badge> : null}
           </span>
@@ -326,36 +400,6 @@ function TaxonRowView({
       <TableCell className="text-right">
         {editing ? null : (
           <div className="flex justify-end gap-1">
-            {move ? (
-              <>
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  aria-label={`Move ${row.name} up`}
-                  disabled={!move.up}
-                  onClick={move.up}
-                >
-                  <HugeiconsIcon
-                    icon={ArrowUp01Icon}
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                </Button>
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  aria-label={`Move ${row.name} down`}
-                  disabled={!move.down}
-                  onClick={move.down}
-                >
-                  <HugeiconsIcon
-                    icon={ArrowDown01Icon}
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                </Button>
-              </>
-            ) : null}
             <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
               Rename
             </Button>
