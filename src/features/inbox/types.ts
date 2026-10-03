@@ -2,11 +2,7 @@
 
 export type TrustLevel = "new" | "trusted" | "flagged"
 export type RejectionReason =
-  | "spam"
-  | "fake_visit"
-  | "inappropriate"
-  | "personal_attack"
-  | "off_topic"
+  "spam" | "fake_visit" | "inappropriate" | "personal_attack" | "off_topic"
 
 export type Person = {
   id: string
@@ -87,10 +83,7 @@ export type ClaimRow = {
   contactEmail: string
   note: string | null
   verificationMethod:
-    | "business_email"
-    | "social_media"
-    | "phone_call"
-    | "manual_review"
+    "business_email" | "social_media" | "phone_call" | "manual_review"
   verificationPlatform: "instagram" | "facebook" | "tiktok" | null
   verificationEvidence: string | null
   createdAt: string
@@ -107,10 +100,40 @@ export type ClaimRow = {
 export type InboxReason = "new" | "reported" | "spot-check"
 
 export type InboxItem =
-  | { kind: "review"; key: string; reason: InboxReason; createdAt: string; data: ReviewRow }
-  | { kind: "reply"; key: string; reason: InboxReason; createdAt: string; data: ReplyRow }
-  | { kind: "photo"; key: string; reason: InboxReason; createdAt: string; data: PhotoRow }
-  | { kind: "submission"; key: string; reason: InboxReason; createdAt: string; data: SubmissionRow }
-  | { kind: "claim"; key: string; reason: InboxReason; createdAt: string; data: ClaimRow }
+  | {
+      kind: "review"
+      key: string
+      reason: InboxReason
+      createdAt: string
+      data: ReviewRow
+    }
+  | {
+      kind: "reply"
+      key: string
+      reason: InboxReason
+      createdAt: string
+      data: ReplyRow
+    }
+  | {
+      kind: "photo"
+      key: string
+      reason: InboxReason
+      createdAt: string
+      data: PhotoRow
+    }
+  | {
+      kind: "submission"
+      key: string
+      reason: InboxReason
+      createdAt: string
+      data: SubmissionRow
+    }
+  | {
+      kind: "claim"
+      key: string
+      reason: InboxReason
+      createdAt: string
+      data: ClaimRow
+    }
 
 export type InboxKind = InboxItem["kind"]

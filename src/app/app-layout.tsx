@@ -20,13 +20,15 @@ export function AppLayout() {
   const [commandOpen, setCommandOpen] = useCommandMenu()
   const current =
     NAV.find((item) =>
-      "end" in item && item.end ? pathname === item.to : pathname.startsWith(item.to)
+      "end" in item && item.end
+        ? pathname === item.to
+        : pathname.startsWith(item.to)
     )?.label ?? ""
 
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="flex min-h-svh flex-col">
+      <SidebarInset className="flex h-svh flex-col">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
@@ -36,7 +38,11 @@ export function AppLayout() {
             className="ml-auto text-muted-foreground"
             onClick={() => setCommandOpen(true)}
           >
-            <HugeiconsIcon icon={Search01Icon} strokeWidth={2} data-icon="inline-start" />
+            <HugeiconsIcon
+              icon={Search01Icon}
+              strokeWidth={2}
+              data-icon="inline-start"
+            />
             Go to…
             <KbdGroup>
               <Kbd>⌘</Kbd>
@@ -44,7 +50,10 @@ export function AppLayout() {
             </KbdGroup>
           </Button>
         </header>
-        <main className="flex min-h-0 flex-1 flex-col">
+        <main
+          id="main"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+        >
           <Outlet />
         </main>
       </SidebarInset>

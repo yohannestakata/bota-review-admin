@@ -10,6 +10,7 @@ import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
+import { UnsavedChanges } from "@/components/unsaved-changes"
 import { StatusBadge } from "@/components/status-badge"
 import {
   AlertDialog,
@@ -98,10 +99,7 @@ export function CollectionPage() {
     )
   }
   return (
-    <CollectionEditor
-      key={collection.data.updatedAt}
-      collection={collection.data}
-    />
+    <CollectionEditor key={collection.data.id} collection={collection.data} />
   )
 }
 
@@ -410,6 +408,7 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
         </CardContent>
       </Card>
 
+      <UnsavedChanges when={dirty} />
       <AlertDialog open={archiving} onOpenChange={setArchiving}>
         <AlertDialogContent>
           <AlertDialogHeader>

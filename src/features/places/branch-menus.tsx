@@ -4,11 +4,24 @@ import { useState } from "react"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { Button } from "@/components/ui/button"
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 
 import { useBranchMenus, useMenuItemAction } from "./queries"
@@ -22,14 +35,17 @@ export function BranchMenus({ branchId }: { branchId: string }) {
   const [menuName, setMenuName] = useState("Menu")
 
   if (menus.isPending) return <Skeleton className="h-40" />
-  if (menus.error) return <ApiErrorAlert error={menus.error} title="Couldn't load the menu" />
+  if (menus.error)
+    return <ApiErrorAlert error={menus.error} title="Couldn't load the menu" />
 
   if (menus.data.length === 0) {
     return (
       <Empty className="border">
         <EmptyHeader>
           <EmptyTitle>No menu yet</EmptyTitle>
-          <EmptyDescription>Start one, then add dishes and prices in birr.</EmptyDescription>
+          <EmptyDescription>
+            Start one, then add dishes and prices in birr.
+          </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <form
@@ -39,7 +55,11 @@ export function BranchMenus({ branchId }: { branchId: string }) {
               act.mutate({ action: "create-menu", name: menuName.trim() })
             }}
           >
-            <Input aria-label="Menu name" value={menuName} onChange={(e) => setMenuName(e.target.value)} />
+            <Input
+              aria-label="Menu name"
+              value={menuName}
+              onChange={(e) => setMenuName(e.target.value)}
+            />
             <Button type="submit" disabled={!menuName.trim() || act.isPending}>
               Start menu
             </Button>
@@ -53,13 +73,26 @@ export function BranchMenus({ branchId }: { branchId: string }) {
   return (
     <div className="flex flex-col gap-6">
       {menus.data.map((menu) => (
-        <MenuTable key={menu.id} menu={menu} branchId={branchId} showName={menus.data.length > 1} />
+        <MenuTable
+          key={menu.id}
+          menu={menu}
+          branchId={branchId}
+          showName={menus.data.length > 1}
+        />
       ))}
     </div>
   )
 }
 
-function MenuTable({ menu, branchId, showName }: { menu: Menu; branchId: string; showName: boolean }) {
+function MenuTable({
+  menu,
+  branchId,
+  showName,
+}: {
+  menu: Menu
+  branchId: string
+  showName: boolean
+}) {
   const act = useMenuItemAction(branchId)
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
@@ -67,7 +100,11 @@ function MenuTable({ menu, branchId, showName }: { menu: Menu; branchId: string;
   const priceOk = Number(price) > 0
 
   const onError = (error: Error) =>
-    toast.add({ title: "That didn't go through", description: error.message, type: "error" })
+    toast.add({
+      title: "That didn't go through",
+      description: error.message,
+      type: "error",
+    })
 
   return (
     <div className="flex flex-col gap-2">
@@ -87,14 +124,25 @@ function MenuTable({ menu, branchId, showName }: { menu: Menu; branchId: string;
             {menu.items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell className="text-muted-foreground">{item.category}</TableCell>
-                <TableCell className="text-right tabular-nums">{birr.format(Number(item.price))}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {item.category}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {birr.format(Number(item.price))}
+                </TableCell>
                 <TableCell className="text-right">
                   <Switch
                     aria-label={`${item.name} available`}
                     checked={item.isAvailable}
                     onCheckedChange={(checked) =>
-                      act.mutate({ action: "availability", itemId: item.id, isAvailable: checked }, { onError })
+                      act.mutate(
+                        {
+                          action: "availability",
+                          itemId: item.id,
+                          isAvailable: checked,
+                        },
+                        { onError }
+                      )
                     }
                   />
                 </TableCell>
@@ -103,7 +151,12 @@ function MenuTable({ menu, branchId, showName }: { menu: Menu; branchId: string;
                     variant="ghost"
                     size="icon-sm"
                     aria-label={`Remove ${item.name}`}
-                    onClick={() => act.mutate({ action: "remove", itemId: item.id }, { onError })}
+                    onClick={() =>
+                      act.mutate(
+                        { action: "remove", itemId: item.id },
+                        { onError }
+                      )
+                    }
                   >
                     <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
                   </Button>
@@ -118,7 +171,13 @@ function MenuTable({ menu, branchId, showName }: { menu: Menu; branchId: string;
         onSubmit={(e) => {
           e.preventDefault()
           act.mutate(
-            { action: "add", menuId: menu.id, name: name.trim(), price, category: category.trim() || undefined },
+            {
+              action: "add",
+              menuId: menu.id,
+              name: name.trim(),
+              price,
+              category: category.trim() || undefined,
+            },
             {
               onSuccess: () => {
                 setName("")
@@ -152,7 +211,11 @@ function MenuTable({ menu, branchId, showName }: { menu: Menu; branchId: string;
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
-        <Button type="submit" variant="outline" disabled={!name.trim() || !priceOk || act.isPending}>
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={!name.trim() || !priceOk || act.isPending}
+        >
           Add dish
         </Button>
       </form>

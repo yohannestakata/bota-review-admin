@@ -1,10 +1,15 @@
-import { useNavigate } from "react-router"
+import { Link } from "react-router"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { Pager } from "@/components/pager"
 import { SearchInput } from "@/components/search-input"
 import { StatusBadge } from "@/components/status-badge"
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -32,7 +37,6 @@ const STATUSES: { value: "all" | ContentStatus; label: string }[] = [
 ]
 
 export function PlacesPage() {
-  const navigate = useNavigate()
   const { get, set, page } = useUrlFilters()
   const q = get("q")
   const status = get("status", "all") as "all" | ContentStatus
@@ -109,18 +113,28 @@ export function PlacesPage() {
                   </TableRow>
                 ))
               : places.data?.rows.map((place) => (
-                  <TableRow
-                    key={place.id}
-                    className="cursor-pointer"
-                    onClick={() => void navigate(`/places/${place.id}`)}
-                  >
-                    <TableCell className="font-medium">{place.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{typeLabel(place.type)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{place.branchCount}</TableCell>
+                  <TableRow key={place.id} className="relative">
+                    <TableCell className="font-medium">
+                      {/* The link covers the whole row, so Cmd-click and keyboard work. */}
+                      <Link
+                        to={`/places/${place.id}`}
+                        className="after:absolute after:inset-0"
+                      >
+                        {place.name}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {typeLabel(place.type)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {place.branchCount}
+                    </TableCell>
                     <TableCell>
                       <StatusBadge status={place.status} />
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">{ago(place.updatedAt)}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      {ago(place.updatedAt)}
+                    </TableCell>
                   </TableRow>
                 ))}
           </TableBody>

@@ -2,9 +2,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ApiError } from "@/lib/api"
 
 /** An API error, with field-level reasons listed when the server gives them. */
-export function ApiErrorAlert({ error, title }: { error: unknown; title: string }) {
+export function ApiErrorAlert({
+  error,
+  title,
+}: {
+  error: unknown
+  title: string
+}) {
   if (!error) return null
-  const fields = error instanceof ApiError && error.fields ? Object.values(error.fields) : []
+  const fields =
+    error instanceof ApiError && error.fields ? Object.values(error.fields) : []
   return (
     <Alert variant="destructive">
       <AlertTitle>{title}</AlertTitle>

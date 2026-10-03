@@ -1,4 +1,8 @@
-import { ArrowDown01Icon, Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
+import {
+  ArrowDown01Icon,
+  Cancel01Icon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 
@@ -29,7 +33,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Kbd } from "@/components/ui/kbd"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -44,7 +53,9 @@ function labels(item: InboxItem): Labels {
   switch (item.kind) {
     case "review":
     case "reply":
-      return reported ? { approve: "Keep", reject: "Remove" } : { approve: "Approve", reject: "Reject" }
+      return reported
+        ? { approve: "Keep", reject: "Remove" }
+        : { approve: "Approve", reject: "Reject" }
     case "photo":
       return { approve: "Approve", reject: "Reject" }
     case "submission":
@@ -82,11 +93,21 @@ export function ItemActions({
     <div className="flex items-center gap-2">
       {needsReason ? (
         <DropdownMenu open={rejectOpen} onOpenChange={onRejectOpenChange}>
-          <DropdownMenuTrigger render={<Button variant="outline" disabled={busy} />}>
-            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} data-icon="inline-start" />
+          <DropdownMenuTrigger
+            render={<Button variant="outline" disabled={busy} />}
+          >
+            <HugeiconsIcon
+              icon={Cancel01Icon}
+              strokeWidth={2}
+              data-icon="inline-start"
+            />
             {reject}
             <Kbd>R</Kbd>
-            <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} data-icon="inline-end" />
+            <HugeiconsIcon
+              icon={ArrowDown01Icon}
+              strokeWidth={2}
+              data-icon="inline-end"
+            />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuGroup>
@@ -94,7 +115,9 @@ export function ItemActions({
               {REJECTION_REASONS.map((r) => (
                 <DropdownMenuItem
                   key={r.value}
-                  onClick={() => onDecide({ action: "reject", reason: r.value })}
+                  onClick={() =>
+                    onDecide({ action: "reject", reason: r.value })
+                  }
                 >
                   {r.label}
                 </DropdownMenuItem>
@@ -104,8 +127,16 @@ export function ItemActions({
         </DropdownMenu>
       ) : needsNote ? (
         <>
-          <Button variant="outline" disabled={busy} onClick={() => onRejectOpenChange(true)}>
-            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} data-icon="inline-start" />
+          <Button
+            variant="outline"
+            disabled={busy}
+            onClick={() => onRejectOpenChange(true)}
+          >
+            <HugeiconsIcon
+              icon={Cancel01Icon}
+              strokeWidth={2}
+              data-icon="inline-start"
+            />
             {reject}
             <Kbd>R</Kbd>
           </Button>
@@ -118,7 +149,11 @@ export function ItemActions({
           >
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{item.kind === "claim" ? "Reject this claim" : "Dismiss this edit"}</DialogTitle>
+                <DialogTitle>
+                  {item.kind === "claim"
+                    ? "Reject this claim"
+                    : "Dismiss this edit"}
+                </DialogTitle>
                 <DialogDescription>
                   {item.kind === "claim"
                     ? "The person who asked will see this reason."
@@ -138,19 +173,27 @@ export function ItemActions({
                     autoFocus
                   />
                   {item.kind === "claim" ? (
-                    <FieldDescription>For example: couldn't confirm the phone number.</FieldDescription>
+                    <FieldDescription>
+                      For example: couldn't confirm the phone number.
+                    </FieldDescription>
                   ) : null}
                 </Field>
               </FieldGroup>
               <DialogFooter>
-                <Button variant="outline" onClick={() => onRejectOpenChange(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => onRejectOpenChange(false)}
+                >
                   Cancel
                 </Button>
                 <Button
                   variant="destructive"
                   disabled={item.kind === "claim" && note.trim().length === 0}
                   onClick={() => {
-                    onDecide({ action: "reject", note: note.trim() || undefined })
+                    onDecide({
+                      action: "reject",
+                      note: note.trim() || undefined,
+                    })
                     setNote("")
                   }}
                 >
@@ -166,7 +209,11 @@ export function ItemActions({
           disabled={busy}
           onClick={() => onDecide({ action: "reject" })}
         >
-          <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} data-icon="inline-start" />
+          <HugeiconsIcon
+            icon={Cancel01Icon}
+            strokeWidth={2}
+            data-icon="inline-start"
+          />
           {reject}
           <Kbd>R</Kbd>
         </Button>
@@ -174,9 +221,17 @@ export function ItemActions({
 
       <Button
         disabled={busy}
-        onClick={() => (item.kind === "claim" ? setVerifyOpen(true) : onDecide({ action: "approve" }))}
+        onClick={() =>
+          item.kind === "claim"
+            ? setVerifyOpen(true)
+            : onDecide({ action: "approve" })
+        }
       >
-        <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} data-icon="inline-start" />
+        <HugeiconsIcon
+          icon={Tick02Icon}
+          strokeWidth={2}
+          data-icon="inline-start"
+        />
         {approve}
         <Kbd>A</Kbd>
       </Button>
@@ -185,15 +240,22 @@ export function ItemActions({
         <AlertDialog open={verifyOpen} onOpenChange={setVerifyOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Verify {item.data.contactName}?</AlertDialogTitle>
+              <AlertDialogTitle>
+                Verify {item.data.contactName}?
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Their account becomes the business owner of {item.data.branch.placeName ?? item.data.branch.label}, and
-                the listing is marked business verified.
+                Their account becomes the business owner of{" "}
+                {item.data.branch.placeName ?? item.data.branch.label}, and the
+                listing is marked business verified.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => onDecide({ action: "approve" })}>Verify</AlertDialogAction>
+              <AlertDialogAction
+                onClick={() => onDecide({ action: "approve" })}
+              >
+                Verify
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

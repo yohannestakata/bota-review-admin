@@ -10,7 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item"
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/components/ui/item"
 import { Separator } from "@/components/ui/separator"
 
 import { ago, initials, placeLabel, SUBMISSION_LABEL } from "./format"
@@ -26,13 +31,20 @@ import type {
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <span className="flex items-center gap-0.5" aria-label={`${rating} out of 5`}>
+    <span
+      className="flex items-center gap-0.5"
+      aria-label={`${rating} out of 5`}
+    >
       {Array.from({ length: 5 }, (_, i) => (
         <HugeiconsIcon
           key={i}
           icon={StarIcon}
           strokeWidth={2}
-          className={i < rating ? "fill-primary text-primary" : "text-muted-foreground/40"}
+          className={
+            i < rating
+              ? "fill-primary text-primary"
+              : "text-muted-foreground/40"
+          }
         />
       ))}
     </span>
@@ -43,21 +55,36 @@ function Author({ person, meta }: { person: Person; meta: string }) {
   return (
     <div className="flex items-center gap-3">
       <Avatar>
-        {person.avatarUrl ? <AvatarImage src={person.avatarUrl} alt="" /> : null}
+        {person.avatarUrl ? (
+          <AvatarImage src={person.avatarUrl} alt="" />
+        ) : null}
         <AvatarFallback>{initials(person.displayName)}</AvatarFallback>
       </Avatar>
       <div className="flex min-w-0 flex-col">
         <span className="truncate font-medium">{person.displayName}</span>
         <span className="text-sm text-muted-foreground">{meta}</span>
       </div>
-      <Badge variant={person.trustLevel === "flagged" ? "destructive" : "outline"} className="ml-auto">
-        {person.trustLevel === "new" ? "New user" : person.trustLevel === "trusted" ? "Trusted" : "Flagged user"}
+      <Badge
+        variant={person.trustLevel === "flagged" ? "destructive" : "outline"}
+        className="ml-auto"
+      >
+        {person.trustLevel === "new"
+          ? "New user"
+          : person.trustLevel === "trusted"
+            ? "Trusted"
+            : "Flagged user"}
       </Badge>
     </div>
   )
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
   return (
     <div className="grid grid-cols-[8rem_1fr] gap-4 text-sm">
       <span className="text-muted-foreground">{label}</span>
@@ -66,7 +93,13 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   )
 }
 
-function ReviewDetail({ review, reason }: { review: ReviewRow; reason: InboxItem["reason"] }) {
+function ReviewDetail({
+  review,
+  reason,
+}: {
+  review: ReviewRow
+  reason: InboxItem["reason"]
+}) {
   return (
     <Card>
       <CardHeader>
@@ -82,16 +115,24 @@ function ReviewDetail({ review, reason }: { review: ReviewRow; reason: InboxItem
       <CardContent className="flex flex-col gap-4">
         <Author person={review.user} meta={ago(review.createdAt)} />
         <Stars rating={review.rating} />
-        <p className="whitespace-pre-wrap leading-relaxed">{review.text}</p>
+        <p className="leading-relaxed whitespace-pre-wrap">{review.text}</p>
         {review.visitDate ? (
-          <p className="text-sm text-muted-foreground">Visited {review.visitDate}</p>
+          <p className="text-sm text-muted-foreground">
+            Visited {review.visitDate}
+          </p>
         ) : null}
       </CardContent>
     </Card>
   )
 }
 
-function ReplyDetail({ reply, reason }: { reply: ReplyRow; reason: InboxItem["reason"] }) {
+function ReplyDetail({
+  reply,
+  reason,
+}: {
+  reply: ReplyRow
+  reason: InboxItem["reason"]
+}) {
   return (
     <Card>
       <CardHeader>
@@ -110,14 +151,16 @@ function ReplyDetail({ reply, reason }: { reply: ReplyRow; reason: InboxItem["re
             <ItemTitle>
               <Stars rating={reply.review.rating} />
             </ItemTitle>
-            <ItemDescription className="line-clamp-4">{reply.review.text}</ItemDescription>
+            <ItemDescription className="line-clamp-4">
+              {reply.review.text}
+            </ItemDescription>
           </ItemContent>
         </Item>
         <Author
           person={reply.user}
           meta={`${reply.authorRole === "owner" ? "Owner" : "User"} · ${ago(reply.createdAt)}`}
         />
-        <p className="whitespace-pre-wrap leading-relaxed">{reply.body}</p>
+        <p className="leading-relaxed whitespace-pre-wrap">{reply.body}</p>
       </CardContent>
     </Card>
   )
@@ -128,7 +171,9 @@ function PhotoDetail({ photo }: { photo: PhotoRow }) {
     <Card>
       <CardHeader>
         <CardTitle>{placeLabel(photo.branch)}</CardTitle>
-        <CardDescription className="capitalize">{photo.category} photo</CardDescription>
+        <CardDescription className="capitalize">
+          {photo.category} photo
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <img
@@ -136,7 +181,10 @@ function PhotoDetail({ photo }: { photo: PhotoRow }) {
           alt=""
           className="max-h-[28rem] w-full rounded-md bg-muted object-contain"
         />
-        <Author person={photo.uploader} meta={`Uploaded ${ago(photo.createdAt)}`} />
+        <Author
+          person={photo.uploader}
+          meta={`Uploaded ${ago(photo.createdAt)}`}
+        />
       </CardContent>
     </Card>
   )
@@ -164,7 +212,8 @@ function list(values?: string[]) {
 }
 
 function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
-  const details = (submission.details ?? {}) as PlaceMissing & Record<string, unknown>
+  const details = (submission.details ?? {}) as PlaceMissing &
+    Record<string, unknown>
   const isNew = submission.type === "place_missing"
   const photos = Array.isArray(details.photos) ? details.photos : []
 
@@ -172,15 +221,22 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
     <Card>
       <CardHeader>
         <CardTitle>
-          {isNew ? details.placeName ?? "New place" : placeLabel(submission.branch)}
+          {isNew
+            ? (details.placeName ?? "New place")
+            : placeLabel(submission.branch)}
         </CardTitle>
         <CardDescription className="flex items-center gap-2">
           {SUBMISSION_LABEL[submission.type]}
-          {submission.priority === "high" ? <Badge variant="destructive">High priority</Badge> : null}
+          {submission.priority === "high" ? (
+            <Badge variant="destructive">High priority</Badge>
+          ) : null}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Author person={submission.user} meta={`Suggested ${ago(submission.createdAt)}`} />
+        <Author
+          person={submission.user}
+          meta={`Suggested ${ago(submission.createdAt)}`}
+        />
         <Separator />
         <div className="flex flex-col gap-3">
           {submission.type === "field_correction" && submission.fieldName ? (
@@ -189,13 +245,17 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
               {submission.suggestedValue === null && photos.length > 0 ? (
                 // A photo suggestion carries the photos, not a text value.
                 <Row label="Suggested">
-                  {photos.length === 1 ? "1 photo, shown below" : `${photos.length} photos, shown below`}
+                  {photos.length === 1
+                    ? "1 photo, shown below"
+                    : `${photos.length} photos, shown below`}
                 </Row>
               ) : (
                 <>
                   <Row label="Now">{submission.currentValue ?? "Empty"}</Row>
                   <Row label="Suggested">
-                    <span className="font-medium">{submission.suggestedValue ?? "Empty"}</span>
+                    <span className="font-medium">
+                      {submission.suggestedValue ?? "Empty"}
+                    </span>
                   </Row>
                 </>
               )}
@@ -204,10 +264,18 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
           {isNew ? (
             <>
               {details.type ? <Row label="Type">{details.type}</Row> : null}
-              {details.neighborhood ? <Row label="Area">{details.neighborhood}</Row> : null}
-              {details.description ? <Row label="About">{details.description}</Row> : null}
-              {details.contactPhone ? <Row label="Phone">{details.contactPhone}</Row> : null}
-              {details.contactEmail ? <Row label="Email">{details.contactEmail}</Row> : null}
+              {details.neighborhood ? (
+                <Row label="Area">{details.neighborhood}</Row>
+              ) : null}
+              {details.description ? (
+                <Row label="About">{details.description}</Row>
+              ) : null}
+              {details.contactPhone ? (
+                <Row label="Phone">{details.contactPhone}</Row>
+              ) : null}
+              {details.contactEmail ? (
+                <Row label="Email">{details.contactEmail}</Row>
+              ) : null}
               {details.latitude != null && details.longitude != null ? (
                 <Row label="Location">
                   <a
@@ -216,31 +284,48 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {details.latitude.toFixed(5)}, {details.longitude.toFixed(5)}
-                    <HugeiconsIcon icon={LinkSquare02Icon} strokeWidth={2} className="size-3.5" />
+                    {details.latitude.toFixed(5)},{" "}
+                    {details.longitude.toFixed(5)}
+                    <HugeiconsIcon
+                      icon={LinkSquare02Icon}
+                      strokeWidth={2}
+                      className="size-3.5"
+                    />
                   </a>
                 </Row>
               ) : null}
-              {list(details.cuisines) ? <Row label="Cuisines">{list(details.cuisines)}</Row> : null}
-              {list(details.tags) ? <Row label="Tags">{list(details.tags)}</Row> : null}
-              {list(details.amenities) ? <Row label="Amenities">{list(details.amenities)}</Row> : null}
+              {list(details.cuisines) ? (
+                <Row label="Cuisines">{list(details.cuisines)}</Row>
+              ) : null}
+              {list(details.tags) ? (
+                <Row label="Tags">{list(details.tags)}</Row>
+              ) : null}
+              {list(details.amenities) ? (
+                <Row label="Amenities">{list(details.amenities)}</Row>
+              ) : null}
               {details.hours?.length ? (
                 <Row label="Hours">
-                  {details.hours.map((h) => `${h.day} ${h.open}–${h.close}`).join(", ")}
+                  {details.hours
+                    .map((h) => `${h.day} ${h.open}–${h.close}`)
+                    .join(", ")}
                 </Row>
               ) : null}
               {details.menu?.length ? (
                 <Row label="Menu">
                   {details.menu
-                    .map((m) => (m.price != null ? `${m.name} (${m.price} Br)` : m.name))
+                    .map((m) =>
+                      m.price != null ? `${m.name} (${m.price} Br)` : m.name
+                    )
                     .join(", ")}
                 </Row>
               ) : null}
             </>
           ) : null}
-          {!isNew && submission.type === "field_correction" && !submission.fieldName ? (
+          {!isNew &&
+          submission.type === "field_correction" &&
+          !submission.fieldName ? (
             <Row label="Changes">
-              <pre className="whitespace-pre-wrap font-mono text-xs">
+              <pre className="font-mono text-xs whitespace-pre-wrap">
                 {JSON.stringify(submission.details, null, 2)}
               </pre>
             </Row>
@@ -250,7 +335,12 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
         {photos.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
             {photos.map((p) => (
-              <img key={p.url} src={p.url} alt="" className="aspect-square rounded-md bg-muted object-cover" />
+              <img
+                key={p.url}
+                src={p.url}
+                alt=""
+                className="aspect-square rounded-md bg-muted object-cover"
+              />
             ))}
           </div>
         ) : null}
@@ -277,7 +367,9 @@ function ClaimDetail({ claim }: { claim: ClaimRow }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <Row label="Name">{claim.contactName}</Row>
-        <Row label="Role"><span className="capitalize">{claim.contactRole}</span></Row>
+        <Row label="Role">
+          <span className="capitalize">{claim.contactRole}</span>
+        </Row>
         <Row label="Phone">{claim.contactPhone}</Row>
         <Row label="Email">{claim.contactEmail}</Row>
         <Separator />
@@ -288,7 +380,12 @@ function ClaimDetail({ claim }: { claim: ClaimRow }) {
         {evidence ? (
           <Row label="Evidence">
             {isLink ? (
-              <a className="underline-offset-4 hover:underline" href={evidence} target="_blank" rel="noreferrer">
+              <a
+                className="underline-offset-4 hover:underline"
+                href={evidence}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {evidence}
               </a>
             ) : (
@@ -296,7 +393,9 @@ function ClaimDetail({ claim }: { claim: ClaimRow }) {
             )}
           </Row>
         ) : null}
-        {claim.branch.phone ? <Row label="Listed phone">{claim.branch.phone}</Row> : null}
+        {claim.branch.phone ? (
+          <Row label="Listed phone">{claim.branch.phone}</Row>
+        ) : null}
         {claim.note ? <Row label="Note">{claim.note}</Row> : null}
         <Separator />
         <Row label="Account">

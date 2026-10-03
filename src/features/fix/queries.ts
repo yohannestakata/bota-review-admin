@@ -5,7 +5,12 @@ import { toPage } from "@/lib/paginated"
 
 import type { ContentStatus } from "@/features/places/types"
 
-export type QualityIssue = { key: string; title: string; description: string; count: number }
+export type QualityIssue = {
+  key: string
+  title: string
+  description: string
+  count: number
+}
 
 export type QualityRow = {
   branchId: string
@@ -30,13 +35,19 @@ export function useQualityIssues() {
   })
 }
 
-export function useQualityRows(issue: string | undefined, q: string, page: number) {
+export function useQualityRows(
+  issue: string | undefined,
+  q: string,
+  page: number
+) {
   const api = useApi()
   return useQuery({
     queryKey: ["quality", issue, { q, page }],
     queryFn: async () =>
       toPage(
-        await api<QualityRow[]>(`/admin/quality/${issue}`, { query: { q, page, limit: PAGE_SIZE } }),
+        await api<QualityRow[]>(`/admin/quality/${issue}`, {
+          query: { q, page, limit: PAGE_SIZE },
+        }),
         page,
         PAGE_SIZE
       ),

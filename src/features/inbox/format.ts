@@ -1,10 +1,17 @@
 import { formatDistanceToNowStrict } from "date-fns"
 
-import type { BranchRef, InboxItem, RejectionReason, SubmissionType } from "./types"
+import type {
+  BranchRef,
+  InboxItem,
+  RejectionReason,
+  SubmissionType,
+} from "./types"
 
 export function placeLabel(branch: BranchRef | null | undefined) {
   if (!branch) return "New place"
-  return branch.placeName ? `${branch.placeName} · ${branch.label}` : branch.label
+  return branch.placeName
+    ? `${branch.placeName} · ${branch.label}`
+    : branch.label
 }
 
 export function ago(iso: string) {

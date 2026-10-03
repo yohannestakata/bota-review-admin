@@ -33,6 +33,8 @@ import { Kbd } from "@/components/ui/kbd"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/toast"
+import { useUrlFilters } from "@/hooks/use-url-filters"
+import { undoable } from "@/lib/undoable"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { ago, KIND_LABEL, summary, title } from "./format"
@@ -66,11 +68,13 @@ const DONE_TOAST: Record<Decision["action"], string> = {
 }
 
 function isTyping(target: EventTarget | null) {
-  const el = target as HTMLElement | null
+  if (!(target instanceof HTMLElement)) return false
+  const el = target
   return (
-    !!el &&
     (el.tagName === "INPUT" ||
       el.tagName === "TEXTAREA" ||
+      el.tagName === "SELECT" ||
+      el.getAttribute("role") === "combobox" ||
       el.isContentEditable)
   )
 }
@@ -78,10 +82,14 @@ function isTyping(target: EventTarget | null) {
 export function InboxPage() {
   const inbox = useInbox()
   const decide = useDecide()
-  const [filter, setFilter] = useState<Filter>("all")
+  // Filter and selection live in the URL, so reloads and links keep your place.
+  const { get, set } = useUrlFilters()
+  const filter = get("kind", "all") as Filter
+  const selectedKey = get("item") || null
+  const setFilter = (next: Filter) => set("kind", next)
+  const setSelectedKey = (key: string | null) => set("item", key ?? "")
   // Decided items leave the list at once, before the server confirms.
   const [decided, setDecided] = useState<Set<string>>(() => new Set())
-  const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [rejectOpen, setRejectOpen] = useState(false)
 
   const open = useMemo(
@@ -113,32 +121,45 @@ export function InboxPage() {
   function run(item: InboxItem, decision: Decision) {
     setRejectOpen(false)
     const next = visible[index + 1] ?? visible[index - 1] ?? null
+    const restore = () =>
+      setDecided((prev) => {
+        const copy = new Set(prev)
+        copy.delete(item.key)
+        return copy
+      })
     setDecided((prev) => new Set(prev).add(item.key))
     setSelectedKey(next?.key ?? null)
-    decide.mutate(
-      { item, decision },
-      {
-        onSuccess: () =>
-          toast.add({
-            title: DONE_TOAST[decision.action],
-            description: title(item),
-            type: "success",
-          }),
-        onError: (error) => {
-          setDecided((prev) => {
-            const copy = new Set(prev)
-            copy.delete(item.key)
-            return copy
-          })
-          toast.add({
-            title: "That didn't go through",
-            description: error.message,
-            type: "error",
-          })
-        },
-      }
-    )
+    // Nothing is sent until the undo window closes.
+    undoable({
+      title: DONE_TOAST[decision.action],
+      description: title(item),
+      onUndo: () => {
+        restore()
+        setSelectedKey(item.key)
+      },
+      action: () =>
+        decide.mutate(
+          { item, decision },
+          {
+            onError: (error) => {
+              restore()
+              toast.add({
+                title: "That didn't go through",
+                description: `${error.message} It's back in the list.`,
+                type: "error",
+              })
+            },
+          }
+        ),
+    })
   }
+
+  // Keep the selected row in view while moving with j/k.
+  useEffect(() => {
+    document
+      .querySelector('[data-inbox-item][aria-current="true"]')
+      ?.scrollIntoView({ block: "nearest" })
+  }, [selected?.key])
 
   // j/k or arrows to move, a to approve, r to reject.
   useEffect(() => {
@@ -151,7 +172,10 @@ export function InboxPage() {
         rejectOpen
       )
         return
-      if (document.querySelector("[role=dialog], [role=alertdialog]")) return
+      if (
+        document.querySelector("[role=dialog], [role=alertdialog], [role=menu]")
+      )
+        return
       const key = e.key.toLowerCase()
       if (key === "j" || key === "arrowdown") {
         e.preventDefault()
@@ -222,7 +246,8 @@ export function InboxPage() {
                   variant={item === selected ? "muted" : "default"}
                   render={<button type="button" />}
                   onClick={() => setSelectedKey(item.key)}
-                  aria-current={item === selected}
+                  aria-current={item === selected || undefined}
+                  data-inbox-item
                   className="text-left"
                 >
                   <ItemMedia variant="icon">

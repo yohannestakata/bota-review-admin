@@ -21,7 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
@@ -34,7 +39,11 @@ import type { PlaceDetail, PlaceType } from "./types"
 
 type DialogProps = { open: boolean; onOpenChange: (open: boolean) => void }
 
-export function EditPlaceDialog({ place, open, onOpenChange }: DialogProps & { place: PlaceDetail }) {
+export function EditPlaceDialog({
+  place,
+  open,
+  onOpenChange,
+}: DialogProps & { place: PlaceDetail }) {
   const [name, setName] = useState(place.name)
   const [type, setType] = useState(place.type)
   const [description, setDescription] = useState(place.description ?? "")
@@ -48,7 +57,11 @@ export function EditPlaceDialog({ place, open, onOpenChange }: DialogProps & { p
           onSubmit={(e) => {
             e.preventDefault()
             update.mutate(
-              { name: name.trim(), type, description: description.trim() || null },
+              {
+                name: name.trim(),
+                type,
+                description: description.trim() || null,
+              },
               {
                 onSuccess: () => {
                   onOpenChange(false)
@@ -65,7 +78,12 @@ export function EditPlaceDialog({ place, open, onOpenChange }: DialogProps & { p
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="place-name">Name</FieldLabel>
-              <Input id="place-name" value={name} maxLength={160} onChange={(e) => setName(e.target.value)} />
+              <Input
+                id="place-name"
+                value={name}
+                maxLength={160}
+                onChange={(e) => setName(e.target.value)}
+              />
             </Field>
             <Field>
               <FieldLabel>Type</FieldLabel>
@@ -91,12 +109,18 @@ export function EditPlaceDialog({ place, open, onOpenChange }: DialogProps & { p
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
-              <FieldDescription>A sentence or two on what makes it worth a visit.</FieldDescription>
+              <FieldDescription>
+                A sentence or two on what makes it worth a visit.
+              </FieldDescription>
             </Field>
           </FieldGroup>
           <ApiErrorAlert error={update.error} title="Couldn't save" />
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={!name.trim() || update.isPending}>
@@ -110,7 +134,11 @@ export function EditPlaceDialog({ place, open, onOpenChange }: DialogProps & { p
   )
 }
 
-export function ArchivePlaceDialog({ place, open, onOpenChange }: DialogProps & { place: PlaceDetail }) {
+export function ArchivePlaceDialog({
+  place,
+  open,
+  onOpenChange,
+}: DialogProps & { place: PlaceDetail }) {
   const archive = useArchivePlace(place.id)
   const navigate = useNavigate()
   return (
@@ -119,7 +147,8 @@ export function ArchivePlaceDialog({ place, open, onOpenChange }: DialogProps & 
         <AlertDialogHeader>
           <AlertDialogTitle>Archive {place.name}?</AlertDialogTitle>
           <AlertDialogDescription>
-            The place and all {place.branches.length} of its branches disappear from the app. Nothing is deleted.
+            The place and all {place.branches.length} of its branches disappear
+            from the app. Nothing is deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -129,11 +158,19 @@ export function ArchivePlaceDialog({ place, open, onOpenChange }: DialogProps & 
             onClick={() =>
               archive.mutate(undefined, {
                 onSuccess: () => {
-                  toast.add({ title: "Archived", description: place.name, type: "success" })
+                  toast.add({
+                    title: "Archived",
+                    description: place.name,
+                    type: "success",
+                  })
                   void navigate("/places")
                 },
                 onError: (error) =>
-                  toast.add({ title: "That didn't go through", description: error.message, type: "error" }),
+                  toast.add({
+                    title: "That didn't go through",
+                    description: error.message,
+                    type: "error",
+                  }),
               })
             }
           >
@@ -177,7 +214,10 @@ export function AddBranchDialog({
         >
           <DialogHeader>
             <DialogTitle>Add a branch</DialogTitle>
-            <DialogDescription>Starts as a draft. Fill in the pin, cuisine and a photo to publish.</DialogDescription>
+            <DialogDescription>
+              Starts as a draft. Fill in the pin, cuisine and a photo to
+              publish.
+            </DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
@@ -203,10 +243,17 @@ export function AddBranchDialog({
           </FieldGroup>
           <ApiErrorAlert error={create.error} title="Couldn't add the branch" />
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={!label.trim() || !address.trim() || create.isPending}>
+            <Button
+              type="submit"
+              disabled={!label.trim() || !address.trim() || create.isPending}
+            >
               {create.isPending ? <Spinner data-icon="inline-start" /> : null}
               Add branch
             </Button>

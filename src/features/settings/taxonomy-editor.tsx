@@ -32,6 +32,7 @@ import {
 import { toast } from "@/components/ui/toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
+import { useUrlFilters } from "@/hooks/use-url-filters"
 import { useTaxonomy, type TaxonomyKind } from "@/features/places/queries"
 import type { TaxonRow } from "@/features/places/types"
 
@@ -57,7 +58,10 @@ const TAG_CATEGORIES: { value: TagCategory; label: string }[] = [
 ]
 
 export function TaxonomyEditor() {
-  const [kind, setKind] = useState<TaxonomyKind>("neighborhoods")
+  const { get, set } = useUrlFilters()
+  const kind = get("list", "neighborhoods") as TaxonomyKind
+  const setKind = (next: TaxonomyKind) =>
+    set("list", next === "neighborhoods" ? "" : next)
   const meta = KINDS.find((k) => k.value === kind) ?? KINDS[0]
   const list = useTaxonomy(kind)
   const act = useTaxonomyAction(kind)

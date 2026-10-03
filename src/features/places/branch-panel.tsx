@@ -31,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/toast"
 
 import { ago } from "@/features/inbox/format"
+import { useUrlFilters } from "@/hooks/use-url-filters"
 
 import { BranchForm } from "./branch-form"
 import { BranchMenus } from "./branch-menus"
@@ -59,6 +60,8 @@ function checklist(branch: Branch, photos: BranchPhoto[] | undefined) {
 
 export function BranchPanel({ branchId }: { branchId: string }) {
   const branch = useBranch(branchId)
+  const { get, set } = useUrlFilters()
+  const tab = get("tab", "details")
   const photos = useBranchPhotos(branchId)
 
   if (branch.isPending) return <Skeleton className="h-96" />
@@ -70,7 +73,12 @@ export function BranchPanel({ branchId }: { branchId: string }) {
   return (
     <div className="flex flex-col gap-6">
       <StatusCard branch={branch.data} photos={photos.data} />
-      <Tabs defaultValue="details">
+      <Tabs
+        value={tab}
+        onValueChange={(value) =>
+          set("tab", value === "details" ? "" : String(value))
+        }
+      >
         <TabsList variant="line">
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="photos">
@@ -78,8 +86,8 @@ export function BranchPanel({ branchId }: { branchId: string }) {
           </TabsTrigger>
           <TabsTrigger value="menu">Menu</TabsTrigger>
         </TabsList>
-        <TabsContent value="details" className="pt-4">
-          <BranchForm key={branch.data.updatedAt} branch={branch.data} />
+        <TabsContent value="details" keepMounted className="pt-4">
+          <BranchForm key={branch.data.id} branch={branch.data} />
         </TabsContent>
         <TabsContent value="photos" className="pt-4">
           <BranchPhotos branchId={branchId} />

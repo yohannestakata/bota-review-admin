@@ -1,4 +1,9 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 
 import { useApi } from "@/lib/api"
 import { toPage } from "@/lib/paginated"
@@ -19,26 +24,71 @@ export type User = {
 }
 
 export const ROLES: { value: Role; label: string; description: string }[] = [
-  { value: "user", label: "Member", description: "Writes reviews and adds photos." },
-  { value: "business_owner", label: "Business owner", description: "Can reply as their business." },
-  { value: "editor", label: "Editor", description: "Has editing rights in the API, but only admins can sign in here." },
-  { value: "admin", label: "Admin", description: "Everything, including people and settings." },
+  {
+    value: "user",
+    label: "Member",
+    description: "Writes reviews and adds photos.",
+  },
+  {
+    value: "business_owner",
+    label: "Business owner",
+    description: "Can reply as their business.",
+  },
+  {
+    value: "editor",
+    label: "Editor",
+    description:
+      "Has editing rights in the API, but only admins can sign in here.",
+  },
+  {
+    value: "admin",
+    label: "Admin",
+    description: "Everything, including people and settings.",
+  },
 ]
 
-export const TRUST: { value: TrustLevel; label: string; description: string }[] = [
-  { value: "new", label: "New", description: "Posts wait for review until 3 are approved." },
-  { value: "trusted", label: "Trusted", description: "Posts go live right away." },
-  { value: "flagged", label: "Flagged", description: "Posts wait for review, and trust takes longer to earn." },
+export const TRUST: {
+  value: TrustLevel
+  label: string
+  description: string
+}[] = [
+  {
+    value: "new",
+    label: "New",
+    description: "Posts wait for review until 3 are approved.",
+  },
+  {
+    value: "trusted",
+    label: "Trusted",
+    description: "Posts go live right away.",
+  },
+  {
+    value: "flagged",
+    label: "Flagged",
+    description: "Posts wait for review, and trust takes longer to earn.",
+  },
 ]
 
 const PAGE_SIZE = 25
 
-export function useUsers(params: { q: string; role?: Role; status?: UserStatus; trustLevel?: TrustLevel; page: number }) {
+export function useUsers(params: {
+  q: string
+  role?: Role
+  status?: UserStatus
+  trustLevel?: TrustLevel
+  page: number
+}) {
   const api = useApi()
   return useQuery({
     queryKey: ["users", params],
     queryFn: async () =>
-      toPage(await api<User[]>("/admin/users", { query: { ...params, limit: PAGE_SIZE } }), params.page, PAGE_SIZE),
+      toPage(
+        await api<User[]>("/admin/users", {
+          query: { ...params, limit: PAGE_SIZE },
+        }),
+        params.page,
+        PAGE_SIZE
+      ),
     placeholderData: keepPreviousData,
   })
 }
@@ -56,9 +106,15 @@ export function useUserAction() {
       const base = `/admin/users/${input.id}`
       switch (input.action) {
         case "role":
-          return api(`${base}/role`, { method: "PATCH", body: { role: input.role } })
+          return api(`${base}/role`, {
+            method: "PATCH",
+            body: { role: input.role },
+          })
         case "trust":
-          return api(`${base}/trust-level`, { method: "PATCH", body: { trustLevel: input.trustLevel } })
+          return api(`${base}/trust-level`, {
+            method: "PATCH",
+            body: { trustLevel: input.trustLevel },
+          })
         default:
           return api(`${base}/${input.action}`, { method: "PATCH" })
       }

@@ -29,7 +29,10 @@ export type PlaceBranchSummary = {
 export type PlaceDetail = PlaceListItem & { branches: PlaceBranchSummary[] }
 
 export type Taxon = { id: string; name: string; slug: string }
-export type TaxonRow = Taxon & { status: "active" | "archived"; category?: string }
+export type TaxonRow = Taxon & {
+  status: "active" | "archived"
+  category?: string
+}
 
 export type Branch = {
   id: string
@@ -50,7 +53,13 @@ export type Branch = {
   rating: string
   reviewCount: number
   updatedAt: string
-  place: { id: string; slug: string; type: PlaceType; status: ContentStatus; name: string }
+  place: {
+    id: string
+    slug: string
+    type: PlaceType
+    status: ContentStatus
+    name: string
+  }
   neighborhood: Taxon | null
   cuisines: Taxon[]
   foodCategories: Taxon[]

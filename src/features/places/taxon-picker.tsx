@@ -19,9 +19,10 @@ import type { Taxon } from "./types"
 function useOptions(kind: TaxonomyKind, chosen: Taxon[]) {
   const { data = [] } = useTaxonomy(kind)
   const ids = new Set(chosen.map((t) => t.id))
-  return [...chosen, ...data.filter((t) => t.status === "active" && !ids.has(t.id))].sort((a, b) =>
-    a.name.localeCompare(b.name)
-  )
+  return [
+    ...chosen,
+    ...data.filter((t) => t.status === "active" && !ids.has(t.id)),
+  ].sort((a, b) => a.name.localeCompare(b.name))
 }
 
 const sameTaxon = (a: Taxon, b: Taxon) => a.id === b.id
@@ -53,9 +54,14 @@ export function TaxonMultiPicker({
     >
       <ComboboxChips ref={anchor}>
         <ComboboxValue>
-          {(chosen: Taxon[]) => chosen.map((t) => <ComboboxChip key={t.id}>{t.name}</ComboboxChip>)}
+          {(chosen: Taxon[]) =>
+            chosen.map((t) => <ComboboxChip key={t.id}>{t.name}</ComboboxChip>)
+          }
         </ComboboxValue>
-        <ComboboxChipsInput id={id} placeholder={value.length ? "" : placeholder} />
+        <ComboboxChipsInput
+          id={id}
+          placeholder={value.length ? "" : placeholder}
+        />
       </ComboboxChips>
       <ComboboxContent anchor={anchor}>
         <ComboboxEmpty>Nothing matches.</ComboboxEmpty>
@@ -93,7 +99,11 @@ export function TaxonPicker({
       itemToStringLabel={taxonName}
       isItemEqualToValue={sameTaxon}
     >
-      <ComboboxInput id={id} placeholder={placeholder} showClear={Boolean(value)} />
+      <ComboboxInput
+        id={id}
+        placeholder={placeholder}
+        showClear={Boolean(value)}
+      />
       <ComboboxContent>
         <ComboboxEmpty>Nothing matches.</ComboboxEmpty>
         <ComboboxList>

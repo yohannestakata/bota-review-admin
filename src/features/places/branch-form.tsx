@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
+import { UnsavedChanges } from "@/components/unsaved-changes"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import {
@@ -102,7 +103,8 @@ function validCoordinate(value: string, limit: number) {
 
 /** Branch details. Keyed by the branch's updatedAt, so a save resets the draft. */
 export function BranchForm({ branch }: { branch: Branch }) {
-  const [initial] = useState(() => toDraft(branch))
+  // Compared against the latest saved branch, so refetches don't wipe edits.
+  const initial = toDraft(branch)
   const [draft, setDraft] = useState(initial)
   const update = useUpdateBranch(branch.id)
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
@@ -136,7 +138,10 @@ export function BranchForm({ branch }: { branch: Branch }) {
       onSubmit={(e) => {
         e.preventDefault()
         update.mutate(patch, {
-          onSuccess: () => toast.add({ title: "Saved", type: "success" }),
+          onSuccess: (saved) => {
+            setDraft(toDraft(saved))
+            toast.add({ title: "Saved", type: "success" })
+          },
         })
       }}
     >
@@ -369,6 +374,7 @@ export function BranchForm({ branch }: { branch: Branch }) {
           </Field>
         </CardFooter>
       </Card>
+      <UnsavedChanges when={dirty} />
     </form>
   )
 }

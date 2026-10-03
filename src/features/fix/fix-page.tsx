@@ -1,6 +1,6 @@
 import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { useNavigate } from "react-router"
+import { Link } from "react-router"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { Pager } from "@/components/pager"
@@ -38,7 +38,6 @@ import { useUrlFilters } from "@/hooks/use-url-filters"
 import { useQualityIssues, useQualityRows } from "./queries"
 
 export function FixPage() {
-  const navigate = useNavigate()
   const { get, set, page } = useUrlFilters()
   const issues = useQualityIssues()
   const q = get("q")
@@ -140,17 +139,15 @@ export function FixPage() {
                           </TableRow>
                         ))
                       : rows.data?.rows.map((row) => (
-                          <TableRow
-                            key={row.branchId}
-                            className="cursor-pointer"
-                            onClick={() =>
-                              void navigate(
-                                `/places/${row.placeId}?branch=${row.branchId}`
-                              )
-                            }
-                          >
+                          <TableRow key={row.branchId} className="relative">
                             <TableCell className="font-medium">
-                              {row.placeName}
+                              {/* Covers the row; carries the check so the place page can offer "next". */}
+                              <Link
+                                to={`/places/${row.placeId}?branch=${row.branchId}&fix=${issue.key}`}
+                                className="after:absolute after:inset-0"
+                              >
+                                {row.placeName}
+                              </Link>
                             </TableCell>
                             <TableCell>{row.label}</TableCell>
                             <TableCell>{row.note}</TableCell>

@@ -17,7 +17,11 @@ export const inboxKey = ["inbox"] as const
 // Submissions are paged by the API (max 50); the header carries the total.
 const SUBMISSION_PAGE = 50
 
-async function list<T>(api: Api, path: string, query?: Record<string, string | number>) {
+async function list<T>(
+  api: Api,
+  path: string,
+  query?: Record<string, string | number>
+) {
   return (await api<T[]>(path, { query })).data
 }
 
@@ -56,19 +60,30 @@ export function useInbox() {
           const res = await api<SubmissionRow[]>("/admin/submissions", {
             query: { status: "pending", limit: SUBMISSION_PAGE },
           })
-          const total = Number(res.headers.get("X-Total-Count") ?? res.data.length)
+          const total = Number(
+            res.headers.get("X-Total-Count") ?? res.data.length
+          )
           return { rows: res.data, total }
         },
       },
       {
         queryKey: [...inboxKey, "claims"],
-        queryFn: () => list<ClaimRow>(api, "/admin/claims", { status: "pending" }),
+        queryFn: () =>
+          list<ClaimRow>(api, "/admin/claims", { status: "pending" }),
       },
     ],
   })
 
-  const [pending, reported, spot, replies, reportedReplies, photos, submissions, claims] =
-    results
+  const [
+    pending,
+    reported,
+    spot,
+    replies,
+    reportedReplies,
+    photos,
+    submissions,
+    claims,
+  ] = results
 
   const items: InboxItem[] = []
   const seen = new Set<string>()
@@ -79,21 +94,69 @@ export function useInbox() {
     items.push(item)
   }
   for (const r of reported.data ?? [])
-    push({ kind: "review", key: `review:${r.id}`, reason: "reported", createdAt: r.createdAt, data: r })
+    push({
+      kind: "review",
+      key: `review:${r.id}`,
+      reason: "reported",
+      createdAt: r.createdAt,
+      data: r,
+    })
   for (const r of pending.data ?? [])
-    push({ kind: "review", key: `review:${r.id}`, reason: "new", createdAt: r.createdAt, data: r })
+    push({
+      kind: "review",
+      key: `review:${r.id}`,
+      reason: "new",
+      createdAt: r.createdAt,
+      data: r,
+    })
   for (const r of spot.data ?? [])
-    push({ kind: "review", key: `review:${r.id}`, reason: "spot-check", createdAt: r.createdAt, data: r })
+    push({
+      kind: "review",
+      key: `review:${r.id}`,
+      reason: "spot-check",
+      createdAt: r.createdAt,
+      data: r,
+    })
   for (const r of reportedReplies.data ?? [])
-    push({ kind: "reply", key: `reply:${r.id}`, reason: "reported", createdAt: r.createdAt, data: r })
+    push({
+      kind: "reply",
+      key: `reply:${r.id}`,
+      reason: "reported",
+      createdAt: r.createdAt,
+      data: r,
+    })
   for (const r of replies.data ?? [])
-    push({ kind: "reply", key: `reply:${r.id}`, reason: "new", createdAt: r.createdAt, data: r })
+    push({
+      kind: "reply",
+      key: `reply:${r.id}`,
+      reason: "new",
+      createdAt: r.createdAt,
+      data: r,
+    })
   for (const p of photos.data ?? [])
-    push({ kind: "photo", key: `photo:${p.id}`, reason: "new", createdAt: p.createdAt, data: p })
+    push({
+      kind: "photo",
+      key: `photo:${p.id}`,
+      reason: "new",
+      createdAt: p.createdAt,
+      data: p,
+    })
   for (const s of submissions.data?.rows ?? [])
-    push({ kind: "submission", key: `submission:${s.id}`, reason: "new", createdAt: s.createdAt, data: s })
+    push({
+      kind: "submission",
+      key: `submission:${s.id}`,
+      reason: "new",
+      createdAt: s.createdAt,
+      data: s,
+    })
   for (const c of claims.data ?? [])
-    push({ kind: "claim", key: `claim:${c.id}`, reason: "new", createdAt: c.createdAt, data: c })
+    push({
+      kind: "claim",
+      key: `claim:${c.id}`,
+      reason: "new",
+      createdAt: c.createdAt,
+      data: c,
+    })
 
   // Reports first (something's wrong on a live page), then oldest first.
   items.sort((a, b) =>
@@ -131,21 +194,38 @@ function endpoint(item: InboxItem, decision: Decision) {
     case "review":
       return approve
         ? { path: `/admin/reviews/${item.data.id}/approve` }
-        : { path: `/admin/reviews/${item.data.id}/reject`, body: { rejectionReason: decision.reason } }
+        : {
+            path: `/admin/reviews/${item.data.id}/reject`,
+            body: { rejectionReason: decision.reason },
+          }
     case "reply":
       return approve
         ? { path: `/admin/reviews/replies/${item.data.id}/approve` }
-        : { path: `/admin/reviews/replies/${item.data.id}/reject`, body: { rejectionReason: decision.reason } }
+        : {
+            path: `/admin/reviews/replies/${item.data.id}/reject`,
+            body: { rejectionReason: decision.reason },
+          }
     case "photo":
-      return { path: `/admin/photos/${item.data.id}/${approve ? "approve" : "reject"}` }
+      return {
+        path: `/admin/photos/${item.data.id}/${approve ? "approve" : "reject"}`,
+      }
     case "submission":
       return approve
-        ? { path: `/admin/submissions/${item.data.id}/review`, body: decision.note ? { note: decision.note } : {} }
-        : { path: `/admin/submissions/${item.data.id}/dismiss`, body: decision.note ? { reason: decision.note } : {} }
+        ? {
+            path: `/admin/submissions/${item.data.id}/review`,
+            body: decision.note ? { note: decision.note } : {},
+          }
+        : {
+            path: `/admin/submissions/${item.data.id}/dismiss`,
+            body: decision.note ? { reason: decision.note } : {},
+          }
     case "claim":
       return approve
         ? { path: `/admin/claims/${item.data.id}/verify` }
-        : { path: `/admin/claims/${item.data.id}/reject`, body: { rejectionReason: decision.note } }
+        : {
+            path: `/admin/claims/${item.data.id}/reject`,
+            body: { rejectionReason: decision.note },
+          }
   }
 }
 
@@ -154,8 +234,17 @@ export function useDecide() {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ item, decision }: { item: InboxItem; decision: Decision }) => {
-      const { path, body } = endpoint(item, decision) as { path: string; body?: unknown }
+    mutationFn: async ({
+      item,
+      decision,
+    }: {
+      item: InboxItem
+      decision: Decision
+    }) => {
+      const { path, body } = endpoint(item, decision) as {
+        path: string
+        body?: unknown
+      }
       await api(path, { method: "PATCH", body })
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: inboxKey }),

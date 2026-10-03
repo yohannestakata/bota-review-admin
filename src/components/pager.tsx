@@ -21,7 +21,8 @@ export function Pager({
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm text-muted-foreground tabular-nums">
-        {from.toLocaleString()}–{to.toLocaleString()} of {total.toLocaleString()}
+        {from.toLocaleString()}–{to.toLocaleString()} of{" "}
+        {total.toLocaleString()}
       </span>
       <div className="flex gap-1">
         <Button

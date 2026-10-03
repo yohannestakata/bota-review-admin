@@ -32,7 +32,11 @@ export function NewPlaceDialog() {
   return (
     <>
       <Button onClick={() => setOpen(true)}>
-        <HugeiconsIcon icon={Add01Icon} strokeWidth={2} data-icon="inline-start" />
+        <HugeiconsIcon
+          icon={Add01Icon}
+          strokeWidth={2}
+          data-icon="inline-start"
+        />
         New place
       </Button>
       <Dialog
@@ -62,7 +66,8 @@ export function NewPlaceDialog() {
             <DialogHeader>
               <DialogTitle>New place</DialogTitle>
               <DialogDescription>
-                Starts as a draft. Add a branch with its address and location next.
+                Starts as a draft. Add a branch with its address and location
+                next.
               </DialogDescription>
             </DialogHeader>
             <FieldGroup>
@@ -94,9 +99,16 @@ export function NewPlaceDialog() {
                 </ToggleGroup>
               </Field>
             </FieldGroup>
-            <ApiErrorAlert error={create.error} title="Couldn't create the place" />
+            <ApiErrorAlert
+              error={create.error}
+              title="Couldn't create the place"
+            />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={!name.trim() || create.isPending}>

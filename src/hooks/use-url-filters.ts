@@ -10,17 +10,15 @@ export function useUrlFilters() {
   const get = (key: string, fallback = "") => params.get(key) ?? fallback
   const page = Math.max(1, Number(params.get("page") ?? 1) || 1)
 
-  const set = (key: string, value: string) =>
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        if (!value || value === "all") next.delete(key)
-        else next.set(key, value)
-        if (key !== "page") next.delete("page")
-        return next
-      },
-      { replace: true }
-    )
+  // Built from the live URL, not this render's params: setters called later
+  // (from a toast's Undo, say) must not undo changes made since.
+  const set = (key: string, value: string) => {
+    const next = new URLSearchParams(window.location.search)
+    if (!value || value === "all") next.delete(key)
+    else next.set(key, value)
+    if (key !== "page") next.delete("page")
+    setParams(next, { replace: true })
+  }
 
   return { get, set, page }
 }
