@@ -1,4 +1,9 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query"
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 
 import { useApi } from "@/lib/api"
 import { toPage } from "@/lib/paginated"
@@ -22,6 +27,8 @@ export type QualityRow = {
   latitude: string | null
   longitude: string | null
   note: string
+  /** The chain a duplicate place can be merged into. */
+  relatedPlaceId: string | null
   updatedAt: string
 }
 
@@ -53,5 +60,31 @@ export function useQualityRows(
       ),
     enabled: Boolean(issue),
     placeholderData: keepPreviousData,
+  })
+}
+
+/** Folds a duplicate place into its chain (see the place page's Merge). */
+export function useMergeIntoChain() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      placeId,
+      intoPlaceId,
+    }: {
+      placeId: string
+      intoPlaceId: string
+    }) =>
+      (
+        await api<{ moved: number }>(`/admin/places/${placeId}/merge`, {
+          method: "POST",
+          body: { intoPlaceId },
+        })
+      ).data,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["quality"] }),
+        queryClient.invalidateQueries({ queryKey: ["places"] }),
+      ]),
   })
 }

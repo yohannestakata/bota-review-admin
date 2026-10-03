@@ -37,6 +37,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 
+import { MergeRowButton } from "./merge-row-button"
 import { useQualityIssues, useQualityRows } from "./queries"
 
 export function FixPage() {
@@ -92,7 +93,7 @@ export function FixPage() {
       </TabsList>
 
       {issue ? (
-        <TabsContent value={issue.key} className="min-w-0">
+        <TabsContent value={issue.key} className="min-w-0 flex-1">
           <Card>
             <CardHeader>
               <CardTitle>{issue.title}</CardTitle>
@@ -148,20 +149,23 @@ export function FixPage() {
                       <TableHead>Branch</TableHead>
                       <TableHead>Problem</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>
+                        <span className="sr-only">Fix</span>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {rows.isPending
                       ? Array.from({ length: 8 }, (_, i) => (
                           <TableRow key={i}>
-                            <TableCell colSpan={4}>
+                            <TableCell colSpan={5}>
                               <Skeleton className="h-5" />
                             </TableCell>
                           </TableRow>
                         ))
                       : rows.data?.rows.map((row) => (
                           <TableRow key={row.branchId} className="relative">
-                            <TableCell className="font-medium">
+                            <TableCell className="font-medium whitespace-normal">
                               {/* Covers the row; carries the check so the place page can offer "next". */}
                               <Link
                                 to={`/places/${row.placeId}?branch=${row.branchId}&fix=${issue.key}`}
@@ -171,9 +175,19 @@ export function FixPage() {
                               </Link>
                             </TableCell>
                             <TableCell>{row.label}</TableCell>
-                            <TableCell>{row.note}</TableCell>
+                            <TableCell className="whitespace-normal">{row.note}</TableCell>
                             <TableCell>
                               <StatusBadge status={row.status} />
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {row.relatedPlaceId ? (
+                                <MergeRowButton
+                                  row={{
+                                    ...row,
+                                    relatedPlaceId: row.relatedPlaceId,
+                                  }}
+                                />
+                              ) : null}
                             </TableCell>
                           </TableRow>
                         ))}
