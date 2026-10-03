@@ -223,7 +223,7 @@ const CATEGORY_LABEL: Record<PhotoCategory, string> = {
   interior: "Inside",
   exterior: "Outside",
   menu: "Menu",
-  ambience: "Ambience",
+  ambience: "Vibe",
 }
 const CATEGORY_ITEMS = PHOTO_CATEGORIES.map((value) => ({
   value,
