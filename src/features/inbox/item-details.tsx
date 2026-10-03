@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/item"
 import { Separator } from "@/components/ui/separator"
 
-import { useTaxonomy } from "@/features/places/queries"
+import { useLookup, useTaxonomy } from "@/features/places/queries"
 import type { TaxonRow } from "@/features/places/types"
 
 import { initials, placeLabel, SUBMISSION_LABEL } from "./format"
@@ -437,6 +437,7 @@ const METHOD_LABEL: Record<ClaimRow["verificationMethod"], string> = {
 }
 
 function ClaimDetail({ claim }: { claim: ClaimRow }) {
+  const platforms = useLookup("claim-platforms")
   const evidence = claim.verificationEvidence
   const isLink = evidence ? /^https?:\/\//.test(evidence) : false
   return (
@@ -455,7 +456,9 @@ function ClaimDetail({ claim }: { claim: ClaimRow }) {
         <Separator />
         <Row label="Verify by">
           {METHOD_LABEL[claim.verificationMethod]}
-          {claim.verificationPlatform ? ` (${claim.verificationPlatform})` : ""}
+          {claim.verificationPlatform
+            ? ` (${platforms.nameOf(claim.verificationPlatform)})`
+            : ""}
         </Row>
         {evidence ? (
           <Row label="Evidence">

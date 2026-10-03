@@ -1,8 +1,8 @@
 // Shapes of the admin moderation queues (backend admin endpoints).
 
 export type TrustLevel = "new" | "trusted" | "flagged"
-export type RejectionReason =
-  "spam" | "fake_visit" | "inappropriate" | "personal_attack" | "off_topic"
+/** A rejection reason's key (an editable list in Settings). */
+export type RejectionReason = string
 
 export type Person = {
   id: string
@@ -84,7 +84,8 @@ export type ClaimRow = {
   note: string | null
   verificationMethod:
     "business_email" | "social_media" | "phone_call" | "manual_review"
-  verificationPlatform: "instagram" | "facebook" | "tiktok" | null
+  /** A claim platform's key (an editable list). */
+  verificationPlatform: string | null
   verificationEvidence: string | null
   createdAt: string
   branch: BranchRef & { phone: string | null }

@@ -1,11 +1,6 @@
 import { formatDistanceToNowStrict } from "date-fns"
 
-import type {
-  BranchRef,
-  InboxItem,
-  RejectionReason,
-  SubmissionType,
-} from "./types"
+import type { BranchRef, InboxItem, SubmissionType } from "./types"
 
 export function placeLabel(branch: BranchRef | null | undefined) {
   if (!branch) return "New place"
@@ -41,14 +36,6 @@ export const SUBMISSION_LABEL: Record<SubmissionType, string> = {
   temporarily_closed: "Temporarily closed",
   permanently_closed: "Permanently closed",
 }
-
-export const REJECTION_REASONS: { value: RejectionReason; label: string }[] = [
-  { value: "spam", label: "Spam" },
-  { value: "fake_visit", label: "Fake visit" },
-  { value: "inappropriate", label: "Inappropriate" },
-  { value: "personal_attack", label: "Personal attack" },
-  { value: "off_topic", label: "Off topic" },
-]
 
 /** One-line summary for the list. */
 export function summary(item: InboxItem): string {

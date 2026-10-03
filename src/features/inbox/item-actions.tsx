@@ -42,7 +42,7 @@ import {
 import { Kbd } from "@/components/ui/kbd"
 import { Textarea } from "@/components/ui/textarea"
 
-import { REJECTION_REASONS } from "./format"
+import { useLookup } from "@/features/places/queries"
 import type { Decision } from "./queries"
 import type { InboxItem } from "./types"
 
@@ -87,6 +87,7 @@ export function ItemActions({
   const [verifyOpen, setVerifyOpen] = useState(false)
   const [note, setNote] = useState("")
   const needsReason = item.kind === "review" || item.kind === "reply"
+  const reasons = useLookup("rejection-reasons").active
   const needsNote = item.kind === "claim" || item.kind === "submission"
 
   return (
@@ -114,14 +115,12 @@ export function ItemActions({
           <DropdownMenuContent align="start">
             <DropdownMenuGroup>
               <DropdownMenuLabel>Reason</DropdownMenuLabel>
-              {REJECTION_REASONS.map((r) => (
+              {reasons.map((r) => (
                 <DropdownMenuItem
-                  key={r.value}
-                  onClick={() =>
-                    onDecide({ action: "reject", reason: r.value })
-                  }
+                  key={r.id}
+                  onClick={() => onDecide({ action: "reject", reason: r.id })}
                 >
-                  {r.label}
+                  {r.name}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>

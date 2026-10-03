@@ -92,12 +92,16 @@ export type TaxonomyKind =
   | "tag-groups"
   | "photo-categories"
   | "place-types"
+  | "rejection-reasons"
+  | "claim-platforms"
 
 /** Small lists keyed by a stable key and kept in a set order. */
 export const LOOKUP_KINDS: TaxonomyKind[] = [
   "tag-groups",
   "photo-categories",
   "place-types",
+  "rejection-reasons",
+  "claim-platforms",
 ]
 
 type LookupRow = {
@@ -133,7 +137,12 @@ export function useTaxonomy(kind: TaxonomyKind) {
 
 /** Active entries of a lookup list, plus a key -> name helper. */
 export function useLookup(
-  kind: "tag-groups" | "photo-categories" | "place-types"
+  kind:
+    | "tag-groups"
+    | "photo-categories"
+    | "place-types"
+    | "rejection-reasons"
+    | "claim-platforms"
 ) {
   const list = useTaxonomy(kind)
   const all = list.data ?? []
