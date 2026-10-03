@@ -187,7 +187,7 @@ export function BranchForm({ branch }: { branch: Branch }) {
                     />
                     <FieldError>{shown("branch-label")}</FieldError>
                     <FieldDescription>
-                      Usually the area, like Bole or Piassa. Changes the link.
+                      Usually the area, like Bole or Piassa.
                     </FieldDescription>
                   </Field>
                   <Field>
