@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardAction,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -108,17 +107,17 @@ export function CollectionsPage() {
               <CardHeader>
                 <CardTitle>{c.name}</CardTitle>
                 <CardDescription>{c.description}</CardDescription>
+                <CardDescription>
+                  {c.publishedBranchCount} live of {c.branchCount}
+                  {c.status !== "published" &&
+                  c.publishedBranchCount < MIN_PUBLISHED
+                    ? `, needs ${MIN_PUBLISHED - c.publishedBranchCount} more to publish`
+                    : ""}
+                </CardDescription>
                 <CardAction>
                   <StatusBadge status={c.status} />
                 </CardAction>
               </CardHeader>
-              <CardContent>
-                {c.publishedBranchCount} live of {c.branchCount}
-                {c.status !== "published" &&
-                c.publishedBranchCount < MIN_PUBLISHED
-                  ? `, needs ${MIN_PUBLISHED - c.publishedBranchCount} more to publish`
-                  : ""}
-              </CardContent>
               <CardFooter>
                 <Button
                   variant="outline"
