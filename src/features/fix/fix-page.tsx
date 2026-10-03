@@ -72,7 +72,7 @@ export function FixPage() {
       orientation="vertical"
       className="gap-6 p-6"
     >
-      <TabsList variant="line" className="w-64 shrink-0">
+      <TabsList variant="line" className="sticky top-6 w-64 shrink-0 self-start">
         {issues.data.map((i) => (
           <TabsTrigger key={i.key} value={i.key}>
             {i.title}
