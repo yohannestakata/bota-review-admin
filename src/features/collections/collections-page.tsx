@@ -32,6 +32,12 @@ import {
 } from "@/components/ui/empty"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+} from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { useUrlFilters } from "@/hooks/use-url-filters"
@@ -45,20 +51,24 @@ export function CollectionsPage() {
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center gap-3">
-        <p className="text-sm text-muted-foreground">
-          Curated lists on the home screen, like Best coffee in Bole. Shown in
-          this order.
-        </p>
-        <Button className="ml-auto" onClick={() => setCreating(true)}>
-          <HugeiconsIcon
-            icon={Add01Icon}
-            strokeWidth={2}
-            data-icon="inline-start"
-          />
-          New collection
-        </Button>
-      </div>
+      <Item>
+        <ItemContent>
+          <ItemDescription>
+            Curated lists on the home screen, like Best coffee in Bole. Shown in
+            this order.
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <Button onClick={() => setCreating(true)}>
+            <HugeiconsIcon
+              icon={Add01Icon}
+              strokeWidth={2}
+              data-icon="inline-start"
+            />
+            New collection
+          </Button>
+        </ItemActions>
+      </Item>
 
       <ApiErrorAlert
         error={collections.error}
@@ -72,7 +82,7 @@ export function CollectionsPage() {
           ))}
         </div>
       ) : collections.data?.rows.length === 0 ? (
-        <Empty className="border">
+        <Empty>
           <EmptyHeader>
             <EmptyTitle>No collections yet</EmptyTitle>
             <EmptyDescription>
@@ -96,9 +106,7 @@ export function CollectionsPage() {
               ) : null}
               <CardHeader>
                 <CardTitle>{c.name}</CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {c.description}
-                </CardDescription>
+                <CardDescription>{c.description}</CardDescription>
                 <CardAction>
                   <StatusBadge status={c.status} />
                 </CardAction>

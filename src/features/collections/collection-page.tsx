@@ -1,6 +1,5 @@
 import {
   ArrowDown01Icon,
-  ArrowLeft01Icon,
   ArrowUp01Icon,
   Image01Icon,
   Cancel01Icon,
@@ -23,6 +22,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -130,82 +137,85 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 p-6">
-      <div className="flex flex-col gap-3">
-        <Button
-          variant="link"
-          className="self-start px-0"
-          render={<Link to="/collections" />}
-          nativeButton={false}
-        >
-          <HugeiconsIcon
-            icon={ArrowLeft01Icon}
-            strokeWidth={2}
-            data-icon="inline-start"
-          />
-          Collections
-        </Button>
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold">{collection.name}</h1>
-          <StatusBadge status={collection.status} />
-          <div className="ml-auto flex gap-2">
-            {collection.status === "published" ? (
-              <Button
-                variant="outline"
-                disabled={act.isPending}
-                onClick={() =>
-                  act.mutate(
-                    { action: "update", body: { status: "draft" } },
-                    { onError }
-                  )
-                }
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link to="/collections" />}>
+              Collections
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{collection.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <Item>
+        <ItemContent>
+          <ItemTitle>
+            {collection.name}
+            <StatusBadge status={collection.status} />
+          </ItemTitle>
+          {collection.status !== "published" && short > 0 ? (
+            <ItemDescription>
+              Add {short} more live {short === 1 ? "place" : "places"} to
+              publish.
+            </ItemDescription>
+          ) : null}
+        </ItemContent>
+        <ItemActions>
+          {collection.status === "published" ? (
+            <Button
+              variant="outline"
+              disabled={act.isPending}
+              onClick={() =>
+                act.mutate(
+                  { action: "update", body: { status: "draft" } },
+                  { onError }
+                )
+              }
+            >
+              Unpublish
+            </Button>
+          ) : (
+            <Button
+              disabled={short > 0 || act.isPending}
+              onClick={() =>
+                act.mutate(
+                  { action: "publish" },
+                  {
+                    onSuccess: () =>
+                      toast.add({
+                        title: "Live in the app",
+                        type: "success",
+                      }),
+                    onError,
+                  }
+                )
+              }
+            >
+              Publish
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="outline" size="icon" aria-label="More" />
+              }
+            >
+              <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setArchiving(true)}
               >
-                Unpublish
-              </Button>
-            ) : (
-              <Button
-                disabled={short > 0 || act.isPending}
-                onClick={() =>
-                  act.mutate(
-                    { action: "publish" },
-                    {
-                      onSuccess: () =>
-                        toast.add({
-                          title: "Live in the app",
-                          type: "success",
-                        }),
-                      onError,
-                    }
-                  )
-                }
-              >
-                Publish
-              </Button>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button variant="outline" size="icon" aria-label="More" />
-                }
-              >
-                <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setArchiving(true)}
-                >
-                  Archive collection
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        {collection.status !== "published" && short > 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Add {short} more live {short === 1 ? "place" : "places"} to publish.
-          </p>
-        ) : null}
-      </div>
+                Archive collection
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </ItemActions>
+      </Item>
 
       <form
         onSubmit={(e) => {
@@ -271,7 +281,7 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
               </Field>
               <AspectRatio ratio={16 / 9}>
                 {/* Shown when there's no cover, or while it loads. */}
-                <Empty className="absolute inset-0 border">
+                <Empty className="absolute inset-0">
                   <EmptyMedia>
                     <HugeiconsIcon icon={Image01Icon} strokeWidth={2} />
                   </EmptyMedia>
@@ -280,7 +290,7 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
                   <img
                     src={cover.trim()}
                     alt=""
-                    className="absolute inset-0 size-full rounded-lg object-cover"
+                    className="absolute inset-0 size-full object-cover"
                   />
                 ) : null}
               </AspectRatio>
@@ -332,22 +342,21 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
               )
             }
           />
-          <ItemGroup className="gap-2">
+          <ItemGroup>
             {collection.branches.map((b, i) => (
               <Item key={b.id} variant="outline" size="sm">
-                <ItemMedia variant="image">
-                  {b.coverPhotoUrl ? (
+                {b.coverPhotoUrl ? (
+                  <ItemMedia variant="image">
                     <img src={b.coverPhotoUrl} alt="" />
-                  ) : (
-                    <div className="size-full bg-muted" />
-                  )}
-                </ItemMedia>
+                  </ItemMedia>
+                ) : (
+                  <ItemMedia variant="icon">
+                    <HugeiconsIcon icon={Image01Icon} strokeWidth={2} />
+                  </ItemMedia>
+                )}
                 <ItemContent>
                   <ItemTitle>
-                    <Link
-                      to={`/places/${b.placeId}?branch=${b.id}`}
-                      className="hover:underline"
-                    >
+                    <Link to={`/places/${b.placeId}?branch=${b.id}`}>
                       {b.placeName}
                     </Link>
                     {b.status !== "published" ? (

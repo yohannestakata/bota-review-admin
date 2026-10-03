@@ -56,13 +56,10 @@ export function BranchAdder({
         <ComboboxList>
           {(b: Branch) => (
             <ComboboxItem key={b.id} value={b}>
-              <span className="font-medium">{b.place.name}</span>
-              <span className="text-muted-foreground">
-                {b.label}
-                {b.neighborhood && b.neighborhood.name !== b.label
-                  ? `, ${b.neighborhood.name}`
-                  : ""}
-              </span>
+              {b.place.name} · {b.label}
+              {b.neighborhood && b.neighborhood.name !== b.label
+                ? `, ${b.neighborhood.name}`
+                : ""}
             </ComboboxItem>
           )}
         </ComboboxList>
