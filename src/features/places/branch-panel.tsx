@@ -59,7 +59,8 @@ const FIX_TARGET: Record<
   "no-location": { field: "branch-location" },
   "no-cuisine": { field: "branch-cuisines" },
   "no-photo": { tab: "photos" },
-  "same-chain": { merge: true },
+  // Only chain duplicates ("Looks like …") can be fixed here, by merging.
+  "possible-duplicate": { merge: true },
 }
 
 /** Mirrors the server's publish rules, so the gaps are visible before trying. */
@@ -264,7 +265,9 @@ function StatusCard({
               {problem.note ? (
                 <AlertDescription>{problem.note}</AlertDescription>
               ) : null}
-              {FIX_TARGET[problem.key] ? (
+              {FIX_TARGET[problem.key] &&
+              (problem.key !== "possible-duplicate" ||
+                problem.note?.startsWith("Looks like ")) ? (
                 <AlertAction>
                   <Button
                     size="sm"

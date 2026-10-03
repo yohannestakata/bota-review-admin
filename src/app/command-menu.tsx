@@ -24,9 +24,13 @@ function usePlaceSearch(q: string) {
   const api = useApi()
   return useQuery({
     queryKey: ["command-places", q],
+    // Archived places (merged duplicates, closed ones) aren't somewhere to go.
     queryFn: async () =>
-      (await api<PlaceListItem[]>("/admin/places", { query: { q, limit: 8 } }))
-        .data,
+      (
+        await api<PlaceListItem[]>("/admin/places", { query: { q, limit: 12 } })
+      ).data
+        .filter((place) => place.status !== "archived")
+        .slice(0, 8),
     enabled: q.length >= 2,
     staleTime: 30_000,
   })
