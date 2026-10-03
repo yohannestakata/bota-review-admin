@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item"
 import { Separator } from "@/components/ui/separator"
 
 import { ago, initials, placeLabel, SUBMISSION_LABEL } from "./format"
@@ -104,10 +105,14 @@ function ReplyDetail({ reply, reason }: { reply: ReplyRow; reason: InboxItem["re
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2 rounded-md bg-muted p-3 text-sm">
-          <Stars rating={reply.review.rating} />
-          <p className="line-clamp-4 text-muted-foreground">{reply.review.text}</p>
-        </div>
+        <Item variant="muted">
+          <ItemContent>
+            <ItemTitle>
+              <Stars rating={reply.review.rating} />
+            </ItemTitle>
+            <ItemDescription className="line-clamp-4">{reply.review.text}</ItemDescription>
+          </ItemContent>
+        </Item>
         <Author
           person={reply.user}
           meta={`${reply.authorRole === "owner" ? "Owner" : "User"} · ${ago(reply.createdAt)}`}
@@ -181,10 +186,19 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
           {submission.type === "field_correction" && submission.fieldName ? (
             <>
               <Row label="Field">{submission.fieldName}</Row>
-              <Row label="Now">{submission.currentValue ?? "Empty"}</Row>
-              <Row label="Suggested">
-                <span className="font-medium">{submission.suggestedValue ?? "Empty"}</span>
-              </Row>
+              {submission.suggestedValue === null && photos.length > 0 ? (
+                // A photo suggestion carries the photos, not a text value.
+                <Row label="Suggested">
+                  {photos.length === 1 ? "1 photo, shown below" : `${photos.length} photos, shown below`}
+                </Row>
+              ) : (
+                <>
+                  <Row label="Now">{submission.currentValue ?? "Empty"}</Row>
+                  <Row label="Suggested">
+                    <span className="font-medium">{submission.suggestedValue ?? "Empty"}</span>
+                  </Row>
+                </>
+              )}
             </>
           ) : null}
           {isNew ? (

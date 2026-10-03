@@ -33,18 +33,48 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { ago, initials } from "@/features/inbox/format"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 
-import { ROLES, TRUST, useUserAction, useUsers, type Role, type TrustLevel, type User, type UserStatus } from "./queries"
+import {
+  ROLES,
+  TRUST,
+  useUserAction,
+  useUsers,
+  type Role,
+  type TrustLevel,
+  type User,
+  type UserStatus,
+} from "./queries"
 
-const roleLabel = (role: Role) => ROLES.find((r) => r.value === role)?.label ?? role
-const trustLabel = (trust: TrustLevel) => TRUST.find((t) => t.value === trust)?.label ?? trust
+const roleLabel = (role: Role) =>
+  ROLES.find((r) => r.value === role)?.label ?? role
+const trustLabel = (trust: TrustLevel) =>
+  TRUST.find((t) => t.value === trust)?.label ?? trust
 
 type Pending =
   | { user: User; action: "role"; role: Role }
@@ -69,13 +99,23 @@ export function PeoplePage() {
   const run = (input: Parameters<typeof act.mutate>[0], done: string) =>
     act.mutate(input, {
       onSuccess: () => toast.add({ title: done, type: "success" }),
-      onError: (error) => toast.add({ title: "That didn't go through", description: error.message, type: "error" }),
+      onError: (error) =>
+        toast.add({
+          title: "That didn't go through",
+          description: error.message,
+          type: "error",
+        }),
     })
 
   return (
     <div className="flex flex-col gap-4 p-6">
       <div className="flex flex-wrap items-center gap-3">
-        <SearchInput value={q} onChange={(v) => set("q", v)} placeholder="Search name or email" className="w-72" />
+        <SearchInput
+          value={q}
+          onChange={(v) => set("q", v)}
+          placeholder="Search name or email"
+          className="w-72"
+        />
         <ToggleGroup
           value={[role]}
           onValueChange={(v) => v[0] && set("role", v[0])}
@@ -127,46 +167,85 @@ export function PeoplePage() {
                   return (
                     <TableRow key={user.id}>
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
-                            <AvatarFallback>{initials(user.displayName)}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex min-w-0 flex-col">
-                            <span className="flex items-center gap-2 font-medium">
+                        <Item size="xs" className="p-0">
+                          <ItemMedia>
+                            <Avatar>
+                              {user.avatarUrl ? (
+                                <AvatarImage src={user.avatarUrl} alt="" />
+                              ) : null}
+                              <AvatarFallback>
+                                {initials(user.displayName)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </ItemMedia>
+                          <ItemContent className="min-w-0">
+                            <ItemTitle>
                               {user.displayName}
-                              {isMe ? <span className="text-xs text-muted-foreground">You</span> : null}
-                              {user.status === "suspended" ? <Badge variant="destructive">Suspended</Badge> : null}
-                            </span>
-                            <span className="truncate text-xs text-muted-foreground">{user.email}</span>
-                          </div>
-                        </div>
+                              {isMe ? (
+                                <Badge variant="outline">You</Badge>
+                              ) : null}
+                              {user.status === "suspended" ? (
+                                <Badge variant="destructive">Suspended</Badge>
+                              ) : null}
+                            </ItemTitle>
+                            <ItemDescription className="truncate">
+                              {user.email}
+                            </ItemDescription>
+                          </ItemContent>
+                        </Item>
                       </TableCell>
                       <TableCell>{roleLabel(user.role)}</TableCell>
-                      <TableCell className={user.trustLevel === "flagged" ? "text-destructive" : undefined}>
+                      <TableCell
+                        className={
+                          user.trustLevel === "flagged"
+                            ? "text-destructive"
+                            : undefined
+                        }
+                      >
                         {trustLabel(user.trustLevel)}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{ago(user.createdAt)}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {ago(user.createdAt)}
+                      </TableCell>
                       <TableCell>
                         {isMe ? null : (
                           <DropdownMenu>
                             <DropdownMenuTrigger
-                              render={<Button variant="ghost" size="icon-sm" aria-label={`Manage ${user.displayName}`} />}
+                              render={
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  aria-label={`Manage ${user.displayName}`}
+                                />
+                              }
                             >
-                              <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} />
+                              <HugeiconsIcon
+                                icon={MoreHorizontalIcon}
+                                strokeWidth={2}
+                              />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-52">
                               <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>Role</DropdownMenuSubTrigger>
+                                <DropdownMenuSubTrigger>
+                                  Role
+                                </DropdownMenuSubTrigger>
                                 <DropdownMenuSubContent>
                                   <DropdownMenuRadioGroup
                                     value={user.role}
                                     onValueChange={(value: Role) =>
-                                      value !== user.role && setPending({ user, action: "role", role: value })
+                                      value !== user.role &&
+                                      setPending({
+                                        user,
+                                        action: "role",
+                                        role: value,
+                                      })
                                     }
                                   >
                                     {ROLES.map((r) => (
-                                      <DropdownMenuRadioItem key={r.value} value={r.value}>
+                                      <DropdownMenuRadioItem
+                                        key={r.value}
+                                        value={r.value}
+                                      >
                                         {r.label}
                                       </DropdownMenuRadioItem>
                                     ))}
@@ -174,25 +253,38 @@ export function PeoplePage() {
                                 </DropdownMenuSubContent>
                               </DropdownMenuSub>
                               <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>Trust</DropdownMenuSubTrigger>
+                                <DropdownMenuSubTrigger>
+                                  Trust
+                                </DropdownMenuSubTrigger>
                                 <DropdownMenuSubContent>
                                   <DropdownMenuGroup>
-                                    <DropdownMenuLabel>How their posts are handled</DropdownMenuLabel>
+                                    <DropdownMenuLabel>
+                                      How their posts are handled
+                                    </DropdownMenuLabel>
                                     <DropdownMenuRadioGroup
                                       value={user.trustLevel}
                                       onValueChange={(value: TrustLevel) =>
                                         value !== user.trustLevel &&
                                         run(
-                                          { id: user.id, action: "trust", trustLevel: value },
+                                          {
+                                            id: user.id,
+                                            action: "trust",
+                                            trustLevel: value,
+                                          },
                                           `${user.displayName} is now ${trustLabel(value).toLowerCase()}`
                                         )
                                       }
                                     >
                                       {TRUST.map((t) => (
-                                        <DropdownMenuRadioItem key={t.value} value={t.value}>
+                                        <DropdownMenuRadioItem
+                                          key={t.value}
+                                          value={t.value}
+                                        >
                                           <div className="flex flex-col">
                                             <span>{t.label}</span>
-                                            <span className="text-xs text-muted-foreground">{t.description}</span>
+                                            <span className="text-xs text-muted-foreground">
+                                              {t.description}
+                                            </span>
                                           </div>
                                         </DropdownMenuRadioItem>
                                       ))}
@@ -205,12 +297,18 @@ export function PeoplePage() {
                                 <DropdownMenuItem
                                   variant="destructive"
                                   disabled={user.role === "admin"}
-                                  onClick={() => setPending({ user, action: "suspend" })}
+                                  onClick={() =>
+                                    setPending({ user, action: "suspend" })
+                                  }
                                 >
                                   Suspend
                                 </DropdownMenuItem>
                               ) : (
-                                <DropdownMenuItem onClick={() => setPending({ user, action: "reinstate" })}>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    setPending({ user, action: "reinstate" })
+                                  }
+                                >
                                   Reinstate
                                 </DropdownMenuItem>
                               )}
@@ -244,7 +342,10 @@ export function PeoplePage() {
         </div>
       ) : null}
 
-      <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
+      <AlertDialog
+        open={pending !== null}
+        onOpenChange={(open) => !open && setPending(null)}
+      >
         {pending ? (
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -266,10 +367,19 @@ export function PeoplePage() {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                variant={pending.action === "suspend" ? "destructive" : "default"}
+                variant={
+                  pending.action === "suspend" ? "destructive" : "default"
+                }
                 onClick={() => {
                   if (pending.action === "role") {
-                    run({ id: pending.user.id, action: "role", role: pending.role }, "Role changed")
+                    run(
+                      {
+                        id: pending.user.id,
+                        action: "role",
+                        role: pending.role,
+                      },
+                      "Role changed"
+                    )
                   } else {
                     run(
                       { id: pending.user.id, action: pending.action },
@@ -279,7 +389,11 @@ export function PeoplePage() {
                   setPending(null)
                 }}
               >
-                {pending.action === "role" ? "Change role" : pending.action === "suspend" ? "Suspend" : "Reinstate"}
+                {pending.action === "role"
+                  ? "Change role"
+                  : pending.action === "suspend"
+                    ? "Suspend"
+                    : "Reinstate"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

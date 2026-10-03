@@ -20,12 +20,20 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import {
+  Item,
+  ItemActions as UiItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item"
 import { Kbd } from "@/components/ui/kbd"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { cn } from "@/lib/utils"
 
 import { ago, KIND_LABEL, summary, title } from "./format"
 import { ItemActions } from "./item-actions"
@@ -61,7 +69,9 @@ function isTyping(target: EventTarget | null) {
   const el = target as HTMLElement | null
   return (
     !!el &&
-    (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)
+    (el.tagName === "INPUT" ||
+      el.tagName === "TEXTAREA" ||
+      el.isContentEditable)
   )
 }
 
@@ -79,11 +89,19 @@ export function InboxPage() {
     [inbox.items, decided]
   )
   const visible = useMemo(
-    () => (filter === "all" ? open : open.filter((item) => item.kind === filter)),
+    () =>
+      filter === "all" ? open : open.filter((item) => item.kind === filter),
     [open, filter]
   )
   const counts = useMemo(() => {
-    const c: Record<Filter, number> = { all: open.length, review: 0, reply: 0, photo: 0, submission: 0, claim: 0 }
+    const c: Record<Filter, number> = {
+      all: open.length,
+      review: 0,
+      reply: 0,
+      photo: 0,
+      submission: 0,
+      claim: 0,
+    }
     for (const item of open) c[item.kind]++
     return c
   }, [open])
@@ -100,14 +118,23 @@ export function InboxPage() {
     decide.mutate(
       { item, decision },
       {
-        onSuccess: () => toast.add({ title: DONE_TOAST[decision.action], description: title(item), type: "success" }),
+        onSuccess: () =>
+          toast.add({
+            title: DONE_TOAST[decision.action],
+            description: title(item),
+            type: "success",
+          }),
         onError: (error) => {
           setDecided((prev) => {
             const copy = new Set(prev)
             copy.delete(item.key)
             return copy
           })
-          toast.add({ title: "That didn't go through", description: error.message, type: "error" })
+          toast.add({
+            title: "That didn't go through",
+            description: error.message,
+            type: "error",
+          })
         },
       }
     )
@@ -116,7 +143,14 @@ export function InboxPage() {
   // j/k or arrows to move, a to approve, r to reject.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey || rejectOpen) return
+      if (
+        isTyping(e.target) ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey ||
+        rejectOpen
+      )
+        return
       if (document.querySelector("[role=dialog], [role=alertdialog]")) return
       const key = e.key.toLowerCase()
       if (key === "j" || key === "arrowdown") {
@@ -159,7 +193,9 @@ export function InboxPage() {
               <ToggleGroupItem key={f.value} value={f.value}>
                 {f.label}
                 {counts[f.value] > 0 ? (
-                  <span className="text-muted-foreground tabular-nums">{counts[f.value]}</span>
+                  <span className="text-muted-foreground tabular-nums">
+                    {counts[f.value]}
+                  </span>
                 ) : null}
               </ToggleGroupItem>
             ))}
@@ -178,42 +214,55 @@ export function InboxPage() {
               ))}
             </div>
           ) : (
-            <ul className="flex flex-col p-1.5" aria-label="Waiting for review">
+            <ItemGroup className="gap-1 p-1.5" aria-label="Waiting for review">
               {visible.map((item) => (
-                <li key={item.key}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedKey(item.key)}
-                    aria-current={item === selected}
-                    className={cn(
-                      "flex w-full gap-3 rounded-md p-2.5 text-left transition-colors hover:bg-muted",
-                      item === selected && "bg-muted"
-                    )}
-                  >
+                <Item
+                  key={item.key}
+                  size="sm"
+                  variant={item === selected ? "muted" : "default"}
+                  render={<button type="button" />}
+                  onClick={() => setSelectedKey(item.key)}
+                  aria-current={item === selected}
+                  className="text-left"
+                >
+                  <ItemMedia variant="icon">
                     <HugeiconsIcon
-                      icon={item.reason === "reported" ? Flag02Icon : KIND_ICON[item.kind]}
+                      icon={
+                        item.reason === "reported"
+                          ? Flag02Icon
+                          : KIND_ICON[item.kind]
+                      }
                       strokeWidth={2}
-                      className={cn(
-                        "mt-0.5 shrink-0 text-muted-foreground",
-                        item.reason === "reported" && "text-destructive"
-                      )}
+                      className={
+                        item.reason === "reported"
+                          ? "text-destructive"
+                          : undefined
+                      }
                     />
-                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="flex items-center gap-2">
-                        <span className="truncate font-medium">{title(item)}</span>
-                        <span className="ml-auto shrink-0 text-xs text-muted-foreground">{ago(item.createdAt)}</span>
-                      </span>
-                      <span className="truncate text-sm text-muted-foreground">{summary(item)}</span>
-                      <span className="flex gap-1.5 pt-1">
-                        <Badge variant="outline">{KIND_LABEL[item.kind]}</Badge>
-                        {item.reason === "reported" ? <Badge variant="destructive">Reported</Badge> : null}
-                        {item.reason === "spot-check" ? <Badge variant="secondary">Spot check</Badge> : null}
-                      </span>
-                    </span>
-                  </button>
-                </li>
+                  </ItemMedia>
+                  <ItemContent className="min-w-0">
+                    <ItemTitle className="w-full">
+                      <span className="truncate">{title(item)}</span>
+                    </ItemTitle>
+                    <ItemDescription className="truncate">
+                      {summary(item)}
+                    </ItemDescription>
+                    <div className="flex gap-1.5">
+                      <Badge variant="outline">{KIND_LABEL[item.kind]}</Badge>
+                      {item.reason === "reported" ? (
+                        <Badge variant="destructive">Reported</Badge>
+                      ) : null}
+                      {item.reason === "spot-check" ? (
+                        <Badge variant="secondary">Spot check</Badge>
+                      ) : null}
+                    </div>
+                  </ItemContent>
+                  <UiItemActions className="self-start">
+                    <ItemDescription>{ago(item.createdAt)}</ItemDescription>
+                  </UiItemActions>
+                </Item>
               ))}
-            </ul>
+            </ItemGroup>
           )}
         </ScrollArea>
       </section>
@@ -225,7 +274,11 @@ export function InboxPage() {
               <AlertTitle>Some queues didn't load</AlertTitle>
               <AlertDescription className="flex items-center gap-3">
                 {inbox.error.message}
-                <Button size="sm" variant="outline" onClick={() => void inbox.refetch()}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void inbox.refetch()}
+                >
                   Retry
                 </Button>
               </AlertDescription>

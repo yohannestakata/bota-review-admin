@@ -3,10 +3,32 @@ import { useState } from "react"
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Field } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
@@ -18,7 +40,11 @@ import { useTaxonomyAction, type TagCategory } from "./queries"
 const KINDS: { value: TaxonomyKind; label: string; singular: string }[] = [
   { value: "neighborhoods", label: "Neighborhoods", singular: "neighborhood" },
   { value: "cuisines", label: "Cuisines", singular: "cuisine" },
-  { value: "food-categories", label: "Food categories", singular: "food category" },
+  {
+    value: "food-categories",
+    label: "Food categories",
+    singular: "food category",
+  },
   { value: "tags", label: "Tags", singular: "tag" },
   { value: "amenities", label: "Amenities", singular: "amenity" },
 ]
@@ -40,73 +66,100 @@ export function TaxonomyEditor() {
   const isTags = kind === "tags"
 
   const onError = (error: Error) =>
-    toast.add({ title: "That didn't go through", description: error.message, type: "error" })
+    toast.add({
+      title: "That didn't go through",
+      description: error.message,
+      type: "error",
+    })
 
   return (
-    <div className="flex flex-col gap-4">
-      <ToggleGroup
-        value={[kind]}
-        onValueChange={(v) => v[0] && setKind(v[0] as TaxonomyKind)}
-        variant="outline"
-        size="sm"
-        spacing={1}
-        className="flex-wrap"
-      >
-        {KINDS.map((k) => (
-          <ToggleGroupItem key={k.value} value={k.value}>
-            {k.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+    <Card>
+      <CardHeader>
+        <CardTitle>Lists</CardTitle>
+        <CardDescription>
+          The options editors pick from and people filter by in the app.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <ToggleGroup
+          value={[kind]}
+          onValueChange={(v) => v[0] && setKind(v[0] as TaxonomyKind)}
+          variant="outline"
+          size="sm"
+          spacing={1}
+          className="flex-wrap"
+        >
+          {KINDS.map((k) => (
+            <ToggleGroupItem key={k.value} value={k.value}>
+              {k.label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
 
-      <form
-        className="flex flex-wrap gap-2"
-        onSubmit={(e) => {
-          e.preventDefault()
-          act.mutate(
-            { action: "create", name: name.trim(), ...(isTags ? { category } : {}) },
-            {
-              onSuccess: () => {
-                toast.add({ title: "Added", description: name.trim(), type: "success" })
-                setName("")
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            act.mutate(
+              {
+                action: "create",
+                name: name.trim(),
+                ...(isTags ? { category } : {}),
               },
-              onError,
-            }
-          )
-        }}
-      >
-        <Input
-          aria-label={`New ${meta.singular}`}
-          placeholder={`New ${meta.singular}`}
-          className="w-64"
-          maxLength={120}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        {isTags ? (
-          <Select items={TAG_CATEGORIES} value={category} onValueChange={(v) => v && setCategory(v)}>
-            <SelectTrigger aria-label="Tag group" className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {TAG_CATEGORIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>
-                    {c.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        ) : null}
-        <Button type="submit" variant="outline" disabled={!name.trim() || act.isPending}>
-          Add
-        </Button>
-      </form>
+              {
+                onSuccess: () => {
+                  toast.add({
+                    title: "Added",
+                    description: name.trim(),
+                    type: "success",
+                  })
+                  setName("")
+                },
+                onError,
+              }
+            )
+          }}
+        >
+          <Field orientation="horizontal">
+            <Input
+              aria-label={`New ${meta.singular}`}
+              placeholder={`New ${meta.singular}`}
+              className="w-64"
+              maxLength={120}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            {isTags ? (
+              <Select
+                items={TAG_CATEGORIES}
+                value={category}
+                onValueChange={(v) => v && setCategory(v)}
+              >
+                <SelectTrigger aria-label="Tag group" className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {TAG_CATEGORIES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            ) : null}
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={!name.trim() || act.isPending}
+            >
+              Add
+            </Button>
+          </Field>
+        </form>
 
-      <ApiErrorAlert error={list.error} title="Couldn't load the list" />
+        <ApiErrorAlert error={list.error} title="Couldn't load the list" />
 
-      <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -125,26 +178,43 @@ export function TaxonomyEditor() {
                   </TableRow>
                 ))
               : list.data?.map((row) => (
-                  <TaxonRowView key={row.id} row={row} isTags={isTags} kind={kind} />
+                  <TaxonRowView
+                    key={row.id}
+                    row={row}
+                    isTags={isTags}
+                    kind={kind}
+                  />
                 ))}
           </TableBody>
         </Table>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 
-function TaxonRowView({ row, isTags, kind }: { row: TaxonRow; isTags: boolean; kind: TaxonomyKind }) {
+function TaxonRowView({
+  row,
+  isTags,
+  kind,
+}: {
+  row: TaxonRow
+  isTags: boolean
+  kind: TaxonomyKind
+}) {
   const act = useTaxonomyAction(kind)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(row.name)
   const archived = row.status === "archived"
 
   const onError = (error: Error) =>
-    toast.add({ title: "That didn't go through", description: error.message, type: "error" })
+    toast.add({
+      title: "That didn't go through",
+      description: error.message,
+      type: "error",
+    })
 
   return (
-    <TableRow className={archived ? "text-muted-foreground" : undefined}>
+    <TableRow>
       <TableCell>
         {editing ? (
           <form
@@ -159,13 +229,17 @@ function TaxonRowView({ row, isTags, kind }: { row: TaxonRow; isTags: boolean; k
           >
             <Input
               aria-label="Name"
-              className="h-8 w-56"
+              className="w-56"
               value={name}
               maxLength={120}
               onChange={(e) => setName(e.target.value)}
               autoFocus
             />
-            <Button type="submit" size="sm" disabled={!name.trim() || act.isPending}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!name.trim() || act.isPending}
+            >
               Save
             </Button>
             <Button
@@ -188,7 +262,7 @@ function TaxonRowView({ row, isTags, kind }: { row: TaxonRow; isTags: boolean; k
         )}
       </TableCell>
       {isTags ? (
-        <TableCell className="capitalize text-muted-foreground">{row.category}</TableCell>
+        <TableCell className="capitalize">{row.category}</TableCell>
       ) : null}
       <TableCell className="text-right">
         {editing ? null : (
@@ -201,7 +275,14 @@ function TaxonRowView({ row, isTags, kind }: { row: TaxonRow; isTags: boolean; k
               variant="ghost"
               disabled={act.isPending}
               onClick={() =>
-                act.mutate({ action: "update", id: row.id, status: archived ? "active" : "archived" }, { onError })
+                act.mutate(
+                  {
+                    action: "update",
+                    id: row.id,
+                    status: archived ? "active" : "archived",
+                  },
+                  { onError }
+                )
               }
             >
               {archived ? "Restore" : "Archive"}

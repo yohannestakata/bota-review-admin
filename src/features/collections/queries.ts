@@ -1,4 +1,9 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 
 import { useApi } from "@/lib/api"
 import { toPage } from "@/lib/paginated"
@@ -41,7 +46,13 @@ export function useCollections(page: number) {
   return useQuery({
     queryKey: [...key, { page }],
     queryFn: async () =>
-      toPage(await api<Collection[]>("/admin/collections", { query: { page, limit: PAGE_SIZE } }), page, PAGE_SIZE),
+      toPage(
+        await api<Collection[]>("/admin/collections", {
+          query: { page, limit: PAGE_SIZE },
+        }),
+        page,
+        PAGE_SIZE
+      ),
     placeholderData: keepPreviousData,
   })
 }
@@ -50,7 +61,8 @@ export function useCollection(id: string) {
   const api = useApi()
   return useQuery({
     queryKey: [...key, "detail", id],
-    queryFn: async () => (await api<CollectionDetail>(`/admin/collections/${id}`)).data,
+    queryFn: async () =>
+      (await api<CollectionDetail>(`/admin/collections/${id}`)).data,
   })
 }
 
@@ -60,7 +72,11 @@ export function useBranchSearch(q: string) {
   return useQuery({
     queryKey: ["branch-search", q],
     queryFn: async () =>
-      (await api<Branch[]>("/admin/branches", { query: { q, status: "published", limit: 20 } })).data,
+      (
+        await api<Branch[]>("/admin/branches", {
+          query: { q, status: "published", limit: 20 },
+        })
+      ).data,
     enabled: q.trim().length >= 2,
     placeholderData: keepPreviousData,
   })
@@ -78,7 +94,8 @@ export function useCreateCollection() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (body: { name: string }) =>
-      (await api<Collection>("/admin/collections", { method: "POST", body })).data,
+      (await api<Collection>("/admin/collections", { method: "POST", body }))
+        .data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
   })
 }
@@ -107,12 +124,18 @@ export function useCollectionAction(id: string) {
         case "add":
           return api(`${base}/branches`, {
             method: "POST",
-            body: { branchId: input.branchId, displayOrder: input.displayOrder },
+            body: {
+              branchId: input.branchId,
+              displayOrder: input.displayOrder,
+            },
           })
         case "remove":
           return api(`${base}/branches/${input.branchId}`, { method: "DELETE" })
         case "order":
-          return api(`${base}/order`, { method: "PATCH", body: { branchIds: input.branchIds } })
+          return api(`${base}/order`, {
+            method: "PATCH",
+            body: { branchIds: input.branchIds },
+          })
       }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),

@@ -13,17 +13,31 @@ export function useTaxonomyAction(kind: TaxonomyKind) {
     mutationFn: async (
       input:
         | { action: "create"; name: string; category?: TagCategory }
-        | { action: "update"; id: string; name?: string; status?: "active" | "archived"; category?: TagCategory }
+        | {
+            action: "update"
+            id: string
+            name?: string
+            status?: "active" | "archived"
+            category?: TagCategory
+          }
     ) => {
       if (input.action === "create") {
-        return api(`/admin/${kind}`, { method: "POST", body: { name: input.name, category: input.category } })
+        return api(`/admin/${kind}`, {
+          method: "POST",
+          body: { name: input.name, category: input.category },
+        })
       }
       return api(`/admin/${kind}/${input.id}`, {
         method: "PATCH",
-        body: { name: input.name, status: input.status, category: input.category },
+        body: {
+          name: input.name,
+          status: input.status,
+          category: input.category,
+        },
       })
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["taxonomy", kind] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["taxonomy", kind] }),
   })
 }
 
@@ -51,7 +65,8 @@ export function useRetryJob() {
   const api = useApi()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (id: string) => (await api(`/admin/jobs/${id}/retry`, { method: "POST" })).data,
+    mutationFn: async (id: string) =>
+      (await api(`/admin/jobs/${id}/retry`, { method: "POST" })).data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["jobs"] }),
   })
 }
@@ -61,7 +76,12 @@ export function useRunPendingJobs() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async () =>
-      (await api<{ processed: number }>("/admin/jobs/run-pending", { method: "POST", body: {} })).data,
+      (
+        await api<{ processed: number }>("/admin/jobs/run-pending", {
+          method: "POST",
+          body: {},
+        })
+      ).data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["jobs"] }),
   })
 }

@@ -3,9 +3,30 @@ import { HugeiconsIcon } from "@hugeicons/react"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { Button } from "@/components/ui/button"
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 import { ago } from "@/features/inbox/format"
 
@@ -23,46 +44,56 @@ export function FailedJobs() {
   const runPending = useRunPendingJobs()
 
   const onError = (error: Error) =>
-    toast.add({ title: "That didn't go through", description: error.message, type: "error" })
+    toast.add({
+      title: "That didn't go through",
+      description: error.message,
+      type: "error",
+    })
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <p className="text-sm text-muted-foreground">
-          Emails, notifications and other work that runs after an action. These ones failed.
-        </p>
-        <Button
-          variant="outline"
-          className="ml-auto"
-          disabled={runPending.isPending}
-          onClick={() =>
-            runPending.mutate(undefined, {
-              onSuccess: (result) =>
-                toast.add({ title: `${result.processed} waiting jobs processed`, type: "success" }),
-              onError,
-            })
-          }
-        >
-          Run waiting jobs now
-        </Button>
-      </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Failed background jobs</CardTitle>
+        <CardDescription>
+          Emails, notifications and other work that runs after an action.
+        </CardDescription>
+        <CardAction>
+          <Button
+            variant="outline"
+            disabled={runPending.isPending}
+            onClick={() =>
+              runPending.mutate(undefined, {
+                onSuccess: (result) =>
+                  toast.add({
+                    title: `${result.processed} waiting jobs processed`,
+                    type: "success",
+                  }),
+                onError,
+              })
+            }
+          >
+            Run waiting jobs now
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <ApiErrorAlert error={jobs.error} title="Couldn't load jobs" />
 
-      <ApiErrorAlert error={jobs.error} title="Couldn't load jobs" />
-
-      {jobs.isPending ? (
-        <Skeleton className="h-40" />
-      ) : jobs.data?.length === 0 ? (
-        <Empty className="border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} />
-            </EmptyMedia>
-            <EmptyTitle>Nothing failed</EmptyTitle>
-            <EmptyDescription>Everything that ran went through.</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <div className="rounded-lg border">
+        {jobs.isPending ? (
+          <Skeleton className="h-40" />
+        ) : jobs.data?.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} />
+              </EmptyMedia>
+              <EmptyTitle>Nothing failed</EmptyTitle>
+              <EmptyDescription>
+                Everything that ran went through.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -87,13 +118,16 @@ export function FailedJobs() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-80 truncate text-muted-foreground" title={job.lastError ?? undefined}>
+                  <TableCell
+                    className="max-w-80 truncate text-muted-foreground"
+                    title={job.lastError ?? undefined}
+                  >
                     {job.lastError}
                   </TableCell>
-                  <TableCell className="tabular-nums">
-                    {job.attempts}
+                  <TableCell className="tabular-nums">{job.attempts}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {ago(job.updatedAt)}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{ago(job.updatedAt)}</TableCell>
                   <TableCell>
                     <Button
                       size="sm"
@@ -101,7 +135,11 @@ export function FailedJobs() {
                       disabled={!job.canRetry || retry.isPending}
                       onClick={() =>
                         retry.mutate(job.id, {
-                          onSuccess: () => toast.add({ title: "Queued again", type: "success" }),
+                          onSuccess: () =>
+                            toast.add({
+                              title: "Queued again",
+                              type: "success",
+                            }),
                           onError,
                         })
                       }
@@ -113,8 +151,8 @@ export function FailedJobs() {
               ))}
             </TableBody>
           </Table>
-        </div>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

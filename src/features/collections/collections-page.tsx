@@ -7,7 +7,14 @@ import { ApiErrorAlert } from "@/components/api-error-alert"
 import { Pager } from "@/components/pager"
 import { StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -16,7 +23,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -34,15 +47,23 @@ export function CollectionsPage() {
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center gap-3">
         <p className="text-sm text-muted-foreground">
-          Curated lists on the home screen, like Best coffee in Bole. Shown in this order.
+          Curated lists on the home screen, like Best coffee in Bole. Shown in
+          this order.
         </p>
         <Button className="ml-auto" onClick={() => setCreating(true)}>
-          <HugeiconsIcon icon={Add01Icon} strokeWidth={2} data-icon="inline-start" />
+          <HugeiconsIcon
+            icon={Add01Icon}
+            strokeWidth={2}
+            data-icon="inline-start"
+          />
           New collection
         </Button>
       </div>
 
-      <ApiErrorAlert error={collections.error} title="Couldn't load collections" />
+      <ApiErrorAlert
+        error={collections.error}
+        title="Couldn't load collections"
+      />
 
       {collections.isPending ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -54,7 +75,9 @@ export function CollectionsPage() {
         <Empty className="border">
           <EmptyHeader>
             <EmptyTitle>No collections yet</EmptyTitle>
-            <EmptyDescription>Group great places around a theme.</EmptyDescription>
+            <EmptyDescription>
+              Group great places around a theme.
+            </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button onClick={() => setCreating(true)}>New collection</Button>
@@ -63,28 +86,41 @@ export function CollectionsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {collections.data?.rows.map((c) => (
-            <Link key={c.id} to={`/collections/${c.id}`} className="rounded-xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
-              <Card className="h-full pt-0 transition-colors hover:bg-muted/50">
-                {c.coverImageUrl ? (
-                  <img src={c.coverImageUrl} alt="" className="aspect-[2/1] w-full rounded-t-xl object-cover" />
-                ) : (
-                  <div className="aspect-[2/1] w-full rounded-t-xl bg-muted" />
-                )}
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span className="truncate">{c.name}</span>
-                    <StatusBadge status={c.status} />
-                  </CardTitle>
-                  <CardDescription className="line-clamp-2">{c.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="mt-auto text-sm text-muted-foreground">
+            <Card key={c.id}>
+              {c.coverImageUrl ? (
+                <img
+                  src={c.coverImageUrl}
+                  alt=""
+                  className="aspect-video object-cover"
+                />
+              ) : null}
+              <CardHeader>
+                <CardTitle>{c.name}</CardTitle>
+                <CardDescription className="line-clamp-2">
+                  {c.description}
+                </CardDescription>
+                <CardAction>
+                  <StatusBadge status={c.status} />
+                </CardAction>
+              </CardHeader>
+              <CardFooter className="mt-auto justify-between gap-2">
+                <CardDescription>
                   {c.publishedBranchCount} live of {c.branchCount}
-                  {c.status !== "published" && c.publishedBranchCount < MIN_PUBLISHED
-                    ? `, needs ${MIN_PUBLISHED - c.publishedBranchCount} more to publish`
+                  {c.status !== "published" &&
+                  c.publishedBranchCount < MIN_PUBLISHED
+                    ? `, needs ${MIN_PUBLISHED - c.publishedBranchCount} more`
                     : ""}
-                </CardContent>
-              </Card>
-            </Link>
+                </CardDescription>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  render={<Link to={`/collections/${c.id}`} />}
+                  nativeButton={false}
+                >
+                  Edit
+                </Button>
+              </CardFooter>
+            </Card>
           ))}
         </div>
       )}
@@ -105,7 +141,13 @@ export function CollectionsPage() {
   )
 }
 
-function NewCollectionDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+function NewCollectionDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
   const [name, setName] = useState("")
   const create = useCreateCollection()
   const navigate = useNavigate()
@@ -124,7 +166,10 @@ function NewCollectionDialog({ open, onOpenChange }: { open: boolean; onOpenChan
         >
           <DialogHeader>
             <DialogTitle>New collection</DialogTitle>
-            <DialogDescription>Starts as a draft. Add at least {MIN_PUBLISHED} live places to publish.</DialogDescription>
+            <DialogDescription>
+              Starts as a draft. Add at least {MIN_PUBLISHED} live places to
+              publish.
+            </DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
@@ -141,7 +186,11 @@ function NewCollectionDialog({ open, onOpenChange }: { open: boolean; onOpenChan
           </FieldGroup>
           <ApiErrorAlert error={create.error} title="Couldn't create it" />
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={!name.trim() || create.isPending}>
