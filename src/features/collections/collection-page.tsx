@@ -1,7 +1,7 @@
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { thumbnail } from "@/lib/cloudinary"
 import {
-  ArrowDown01Icon,
-  ArrowUp01Icon,
   Image01Icon,
   Cancel01Icon,
   MoreHorizontalIcon,
@@ -12,6 +12,7 @@ import { Link, useNavigate, useParams } from "react-router"
 
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ApiErrorAlert } from "@/components/api-error-alert"
+import { DragHandle, SortableList } from "@/components/sortable-list"
 import { UnsavedChanges } from "@/components/unsaved-changes"
 import { StatusBadge } from "@/components/status-badge"
 import {
@@ -78,6 +79,7 @@ import {
   MIN_PUBLISHED,
   useCollection,
   useCollectionAction,
+  type CollectionBranch,
   type CollectionDetail,
 } from "./queries"
 
@@ -133,13 +135,6 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
       description: error.message,
       type: "error",
     })
-
-  const move = (index: number, by: -1 | 1) => {
-    const next = [...ids]
-    const [moved] = next.splice(index, 1)
-    next.splice(index + by, 0, moved)
-    act.mutate({ action: "order", branchIds: next }, { onError })
-  }
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 p-6">
@@ -360,105 +355,44 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
               )
             }
           />
-          <ItemGroup>
-            {shown.map((b, i) => (
-              <Item key={b.id} variant="outline" size="sm">
-                {b.coverPhotoUrl ? (
-                  <ItemMedia variant="image">
-                    <img
-                      src={thumbnail(b.coverPhotoUrl, 80)}
-                      alt=""
-                      width={40}
-                      height={40}
-                      loading="lazy"
-                    />
-                  </ItemMedia>
-                ) : (
-                  <ItemMedia variant="icon">
-                    <HugeiconsIcon
-                      aria-hidden="true"
-                      icon={Image01Icon}
-                      strokeWidth={2}
-                    />
-                  </ItemMedia>
-                )}
-                <ItemContent>
-                  <ItemTitle>
-                    <Link to={`/places/${b.placeId}?branch=${b.id}`}>
-                      {b.placeName}
-                    </Link>
-                    {b.status !== "published" ? (
-                      <StatusBadge status={b.status} />
-                    ) : null}
-                  </ItemTitle>
-                  <ItemDescription>
-                    {b.label}
-                    {b.neighborhood && b.neighborhood.name !== b.label
-                      ? `, ${b.neighborhood.name}`
-                      : ""}
-                  </ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Move up"
-                    disabled={i === 0}
-                    onClick={() => move(i, -1)}
-                  >
-                    <HugeiconsIcon
-                      aria-hidden="true"
-                      icon={ArrowUp01Icon}
-                      strokeWidth={2}
-                    />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Move down"
-                    disabled={i === ids.length - 1}
-                    onClick={() => move(i, 1)}
-                  >
-                    <HugeiconsIcon
-                      aria-hidden="true"
-                      icon={ArrowDown01Icon}
-                      strokeWidth={2}
-                    />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Remove ${b.placeName}`}
-                    disabled={act.isPending}
-                    onClick={() => {
-                      hide(b.id)
-                      undoable({
-                        title: "Removed from the collection",
-                        description: b.placeName,
-                        onUndo: () => unhide(b.id),
-                        action: () =>
-                          act.mutate(
-                            { action: "remove", branchId: b.id },
-                            {
-                              onError: (error) => {
-                                unhide(b.id)
-                                onError(error)
-                              },
-                            }
-                          ),
-                      })
-                    }}
-                  >
-                    <HugeiconsIcon
-                      aria-hidden="true"
-                      icon={Cancel01Icon}
-                      strokeWidth={2}
-                    />
-                  </Button>
-                </ItemActions>
-              </Item>
-            ))}
-          </ItemGroup>
+          <SortableList
+            items={shown}
+            nameOf={(b) => b.placeName}
+            onReorder={(next) =>
+              act.mutate(
+                { action: "order", branchIds: next.map((b) => b.id) },
+                { onError }
+              )
+            }
+          >
+            <ItemGroup>
+              {shown.map((b) => (
+                <SortablePlace
+                  key={b.id}
+                  branch={b}
+                  removeDisabled={act.isPending}
+                  onRemove={() => {
+                    hide(b.id)
+                    undoable({
+                      title: "Removed from the collection",
+                      description: b.placeName,
+                      onUndo: () => unhide(b.id),
+                      action: () =>
+                        act.mutate(
+                          { action: "remove", branchId: b.id },
+                          {
+                            onError: (error) => {
+                              unhide(b.id)
+                              onError(error)
+                            },
+                          }
+                        ),
+                    })
+                  }}
+                />
+              ))}
+            </ItemGroup>
+          </SortableList>
         </CardContent>
       </Card>
 
@@ -497,6 +431,98 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  )
+}
+
+/** One place in the collection: drag it by the grip to reorder. */
+function SortablePlace({
+  branch: b,
+  removeDisabled,
+  onRemove,
+}: {
+  branch: CollectionBranch
+  removeDisabled: boolean
+  onRemove: () => void
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: b.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={isDragging ? "relative z-10" : undefined}
+    >
+      <Item
+        variant="outline"
+        size="sm"
+        className={isDragging ? "bg-background" : undefined}
+      >
+        <DragHandle
+          label={`Drag to reorder ${b.placeName}`}
+          handleRef={setActivatorNodeRef}
+          attributes={attributes}
+          listeners={listeners}
+        />
+        {b.coverPhotoUrl ? (
+          <ItemMedia variant="image">
+            <img
+              src={thumbnail(b.coverPhotoUrl, 80)}
+              alt=""
+              width={40}
+              height={40}
+              loading="lazy"
+            />
+          </ItemMedia>
+        ) : (
+          <ItemMedia variant="icon">
+            <HugeiconsIcon
+              aria-hidden="true"
+              icon={Image01Icon}
+              strokeWidth={2}
+            />
+          </ItemMedia>
+        )}
+        <ItemContent>
+          <ItemTitle>
+            <Link to={`/places/${b.placeId}?branch=${b.id}`}>
+              {b.placeName}
+            </Link>
+            {b.status !== "published" ? (
+              <StatusBadge status={b.status} />
+            ) : null}
+          </ItemTitle>
+          <ItemDescription>
+            {b.label}
+            {b.neighborhood && b.neighborhood.name !== b.label
+              ? `, ${b.neighborhood.name}`
+              : ""}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`Remove ${b.placeName}`}
+            disabled={removeDisabled}
+            onClick={onRemove}
+          >
+            <HugeiconsIcon
+              aria-hidden="true"
+              icon={Cancel01Icon}
+              strokeWidth={2}
+            />
+          </Button>
+        </ItemActions>
+      </Item>
     </div>
   )
 }

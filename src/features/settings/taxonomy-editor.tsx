@@ -1,26 +1,9 @@
-import {
-  closestCenter,
-  DndContext,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type Announcements,
-  type DragEndEvent,
-} from "@dnd-kit/core"
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
+import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { DragDropVerticalIcon } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
+import { DragHandle, SortableList } from "@/components/sortable-list"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -104,32 +87,8 @@ export function TaxonomyEditor() {
   // Moving is off while a search narrows the list.
   const reorder = useReorderLookup(kind)
   const canReorder = LOOKUP_KINDS.includes(kind) && !q
-  const sensors = useSensors(
-    // A small move starts a drag, so clicks on the handle still work.
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-    // Keyboard: Space to pick up, arrows to move, Space to drop.
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  )
-  // Screen readers hear names ("Menu"), not internal keys ("menu").
-  const nameOf = (id: string | number) =>
-    rows.find((row) => row.id === id)?.name ?? String(id)
-  const announcements: Announcements = {
-    onDragStart: ({ active }) => `Picked up ${nameOf(active.id)}.`,
-    onDragOver: ({ active, over }) =>
-      over
-        ? `${nameOf(active.id)} is over ${nameOf(over.id)}.`
-        : `${nameOf(active.id)} isn't over a row.`,
-    onDragEnd: ({ active, over }) =>
-      over
-        ? `${nameOf(active.id)} dropped at ${nameOf(over.id)}.`
-        : `${nameOf(active.id)} dropped.`,
-    onDragCancel: ({ active }) => `Moving ${nameOf(active.id)} was cancelled.`,
-  }
-  const onDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!over || active.id === over.id) return
-    const from = rows.findIndex((row) => row.id === active.id)
-    const to = rows.findIndex((row) => row.id === over.id)
-    reorder.mutate(arrayMove(rows, from, to), {
+  const saveOrder = (next: TaxonRow[]) =>
+    reorder.mutate(next, {
       onError: (error) =>
         toast.add({
           title: "Couldn't save the order",
@@ -137,7 +96,6 @@ export function TaxonomyEditor() {
           type: "error",
         }),
     })
-  }
   const [name, setName] = useState("")
   // Tag groups are their own list now; new tags default to the first one.
   const groups = useLookup("tag-groups")
@@ -245,47 +203,41 @@ export function TaxonomyEditor() {
 
         <ApiErrorAlert error={list.error} title="Couldn't load the list" />
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={onDragEnd}
-          accessibility={{ announcements }}
+        <SortableList
+          items={rows}
+          nameOf={(row) => row.name}
+          onReorder={saveOrder}
         >
-          <SortableContext
-            items={rows.map((row) => row.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  {isTags ? <TableHead>Group</TableHead> : null}
-                  <TableHead className="w-40 text-right" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {list.isPending
-                  ? Array.from({ length: 6 }, (_, i) => (
-                      <TableRow key={i}>
-                        <TableCell colSpan={3}>
-                          <Skeleton className="h-5" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  : rows.map((row) => (
-                      <TaxonRowView
-                        key={row.id}
-                        row={row}
-                        isTags={isTags}
-                        kind={kind}
-                        groupName={groups.nameOf}
-                        sortable={canReorder}
-                      />
-                    ))}
-              </TableBody>
-            </Table>
-          </SortableContext>
-        </DndContext>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                {isTags ? <TableHead>Group</TableHead> : null}
+                <TableHead className="w-40 text-right" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {list.isPending
+                ? Array.from({ length: 6 }, (_, i) => (
+                    <TableRow key={i}>
+                      <TableCell colSpan={3}>
+                        <Skeleton className="h-5" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : rows.map((row) => (
+                    <TaxonRowView
+                      key={row.id}
+                      row={row}
+                      isTags={isTags}
+                      kind={kind}
+                      groupName={groups.nameOf}
+                      sortable={canReorder}
+                    />
+                  ))}
+            </TableBody>
+          </Table>
+        </SortableList>
       </CardContent>
     </Card>
   )
@@ -375,21 +327,12 @@ function TaxonRowView({
         ) : (
           <span className="flex items-center gap-2">
             {sortable ? (
-              <Button
-                ref={setActivatorNodeRef}
-                size="icon-sm"
-                variant="ghost"
-                className="cursor-grab touch-none"
-                aria-label={`Drag to reorder ${row.name}`}
-                {...attributes}
-                {...listeners}
-              >
-                <HugeiconsIcon
-                  icon={DragDropVerticalIcon}
-                  strokeWidth={2}
-                  aria-hidden="true"
-                />
-              </Button>
+              <DragHandle
+                label={`Drag to reorder ${row.name}`}
+                handleRef={setActivatorNodeRef}
+                attributes={attributes}
+                listeners={listeners}
+              />
             ) : null}
             {row.name}
             {archived ? <Badge variant="outline">Archived</Badge> : null}
