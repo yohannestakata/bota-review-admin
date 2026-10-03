@@ -51,7 +51,9 @@ export function BranchAdder({
         <ComboboxEmpty>
           {q.trim().length < 2
             ? "Type at least 2 letters."
-            : "No live places match."}
+            : search.isFetching
+              ? "Searching…"
+              : "No live places match."}
         </ComboboxEmpty>
         <ComboboxList>
           {(b: Branch) => (

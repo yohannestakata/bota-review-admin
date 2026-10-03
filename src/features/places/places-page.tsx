@@ -7,10 +7,12 @@ import { SearchInput } from "@/components/search-input"
 import { StatusBadge } from "@/components/status-badge"
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -145,6 +147,15 @@ export function PlacesPage() {
               <EmptyTitle>No places match</EmptyTitle>
               <EmptyDescription>Try another search or filter.</EmptyDescription>
             </EmptyHeader>
+            <EmptyContent>
+              <Button
+                variant="outline"
+                render={<Link to="/places" />}
+                nativeButton={false}
+              >
+                Clear Filters
+              </Button>
+            </EmptyContent>
           </Empty>
         ) : null}
       </div>
@@ -155,7 +166,6 @@ export function PlacesPage() {
             page={page}
             limit={places.data.limit}
             total={places.data.total}
-            onPageChange={(p) => set("page", String(p))}
           />
         </div>
       ) : null}

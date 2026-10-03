@@ -1,6 +1,6 @@
 import { Cancel01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
 import { Button } from "@/components/ui/button"
@@ -99,6 +99,7 @@ function MenuTable({
 }) {
   const act = useMenuItemAction(branchId)
   const { hidden, hide, unhide } = useHidden()
+  const dishInput = useRef<HTMLInputElement>(null)
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
   const [category, setCategory] = useState("")
@@ -204,6 +205,8 @@ function MenuTable({
               onSuccess: () => {
                 setName("")
                 setPrice("")
+                // Ready for the next dish.
+                dishInput.current?.focus()
               },
               onError,
             }
@@ -211,6 +214,7 @@ function MenuTable({
         }}
       >
         <Input
+          ref={dishInput}
           aria-label="Dish"
           required
           autoComplete="off"

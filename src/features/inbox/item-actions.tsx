@@ -163,46 +163,62 @@ export function ItemActions({
                     : "Nothing changes on the place."}
                 </DialogDescription>
               </DialogHeader>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="decision-note">
-                    {item.kind === "claim" ? "Reason" : "Reason (optional)"}
-                  </FieldLabel>
-                  <Textarea
-                    id="decision-note"
-                    value={note}
-                    maxLength={item.kind === "claim" ? 500 : 200}
-                    onChange={(e) => setNote(e.target.value)}
-                    autoFocus
-                  />
-                  {item.kind === "claim" ? (
-                    <FieldDescription>
-                      For example: couldn't confirm the phone number.
-                    </FieldDescription>
-                  ) : null}
-                </Field>
-              </FieldGroup>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => onRejectOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  disabled={item.kind === "claim" && note.trim().length === 0}
-                  onClick={() => {
-                    onDecide({
-                      action: "reject",
-                      note: note.trim() || undefined,
-                    })
-                    setNote("")
-                  }}
-                >
-                  {reject}
-                </Button>
-              </DialogFooter>
+              <form
+                className="contents"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  onDecide({
+                    action: "reject",
+                    note: note.trim() || undefined,
+                  })
+                  setNote("")
+                }}
+              >
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="decision-note">
+                      {item.kind === "claim" ? "Reason" : "Reason (optional)"}
+                    </FieldLabel>
+                    <Textarea
+                      id="decision-note"
+                      value={note}
+                      maxLength={item.kind === "claim" ? 500 : 200}
+                      onChange={(e) => setNote(e.target.value)}
+                      // ⌘/Ctrl+Enter sends, like most message boxes.
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                          e.preventDefault()
+                          e.currentTarget.form?.requestSubmit()
+                        }
+                      }}
+                      required={item.kind === "claim"}
+                      placeholder={
+                        item.kind === "claim"
+                          ? undefined
+                          : "Already up to date…"
+                      }
+                      autoFocus
+                    />
+                    {item.kind === "claim" ? (
+                      <FieldDescription>
+                        For example: couldn't confirm the phone number.
+                      </FieldDescription>
+                    ) : null}
+                  </Field>
+                </FieldGroup>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onRejectOpenChange(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" variant="destructive">
+                    {reject}
+                  </Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         </>

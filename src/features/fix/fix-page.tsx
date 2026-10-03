@@ -7,6 +7,7 @@ import { Pager } from "@/components/pager"
 import { SearchInput } from "@/components/search-input"
 import { StatusBadge } from "@/components/status-badge"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/card"
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -72,7 +74,10 @@ export function FixPage() {
       orientation="vertical"
       className="gap-6 p-6"
     >
-      <TabsList variant="line" className="sticky top-6 w-64 shrink-0 self-start">
+      <TabsList
+        variant="line"
+        className="sticky top-6 w-64 shrink-0 self-start"
+      >
         {issues.data.map((i) => (
           <TabsTrigger key={i.key} value={i.key}>
             {i.title}
@@ -106,7 +111,22 @@ export function FixPage() {
                 error={rows.error}
                 title="Couldn't load this list"
               />
-              {rows.data && rows.data.total === 0 && !q ? (
+              {rows.data && rows.data.total === 0 && q ? (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyTitle>No places match “{q}”</EmptyTitle>
+                    <EmptyDescription>
+                      Check the spelling, or clear the search to see all of
+                      them.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button variant="outline" onClick={() => set("q", "")}>
+                      Clear Search
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              ) : rows.data && rows.data.total === 0 ? (
                 <Empty>
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
@@ -167,7 +187,6 @@ export function FixPage() {
                   page={page}
                   limit={rows.data.limit}
                   total={rows.data.total}
-                  onPageChange={(p) => set("page", String(p))}
                 />
               </CardFooter>
             ) : null}

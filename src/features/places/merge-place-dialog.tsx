@@ -105,7 +105,9 @@ export function MergePlaceDialog({
                 <ComboboxEmpty>
                   {q.trim().length < 2
                     ? "Type at least 2 letters."
-                    : "No places match."}
+                    : search.isFetching
+                      ? "Searching…"
+                      : "No places match."}
                 </ComboboxEmpty>
                 <ComboboxList>
                   {(p: PlaceListItem) => (

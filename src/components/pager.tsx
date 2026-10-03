@@ -1,56 +1,64 @@
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
+import { Link, useLocation } from "react-router"
 
 import { Button } from "@/components/ui/button"
 
-/** "21–40 of 2,431" with previous / next. */
+const count = new Intl.NumberFormat()
+
+/** "21–40 of 2,431" with previous / next as links to `?page=`. */
 export function Pager({
   page,
   limit,
   total,
-  onPageChange,
 }: {
   page: number
   limit: number
   total: number
-  onPageChange: (page: number) => void
 }) {
+  const { pathname, search } = useLocation()
   const pages = Math.max(1, Math.ceil(total / limit))
   const from = total === 0 ? 0 : (page - 1) * limit + 1
   const to = Math.min(page * limit, total)
+
+  const href = (target: number) => {
+    const params = new URLSearchParams(search)
+    if (target <= 1) params.delete("page")
+    else params.set("page", String(target))
+    const query = params.toString()
+    return query ? `${pathname}?${query}` : pathname
+  }
+
+  const step = (
+    target: number,
+    label: string,
+    icon: typeof ArrowLeft01Icon,
+    enabled: boolean
+  ) =>
+    enabled ? (
+      <Button
+        variant="outline"
+        size="icon-sm"
+        aria-label={label}
+        render={<Link to={href(target)} />}
+        nativeButton={false}
+      >
+        <HugeiconsIcon icon={icon} strokeWidth={2} aria-hidden="true" />
+      </Button>
+    ) : (
+      <Button variant="outline" size="icon-sm" aria-label={label} disabled>
+        <HugeiconsIcon icon={icon} strokeWidth={2} aria-hidden="true" />
+      </Button>
+    )
+
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm text-muted-foreground tabular-nums">
-        {from.toLocaleString()}–{to.toLocaleString()} of{" "}
-        {total.toLocaleString()}
+        {count.format(from)}–{count.format(to)} of {count.format(total)}
       </span>
       <div className="flex gap-1">
-        <Button
-          variant="outline"
-          size="icon-sm"
-          aria-label="Previous page"
-          disabled={page <= 1}
-          onClick={() => onPageChange(page - 1)}
-        >
-          <HugeiconsIcon
-            aria-hidden="true"
-            icon={ArrowLeft01Icon}
-            strokeWidth={2}
-          />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon-sm"
-          aria-label="Next page"
-          disabled={page >= pages}
-          onClick={() => onPageChange(page + 1)}
-        >
-          <HugeiconsIcon
-            aria-hidden="true"
-            icon={ArrowRight01Icon}
-            strokeWidth={2}
-          />
-        </Button>
+        {step(page - 1, "Previous page", ArrowLeft01Icon, page > 1)}
+        {step(page + 1, "Next page", ArrowRight01Icon, page < pages)}
       </div>
     </div>
   )

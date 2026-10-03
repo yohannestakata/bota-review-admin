@@ -327,7 +327,9 @@ export function PeoplePage() {
                                     setPending({ user, action: "suspend" })
                                   }
                                 >
-                                  Suspend
+                                  {user.role === "admin"
+                                    ? "Admins can't be suspended"
+                                    : "Suspend"}
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
@@ -363,7 +365,6 @@ export function PeoplePage() {
             page={page}
             limit={users.data.limit}
             total={users.data.total}
-            onPageChange={(p) => set("page", String(p))}
           />
         </div>
       ) : null}

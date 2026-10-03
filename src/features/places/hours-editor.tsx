@@ -11,6 +11,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { toast } from "@/components/ui/toast"
 
 import { DAYS } from "./labels"
 import type { DayKey, Hours } from "./types"
@@ -29,12 +30,19 @@ export function HoursEditor({
   const setDay = (day: DayKey, ranges: [string, string][]) =>
     onChange({ ...value, [day]: ranges })
 
-  const copyToAll = (day: DayKey) =>
+  // Overwrites the whole week, so offer a way back.
+  const copyToAll = (day: DayKey) => {
+    const before = value
     onChange(
       Object.fromEntries(
         DAYS.map((d) => [d.key, (value[day] ?? []).map((r) => [...r])])
       ) as Hours
     )
+    toast.add({
+      title: "Copied to every day",
+      actionProps: { children: "Undo", onClick: () => onChange(before) },
+    })
+  }
 
   return (
     <FieldGroup>

@@ -45,7 +45,7 @@ import { useUrlFilters } from "@/hooks/use-url-filters"
 import { MIN_PUBLISHED, useCollections, useCreateCollection } from "./queries"
 
 export function CollectionsPage() {
-  const { set, page } = useUrlFilters()
+  const { page } = useUrlFilters()
   const collections = useCollections(page)
   const [creating, setCreating] = useState(false)
 
@@ -102,6 +102,9 @@ export function CollectionsPage() {
                 <img
                   src={c.coverImageUrl}
                   alt=""
+                  width={1200}
+                  height={675}
+                  loading="lazy"
                   className="aspect-video object-cover"
                 />
               ) : null}
@@ -140,7 +143,6 @@ export function CollectionsPage() {
             page={page}
             limit={collections.data.limit}
             total={collections.data.total}
-            onPageChange={(p) => set("page", String(p))}
           />
         </div>
       ) : null}

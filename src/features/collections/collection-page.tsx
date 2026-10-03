@@ -1,3 +1,4 @@
+import { thumbnail } from "@/lib/cloudinary"
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
@@ -364,7 +365,13 @@ function CollectionEditor({ collection }: { collection: CollectionDetail }) {
               <Item key={b.id} variant="outline" size="sm">
                 {b.coverPhotoUrl ? (
                   <ItemMedia variant="image">
-                    <img src={b.coverPhotoUrl} alt="" />
+                    <img
+                      src={thumbnail(b.coverPhotoUrl, 80)}
+                      alt=""
+                      width={40}
+                      height={40}
+                      loading="lazy"
+                    />
                   </ItemMedia>
                 ) : (
                   <ItemMedia variant="icon">

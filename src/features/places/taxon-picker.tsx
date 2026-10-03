@@ -17,12 +17,13 @@ import type { Taxon } from "./types"
 
 /** Active options, plus anything already chosen (even if since archived). */
 function useOptions(kind: TaxonomyKind, chosen: Taxon[]) {
-  const { data = [] } = useTaxonomy(kind)
+  const { data = [], isPending } = useTaxonomy(kind)
   const ids = new Set(chosen.map((t) => t.id))
-  return [
+  const options = [
     ...chosen,
     ...data.filter((t) => t.status === "active" && !ids.has(t.id)),
   ].sort((a, b) => a.name.localeCompare(b.name))
+  return { options, empty: isPending ? "Loading…" : "Nothing matches." }
 }
 
 const sameTaxon = (a: Taxon, b: Taxon) => a.id === b.id
@@ -41,7 +42,7 @@ export function TaxonMultiPicker({
   onChange: (value: Taxon[]) => void
   placeholder: string
 }) {
-  const options = useOptions(kind, value)
+  const { options, empty } = useOptions(kind, value)
   const anchor = useComboboxAnchor()
   return (
     <Combobox
@@ -64,7 +65,7 @@ export function TaxonMultiPicker({
         />
       </ComboboxChips>
       <ComboboxContent anchor={anchor}>
-        <ComboboxEmpty>Nothing matches.</ComboboxEmpty>
+        <ComboboxEmpty>{empty}</ComboboxEmpty>
         <ComboboxList>
           {(t: Taxon) => (
             <ComboboxItem key={t.id} value={t}>
@@ -90,7 +91,7 @@ export function TaxonPicker({
   onChange: (value: Taxon | null) => void
   placeholder: string
 }) {
-  const options = useOptions(kind, value ? [value] : [])
+  const { options, empty } = useOptions(kind, value ? [value] : [])
   return (
     <Combobox
       items={options}
@@ -105,7 +106,7 @@ export function TaxonPicker({
         showClear={Boolean(value)}
       />
       <ComboboxContent>
-        <ComboboxEmpty>Nothing matches.</ComboboxEmpty>
+        <ComboboxEmpty>{empty}</ComboboxEmpty>
         <ComboboxList>
           {(t: Taxon) => (
             <ComboboxItem key={t.id} value={t}>

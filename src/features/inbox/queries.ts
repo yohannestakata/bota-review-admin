@@ -174,7 +174,9 @@ export function useInbox() {
 
   return {
     items,
-    isLoading: results.some((r) => r.isPending),
+    // Show what has arrived; one slow queue shouldn't hide the rest.
+    isLoading: results.every((r) => r.isPending),
+    isLoadingMore: results.some((r) => r.isPending),
     isFetching: results.some((r) => r.isFetching),
     error: results.find((r) => r.error)?.error ?? null,
     /** Total waiting, including submissions beyond the first page. */

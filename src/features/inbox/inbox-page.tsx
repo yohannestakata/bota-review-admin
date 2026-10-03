@@ -225,6 +225,11 @@ export function InboxPage() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
+          {inbox.isLoadingMore && !inbox.isLoading ? (
+            <p className="text-xs text-muted-foreground" role="status">
+              Loading the rest…
+            </p>
+          ) : null}
           {inbox.hiddenSubmissions > 0 ? (
             <p className="text-xs text-muted-foreground">
               {inbox.hiddenSubmissions} more edits load as you clear these.

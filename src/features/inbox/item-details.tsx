@@ -1,3 +1,4 @@
+import { thumbnail } from "@/lib/cloudinary"
 import { TimeAgo } from "@/components/time-ago"
 import { LinkSquare02Icon, StarIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -115,7 +116,10 @@ function ReviewDetail({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Author person={review.user} meta={<TimeAgo iso={review.createdAt} />} />
+        <Author
+          person={review.user}
+          meta={<TimeAgo iso={review.createdAt} />}
+        />
         <Stars rating={review.rating} />
         <p className="leading-relaxed whitespace-pre-wrap">{review.text}</p>
         {review.visitDate ? (
@@ -179,8 +183,10 @@ function PhotoDetail({ photo }: { photo: PhotoRow }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <img
-          src={photo.url}
-          alt=""
+          src={thumbnail(photo.url, 1200)}
+          alt={`Photo by ${photo.uploader.displayName}, waiting for review`}
+          width={photo.width}
+          height={photo.height}
           className="max-h-[28rem] w-full rounded-md bg-muted object-contain"
         />
         <Author
@@ -338,12 +344,22 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow }) {
         {photos.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
             {photos.map((p) => (
-              <img
+              <a
                 key={p.url}
-                src={p.url}
-                alt=""
-                className="aspect-square rounded-md bg-muted object-cover"
-              />
+                href={p.url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open the photo full size"
+              >
+                <img
+                  src={thumbnail(p.url, 400)}
+                  alt=""
+                  width={400}
+                  height={400}
+                  loading="lazy"
+                  className="aspect-square rounded-md bg-muted object-cover"
+                />
+              </a>
             ))}
           </div>
         ) : null}
