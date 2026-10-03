@@ -1,5 +1,5 @@
 import { SignIn, useAuth, useClerk } from "@clerk/react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Outlet } from "react-router"
 
 import { Button } from "@/components/ui/button"
@@ -86,4 +86,10 @@ export function AuthGate() {
   }
 
   return <Outlet />
+}
+
+/** The signed-in admin, as confirmed by the API. Only valid inside AuthGate. */
+export function useMe() {
+  const queryClient = useQueryClient()
+  return queryClient.getQueryData<AuthCheck>(["auth-check"])?.user
 }

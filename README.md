@@ -1,21 +1,45 @@
-# React + TypeScript + Vite + shadcn/ui
+# Bota Admin
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+The admin for Bota Review: moderation inbox, places, data fixes, collections,
+people and settings. Vite, React, shadcn (Base UI), TanStack Query, Clerk.
 
-## Adding components
+Only accounts with the `admin` role can sign in.
 
-To add components to your app, run the following command:
+## Run locally
 
 ```bash
-npx shadcn@latest add button
+cp .env.example .env.local   # then fill in the two values
+pnpm install
+pnpm dev                     # http://localhost:5173
 ```
 
-This will place the ui components in the `src/components` directory.
+The API must allow `http://localhost:5173` in `ALLOWED_ORIGINS` and
+`CLERK_AUTHORIZED_PARTIES` (the backend's `.env.example` already does).
 
-## Using components
+## Checks
 
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button"
+```bash
+pnpm lint
+pnpm build
 ```
+
+## Deploy
+
+`render.yaml` describes a Render static site. Create it from the Blueprint,
+then set:
+
+- `VITE_API_URL`: the API's public URL including `/v1`.
+- `VITE_CLERK_PUBLISHABLE_KEY`: the production Clerk publishable key.
+
+Then add the admin's URL to the API service's `ALLOWED_ORIGINS` and
+`CLERK_AUTHORIZED_PARTIES`, and to the Clerk instance's allowed origins.
+
+Vite bakes env values into the build, so redeploy after changing them.
+
+## Layout
+
+- `src/app`: shell, routing, sign-in gate, ⌘K menu.
+- `src/features/<area>`: one folder per section, each with its own
+  `queries.ts` (API calls) and pages.
+- `src/components/ui`: shadcn components, added with
+  `pnpm dlx shadcn@latest add <name>`.
