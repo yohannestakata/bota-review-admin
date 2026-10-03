@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useApi } from "@/lib/api"
 
 import type { TaxonomyKind } from "@/features/places/queries"
-import type { TaxonRow } from "@/features/places/types"
+import type { PlaceType, TaxonRow } from "@/features/places/types"
 
 /** A tag group's key; the groups are editable in Settings. */
 export type TagCategory = string
@@ -112,5 +112,57 @@ export function useRunPendingJobs() {
         })
       ).data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["jobs"] }),
+  })
+}
+
+export type MealTime = {
+  key: string
+  name: string
+  /** The home rail's title, e.g. "Dinner tonight". */
+  title: string
+  /** Addis Ababa hours, 0 to 23. */
+  from: number
+  until: number
+  tagIds: string[]
+  foodCategoryIds: string[]
+  placeTypes: PlaceType[]
+}
+
+export type MealLinks = Pick<
+  MealTime,
+  "tagIds" | "foodCategoryIds" | "placeTypes"
+>
+
+export function useMealTimes() {
+  const api = useApi()
+  return useQuery({
+    queryKey: ["meal-times"],
+    queryFn: async () => (await api<MealTime[]>("/admin/meal-times")).data,
+  })
+}
+
+/** Saves a slot's links; the card shows them at once and snaps back on failure. */
+export function useSetMealTime() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  const key = ["meal-times"]
+  return useMutation({
+    mutationFn: async ({ slot, links }: { slot: string; links: MealLinks }) =>
+      api<MealTime>(`/admin/meal-times/${slot}`, {
+        method: "PUT",
+        body: links,
+      }),
+    onMutate: async ({ slot, links }) => {
+      await queryClient.cancelQueries({ queryKey: key })
+      const before = queryClient.getQueryData<MealTime[]>(key)
+      queryClient.setQueryData<MealTime[]>(key, (rows) =>
+        rows?.map((row) => (row.key === slot ? { ...row, ...links } : row))
+      )
+      return { before }
+    },
+    onError: (_error, _input, context) => {
+      if (context?.before) queryClient.setQueryData(key, context.before)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
   })
 }
