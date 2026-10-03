@@ -34,7 +34,11 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { SearchInput } from "@/components/search-input"
 import { useUrlFilters } from "@/hooks/use-url-filters"
-import { useTaxonomy, type TaxonomyKind } from "@/features/places/queries"
+import {
+  useLookup,
+  useTaxonomy,
+  type TaxonomyKind,
+} from "@/features/places/queries"
 import type { TaxonRow } from "@/features/places/types"
 
 import { useTaxonomyAction, type TagCategory } from "./queries"
@@ -49,13 +53,12 @@ const KINDS: { value: TaxonomyKind; label: string; singular: string }[] = [
   },
   { value: "tags", label: "Tags", singular: "tag" },
   { value: "amenities", label: "Amenities", singular: "amenity" },
-]
-
-const TAG_CATEGORIES: { value: TagCategory; label: string }[] = [
-  { value: "vibe", label: "Vibe" },
-  { value: "diet", label: "Diet" },
-  { value: "time", label: "Time" },
-  { value: "practical", label: "Practical" },
+  { value: "tag-groups", label: "Tag groups", singular: "tag group" },
+  {
+    value: "photo-categories",
+    label: "Photo categories",
+    singular: "photo category",
+  },
 ]
 
 export function TaxonomyEditor() {
@@ -73,7 +76,11 @@ export function TaxonomyEditor() {
   )
   const act = useTaxonomyAction(kind)
   const [name, setName] = useState("")
-  const [category, setCategory] = useState<TagCategory>("vibe")
+  // Tag groups are their own list now; new tags default to the first one.
+  const groups = useLookup("tag-groups")
+  const groupItems = groups.active.map((g) => ({ value: g.id, label: g.name }))
+  const [pickedGroup, setPickedGroup] = useState<TagCategory | null>(null)
+  const category = pickedGroup ?? groupItems[0]?.value ?? ""
   const isTags = kind === "tags"
 
   const onError = (error: Error) =>
@@ -149,16 +156,16 @@ export function TaxonomyEditor() {
             />
             {isTags ? (
               <Select
-                items={TAG_CATEGORIES}
+                items={groupItems}
                 value={category}
-                onValueChange={(v) => v && setCategory(v)}
+                onValueChange={(v) => v && setPickedGroup(String(v))}
               >
                 <SelectTrigger aria-label="Tag group" className="w-36">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {TAG_CATEGORIES.map((c) => (
+                    {groupItems.map((c) => (
                       <SelectItem key={c.value} value={c.value}>
                         {c.label}
                       </SelectItem>
@@ -198,6 +205,7 @@ export function TaxonomyEditor() {
                     row={row}
                     isTags={isTags}
                     kind={kind}
+                    groupName={groups.nameOf}
                   />
                 ))}
           </TableBody>
@@ -211,10 +219,12 @@ function TaxonRowView({
   row,
   isTags,
   kind,
+  groupName,
 }: {
   row: TaxonRow
   isTags: boolean
   kind: TaxonomyKind
+  groupName: (key: string | null | undefined) => string
 }) {
   const act = useTaxonomyAction(kind)
   const [editing, setEditing] = useState(false)
@@ -274,9 +284,7 @@ function TaxonRowView({
           </span>
         )}
       </TableCell>
-      {isTags ? (
-        <TableCell className="capitalize">{row.category}</TableCell>
-      ) : null}
+      {isTags ? <TableCell>{groupName(row.category)}</TableCell> : null}
       <TableCell className="text-right">
         {editing ? null : (
           <div className="flex justify-end gap-1">

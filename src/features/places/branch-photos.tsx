@@ -40,9 +40,9 @@ import { thumbnail } from "@/lib/cloudinary"
 import { ApiErrorAlert } from "@/components/api-error-alert"
 
 import {
-  PHOTO_CATEGORIES,
   useBranchPhotos,
   usePhotoAction,
+  useLookup,
   useUploadPhotos,
   type PhotoCategory,
 } from "./queries"
@@ -217,38 +217,33 @@ export function BranchPhotos({ branchId }: { branchId: string }) {
   )
 }
 
-const CATEGORY_LABEL: Record<PhotoCategory, string> = {
-  food: "Food",
-  drink: "Drink",
-  interior: "Inside",
-  exterior: "Outside",
-  menu: "Menu",
-  ambience: "Vibe",
-}
-const CATEGORY_ITEMS = PHOTO_CATEGORIES.map((value) => ({
-  value,
-  label: CATEGORY_LABEL[value],
-}))
-
 /** Pick photos from the computer; they upload and go live straight away. */
 function PhotoUploader({ branchId }: { branchId: string }) {
   const input = useRef<HTMLInputElement>(null)
-  const [category, setCategory] = useState<PhotoCategory>("food")
+  // Categories are edited in Settings; Food is the usual default.
+  const { active } = useLookup("photo-categories")
+  const items = active.map((c) => ({ value: c.id, label: c.name }))
+  const [picked, setPicked] = useState<PhotoCategory | null>(null)
+  const category =
+    picked ??
+    items.find((c) => c.value === "food")?.value ??
+    items[0]?.value ??
+    "food"
   const upload = useUploadPhotos(branchId)
 
   return (
     <Field orientation="horizontal" className="w-auto">
       <Select
-        items={CATEGORY_ITEMS}
+        items={items}
         value={category}
-        onValueChange={(v) => v && setCategory(v as PhotoCategory)}
+        onValueChange={(v) => v && setPicked(String(v))}
       >
         <SelectTrigger aria-label="What the photos show" className="w-36">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {CATEGORY_ITEMS.map((c) => (
+            {items.map((c) => (
               <SelectItem key={c.value} value={c.value}>
                 {c.label}
               </SelectItem>

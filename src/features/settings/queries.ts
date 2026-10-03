@@ -4,7 +4,8 @@ import { useApi } from "@/lib/api"
 
 import type { TaxonomyKind } from "@/features/places/queries"
 
-export type TagCategory = "vibe" | "diet" | "time" | "practical"
+/** A tag group's key; the groups are editable in Settings. */
+export type TagCategory = string
 
 export function useTaxonomyAction(kind: TaxonomyKind) {
   const api = useApi()
