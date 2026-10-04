@@ -27,9 +27,25 @@ import { useHidden } from "@/hooks/use-hidden"
 import { undoable } from "@/lib/undoable"
 
 import { useBranchMenus, useMenuItemAction } from "./queries"
-import type { Menu } from "./types"
+import type { Menu, MenuItem, MenuItemSize } from "./types"
 
 const birr = new Intl.NumberFormat("en", { maximumFractionDigits: 2 })
+
+const priceText = (item: MenuItem) =>
+  item.sizes
+    ? item.sizes
+        .map((size) => `${size.label} ${birr.format(Number(size.price))}`)
+        .join(" · ")
+    : birr.format(Number(item.price))
+
+/** "Small 545, Large 890" → sizes; null unless every part has a name and price. */
+function parseSizes(text: string): MenuItemSize[] | null {
+  const sizes = text
+    .split(",")
+    .map((part) => part.trim().match(/^(.+?)\s+(\d+(?:\.\d{1,2})?)$/))
+  if (sizes.length < 2 || sizes.some((m) => !m)) return null
+  return sizes.map((m) => ({ label: m![1], price: m![2] }))
+}
 
 export function BranchMenus({ branchId }: { branchId: string }) {
   const menus = useBranchMenus(branchId)
@@ -102,6 +118,7 @@ function MenuTable({
   const dishInput = useRef<HTMLInputElement>(null)
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
+  const [sizesText, setSizesText] = useState("")
   const [category, setCategory] = useState("")
 
   const onError = (error: Error) =>
@@ -135,7 +152,7 @@ function MenuTable({
                     {item.category}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
-                    {birr.format(Number(item.price))}
+                    {priceText(item)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Switch
@@ -193,18 +210,28 @@ function MenuTable({
         className="flex flex-wrap gap-2"
         onSubmit={(e) => {
           e.preventDefault()
+          const sizes = sizesText.trim() ? parseSizes(sizesText) : null
+          if (sizesText.trim() && !sizes) {
+            toast.add({
+              title: "Sizes need a name and price each",
+              description: "Like Small 545, Medium 885, Large 1290",
+              type: "error",
+            })
+            return
+          }
           act.mutate(
             {
               action: "add",
               menuId: menu.id,
               name: name.trim(),
-              price,
+              ...(sizes ? { sizes } : { price }),
               category: category.trim() || undefined,
             },
             {
               onSuccess: () => {
                 setName("")
                 setPrice("")
+                setSizesText("")
                 // Ready for the next dish.
                 dishInput.current?.focus()
               },
@@ -233,7 +260,8 @@ function MenuTable({
         />
         <Input
           aria-label="Price in birr"
-          required
+          required={!sizesText.trim()}
+          disabled={Boolean(sizesText.trim())}
           autoComplete="off"
           pattern="[0-9]+([.][0-9]{1,2})?"
           title="A price in birr, like 120 or 89.50"
@@ -242,6 +270,14 @@ function MenuTable({
           className="w-28"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+        />
+        <Input
+          aria-label="Sizes"
+          autoComplete="off"
+          placeholder="Or sizes: Small 545, Large 890"
+          className="w-64"
+          value={sizesText}
+          onChange={(e) => setSizesText(e.target.value)}
         />
         <Button type="submit" variant="outline" disabled={act.isPending}>
           Add dish

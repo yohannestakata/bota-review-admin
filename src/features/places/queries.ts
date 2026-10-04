@@ -14,6 +14,7 @@ import type {
   BranchPhoto,
   ContentStatus,
   Menu,
+  MenuItemSize,
   PlaceDetail,
   PlaceListItem,
   PlaceType,
@@ -243,7 +244,8 @@ export function useMenuItemAction(branchId: string) {
             action: "add"
             menuId: string
             name: string
-            price: string
+            price?: string
+            sizes?: MenuItemSize[]
             category?: string
           }
         | { action: "create-menu"; name: string }
@@ -261,7 +263,9 @@ export function useMenuItemAction(branchId: string) {
             method: "POST",
             body: {
               name: input.name,
-              price: input.price,
+              ...(input.sizes
+                ? { sizes: input.sizes }
+                : { price: input.price }),
               ...(input.category ? { category: input.category } : {}),
             },
           })

@@ -83,11 +83,16 @@ export type BranchPhoto = {
   uploader: { id: string; displayName: string }
 }
 
+/** A priced size of a menu item, in menu order. */
+export type MenuItemSize = { label: string; price: string }
+
 export type MenuItem = {
   id: string
   name: string
   description: string | null
+  /** The lowest price; for an item with sizes, the smallest size's. */
   price: string
+  sizes: MenuItemSize[] | null
   category: string | null
   isAvailable: boolean
   displayOrder: number
