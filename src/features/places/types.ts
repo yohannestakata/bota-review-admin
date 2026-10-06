@@ -94,6 +94,7 @@ export type MenuItem = {
   price: string
   sizes: MenuItemSize[] | null
   category: string | null
+  imageUrl: string | null
   isAvailable: boolean
   displayOrder: number
 }

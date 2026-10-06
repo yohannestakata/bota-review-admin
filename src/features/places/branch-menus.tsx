@@ -1,4 +1,4 @@
-import { Cancel01Icon } from "@hugeicons/core-free-icons"
+import { Cancel01Icon, Image01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useRef, useState } from "react"
 
@@ -11,8 +11,16 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import {
   Table,
@@ -24,6 +32,7 @@ import {
 } from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 import { useHidden } from "@/hooks/use-hidden"
+import { thumbnail } from "@/lib/cloudinary"
 import { undoable } from "@/lib/undoable"
 
 import { useBranchMenus, useMenuItemAction } from "./queries"
@@ -116,6 +125,26 @@ function MenuTable({
   const act = useMenuItemAction(branchId)
   const { hidden, hide, unhide } = useHidden()
   const dishInput = useRef<HTMLInputElement>(null)
+  const photoInput = useRef<HTMLInputElement>(null)
+  // The dish a picked photo is for, and the one uploading now.
+  const photoFor = useRef<MenuItem | null>(null)
+  const [uploadingId, setUploadingId] = useState<string | null>(null)
+  const setPhoto = (item: MenuItem, file: File | null) => {
+    setUploadingId(item.id)
+    act.mutate(
+      { action: "photo", itemId: item.id, file },
+      {
+        onSuccess: () =>
+          toast.add({
+            title: file ? "Photo added" : "Photo removed",
+            description: item.name,
+            type: "success",
+          }),
+        onError,
+        onSettled: () => setUploadingId(null),
+      }
+    )
+  }
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
   const [sizesText, setSizesText] = useState("")
@@ -135,6 +164,7 @@ function MenuTable({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-14">Photo</TableHead>
               <TableHead>Dish</TableHead>
               <TableHead>Section</TableHead>
               <TableHead className="text-right">Price (birr)</TableHead>
@@ -147,6 +177,56 @@ function MenuTable({
               .filter((item) => !hidden.has(item.id))
               .map((item) => (
                 <TableRow key={item.id}>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon-lg"
+                            aria-label={`Photo of ${item.name}`}
+                            disabled={uploadingId === item.id}
+                          />
+                        }
+                      >
+                        {uploadingId === item.id ? (
+                          <Spinner />
+                        ) : item.imageUrl ? (
+                          <img
+                            src={thumbnail(item.imageUrl, 80)}
+                            alt=""
+                            className="size-full rounded-md object-cover"
+                          />
+                        ) : (
+                          <HugeiconsIcon
+                            aria-hidden="true"
+                            icon={Image01Icon}
+                            strokeWidth={2}
+                          />
+                        )}
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              photoFor.current = item
+                              photoInput.current?.click()
+                            }}
+                          >
+                            {item.imageUrl ? "Change photo…" : "Add photo…"}
+                          </DropdownMenuItem>
+                          {item.imageUrl ? (
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => setPhoto(item, null)}
+                            >
+                              Remove photo
+                            </DropdownMenuItem>
+                          ) : null}
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {item.category}
@@ -205,6 +285,17 @@ function MenuTable({
               ))}
           </TableBody>
         </Table>
+        <input
+          ref={photoInput}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/heic"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            e.target.value = ""
+            if (file && photoFor.current) setPhoto(photoFor.current, file)
+          }}
+        />
       </div>
       <form
         className="flex flex-wrap gap-2"
