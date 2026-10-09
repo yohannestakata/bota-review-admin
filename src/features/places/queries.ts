@@ -79,7 +79,8 @@ export function useBranchMenus(id: string | undefined) {
   const api = useApi()
   return useQuery({
     queryKey: [...branchKey(id ?? ""), "menus"],
-    queryFn: async () => (await api<Menu[]>(`/branches/${id}/menus`)).data,
+    queryFn: async () =>
+      (await api<Menu[]>(`/branches/${id}/menus?own=true`)).data,
     enabled: Boolean(id),
   })
 }
