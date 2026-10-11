@@ -27,6 +27,8 @@ export type ReviewRow = {
   requiresSpotCheck: boolean
   reportCount: number
   isFlagged: boolean
+  /** Why the text was held for a check ("strong_language", "phone"…). */
+  heldFor?: string[]
   createdAt: string
   branch: BranchRef
   user: Person

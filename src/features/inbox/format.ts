@@ -81,3 +81,11 @@ export function title(item: InboxItem): string {
       return placeLabel(item.data.branch)
   }
 }
+
+/** Why a review's text was held for a check. */
+export const HELD_LABEL: Record<string, string> = {
+  slur: "Slur",
+  strong_language: "Strong language",
+  phone: "Phone number",
+  link: "Link",
+}

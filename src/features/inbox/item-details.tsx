@@ -25,7 +25,7 @@ import { useLookup, useTaxonomy } from "@/features/places/queries"
 import type { TaxonRow } from "@/features/places/types"
 
 import { AttachChooser } from "./attach-chooser"
-import { initials, placeLabel, SUBMISSION_LABEL } from "./format"
+import { HELD_LABEL, initials, placeLabel, SUBMISSION_LABEL } from "./format"
 import type {
   ClaimRow,
   InboxItem,
@@ -117,7 +117,11 @@ function ReviewDetail({
             ? `Reported by ${review.reportCount} ${review.reportCount === 1 ? "person" : "people"}`
             : reason === "spot-check"
               ? "Published automatically. Spot check it."
-              : "Waiting to be published"}
+              : review.heldFor?.length
+                ? `Held for a check: ${review.heldFor
+                    .map((key) => HELD_LABEL[key] ?? key)
+                    .join(", ")}`
+                : "Waiting to be published"}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
