@@ -47,7 +47,7 @@ import {
   useBranchPhotos,
   useBranchStatus,
 } from "./queries"
-import type { Branch, BranchPhoto } from "./types"
+import type { Branch } from "./types"
 
 // Where each problem is fixed: a field to scroll to, or a tab to open.
 const FIX_TARGET: Record<
@@ -67,7 +67,7 @@ const FIX_TARGET: Record<
 }
 
 /** Mirrors the server's publish rules, so the gaps are visible before trying. */
-function checklist(branch: Branch, photos: BranchPhoto[] | undefined) {
+function checklist(branch: Branch) {
   return [
     {
       label: "Name and address",
@@ -82,11 +82,6 @@ function checklist(branch: Branch, photos: BranchPhoto[] | undefined) {
       key: "no-cuisine",
       label: "Cuisine or food category",
       done: branch.cuisines.length + branch.foodCategories.length > 0,
-    },
-    {
-      key: "no-photo",
-      label: "An approved photo",
-      done: Boolean(photos?.some((p) => p.moderationStatus === "approved")),
     },
   ]
 }
@@ -137,7 +132,7 @@ export function BranchPanel({ branchId }: { branchId: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <StatusCard branch={branch.data} photos={photos.data} onFix={fix} />
+      <StatusCard branch={branch.data} onFix={fix} />
       <Tabs
         value={tab}
         onValueChange={(value) =>
@@ -167,16 +162,14 @@ export function BranchPanel({ branchId }: { branchId: string }) {
 
 function StatusCard({
   branch,
-  photos,
   onFix,
 }: {
   branch: Branch
-  photos: BranchPhoto[] | undefined
   onFix: (key: string, note?: string | null) => void
 }) {
   const status = useBranchStatus(branch.id)
   const [confirmArchive, setConfirmArchive] = useState(false)
-  const items = checklist(branch, photos)
+  const items = checklist(branch)
   const ready = items.every((i) => i.done)
 
   const run = (action: "publish" | "unpublish" | "archive", done: string) =>
@@ -194,7 +187,7 @@ function StatusCard({
   const problems = (issues.data ?? []).filter(
     // The checklist above covers these (and a draft from a submission).
     (i) =>
-      !["no-photo", "no-cuisine", "no-location", "from-submission"].includes(
+      !["no-cuisine", "no-location", "from-submission"].includes(
         i.key
       )
   )
