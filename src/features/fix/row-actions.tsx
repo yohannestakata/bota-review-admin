@@ -13,6 +13,7 @@ import { useDismissal, type QualityRow } from "./queries"
 
 const DISMISS_LABEL: Record<string, string> = {
   "possible-duplicate": "Not a Duplicate",
+  "similar-nearby": "Not a Duplicate",
   "odd-name": "Name Is Right",
   "outside-addis": "Location Is Right",
   "placeholder-location": "Location Is Right",
@@ -40,7 +41,8 @@ export function RowActions({ row, issue }: { row: QualityRow; issue: string }) {
         <DismissButton row={row} issue={issue} label={dismissLabel} />
       ) : null}
 
-      {issue === "possible-duplicate" && row.relatedPlaceId ? (
+      {(issue === "possible-duplicate" || issue === "similar-nearby") &&
+      row.relatedPlaceId ? (
         <Button variant="outline" size="sm" onClick={() => setOpen("merge")}>
           Merge…
         </Button>

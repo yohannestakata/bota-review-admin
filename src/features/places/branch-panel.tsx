@@ -63,6 +63,7 @@ const FIX_TARGET: Record<
   "odd-name": { edit: true },
   // Only chain duplicates ("Looks like …") can be fixed here, by merging.
   "possible-duplicate": { merge: true },
+  "similar-nearby": { merge: true },
 }
 
 /** Mirrors the server's publish rules, so the gaps are visible before trying. */
@@ -105,7 +106,10 @@ export function BranchPanel({ branchId }: { branchId: string }) {
     }
     if (target.merge) {
       // The note reads "Looks like <chain>": search for that chain.
-      set("merge", note?.replace(/^Looks like /, "") ?? " ")
+      set(
+        "merge",
+        note?.replace(/^Looks like /, "").replace(/, \d+ m away$/, "") ?? " "
+      )
       return
     }
     set("tab", target.tab ?? "")
