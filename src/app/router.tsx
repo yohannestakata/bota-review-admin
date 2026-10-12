@@ -21,6 +21,13 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <InboxPage /> },
               {
+                path: "growth",
+                lazy: () =>
+                  import("@/features/growth/growth-page").then((m) => ({
+                    Component: m.GrowthPage,
+                  })),
+              },
+              {
                 path: "places",
                 lazy: () =>
                   import("@/features/places/places-page").then((m) => ({

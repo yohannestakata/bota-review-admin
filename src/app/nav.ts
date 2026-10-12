@@ -1,4 +1,5 @@
 import {
+  ChartLineData01Icon,
   InboxIcon,
   Layers01Icon,
   Settings02Icon,
@@ -9,6 +10,7 @@ import {
 
 export const NAV = [
   { to: "/", label: "Inbox", icon: InboxIcon, end: true },
+  { to: "/growth", label: "Growth", icon: ChartLineData01Icon },
   { to: "/places", label: "Places", icon: Store01Icon },
   { to: "/fix", label: "Fix list", icon: Wrench01Icon },
   { to: "/collections", label: "Collections", icon: Layers01Icon },
