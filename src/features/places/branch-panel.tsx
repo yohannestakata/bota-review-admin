@@ -41,6 +41,7 @@ import { useUrlFilters } from "@/hooks/use-url-filters"
 import { BranchForm } from "./branch-form"
 import { BranchMenus } from "./branch-menus"
 import { BranchPhotos } from "./branch-photos"
+import { BranchStats } from "./branch-stats"
 import {
   useBranch,
   useBranchIssues,
@@ -145,6 +146,7 @@ export function BranchPanel({ branchId }: { branchId: string }) {
             Photos{photos.data ? ` (${photos.data.length})` : ""}
           </TabsTrigger>
           <TabsTrigger value="menu">Menu</TabsTrigger>
+          <TabsTrigger value="stats">Stats</TabsTrigger>
         </TabsList>
         <TabsContent value="details" keepMounted className="pt-4">
           <BranchForm key={branch.data.id} branch={branch.data} />
@@ -154,6 +156,9 @@ export function BranchPanel({ branchId }: { branchId: string }) {
         </TabsContent>
         <TabsContent value="menu" className="pt-4">
           <BranchMenus branchId={branchId} />
+        </TabsContent>
+        <TabsContent value="stats" className="pt-4">
+          <BranchStats branchId={branchId} />
         </TabsContent>
       </Tabs>
     </div>
@@ -186,10 +191,7 @@ function StatusCard({
   const issues = useBranchIssues(branch.id)
   const problems = (issues.data ?? []).filter(
     // The checklist above covers these (and a draft from a submission).
-    (i) =>
-      !["no-cuisine", "no-location", "from-submission"].includes(
-        i.key
-      )
+    (i) => !["no-cuisine", "no-location", "from-submission"].includes(i.key)
   )
 
   return (
