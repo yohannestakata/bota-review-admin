@@ -1,0 +1,11 @@
+// Cloudflare: the admin is a static Vite app (dist/), served as Worker assets.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bota-review-admin",
+  "compatibility_date": "2026-10-18",
+  "assets": {
+    "directory": "./dist",
+    // Client-side routing: any path that isn't a file serves the app.
+    "not_found_handling": "single-page-application"
+  }
+}
