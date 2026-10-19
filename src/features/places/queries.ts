@@ -163,6 +163,7 @@ function useInvalidateBranch() {
       queryClient.invalidateQueries({ queryKey: branchKey(branchId) }),
       queryClient.invalidateQueries({ queryKey: placesKey }),
       queryClient.invalidateQueries({ queryKey: ["quality"] }),
+      queryClient.invalidateQueries({ queryKey: ["needs-cuisine"] }),
     ])
 }
 
@@ -182,6 +183,34 @@ export function useUpdateBranch(branchId: string) {
       queryClient.setQueryData(branchKey(branchId), saved)
       return invalidate(branchId)
     },
+  })
+}
+
+/**
+ * Sets the same cuisines on several branches of a place (a chain's), through
+ * the branch editor's own endpoint.
+ */
+export function useSetCuisines() {
+  const api = useApi()
+  const invalidate = useInvalidateBranch()
+  return useMutation({
+    mutationFn: ({
+      branchIds,
+      cuisineIds,
+    }: {
+      branchIds: string[]
+      cuisineIds: string[]
+    }) =>
+      Promise.all(
+        branchIds.map((branchId) =>
+          api<Branch>(`/admin/branches/${branchId}`, {
+            method: "PATCH",
+            body: { cuisineIds } satisfies BranchPatch,
+          })
+        )
+      ),
+    onSuccess: (_saved, { branchIds }) =>
+      Promise.all(branchIds.map((branchId) => invalidate(branchId))),
   })
 }
 

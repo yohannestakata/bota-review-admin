@@ -35,12 +35,15 @@ export function TaxonMultiPicker({
   value,
   onChange,
   placeholder,
+  invalid,
 }: {
   id?: string
   kind: TaxonomyKind
   value: Taxon[]
   onChange: (value: Taxon[]) => void
   placeholder: string
+  /** Rings the picker red, e.g. after saving with nothing picked. */
+  invalid?: boolean
 }) {
   const { options, empty } = useOptions(kind, value)
   const anchor = useComboboxAnchor()
@@ -62,6 +65,7 @@ export function TaxonMultiPicker({
         <ComboboxChipsInput
           id={id}
           placeholder={value.length ? "" : placeholder}
+          aria-invalid={invalid || undefined}
         />
       </ComboboxChips>
       <ComboboxContent anchor={anchor}>

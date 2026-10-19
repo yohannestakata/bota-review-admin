@@ -56,6 +56,13 @@ export const router = createBrowserRouter([
                   })),
               },
               {
+                path: "needs-cuisine",
+                lazy: () =>
+                  import("@/features/needs-cuisine/needs-cuisine-page").then(
+                    (m) => ({ Component: m.NeedsCuisinePage })
+                  ),
+              },
+              {
                 path: "collections",
                 lazy: () =>
                   import("@/features/collections/collections-page").then(

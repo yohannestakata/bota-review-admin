@@ -1,6 +1,7 @@
 import {
   ChartLineData01Icon,
   InboxIcon,
+  Restaurant01Icon,
   StarIcon,
   Layers01Icon,
   Settings02Icon,
@@ -15,6 +16,7 @@ export const NAV = [
   { to: "/places", label: "Places", icon: Store01Icon },
   { to: "/featured", label: "Featured", icon: StarIcon },
   { to: "/fix", label: "Fix list", icon: Wrench01Icon },
+  { to: "/needs-cuisine", label: "Needs cuisine", icon: Restaurant01Icon },
   { to: "/collections", label: "Collections", icon: Layers01Icon },
   { to: "/people", label: "People", icon: UserGroupIcon },
   { to: "/settings", label: "Settings", icon: Settings02Icon },
