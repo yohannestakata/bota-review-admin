@@ -159,7 +159,7 @@ export function ItemActions({
                 <DialogDescription>
                   {item.kind === "claim"
                     ? "The person who asked will see this reason."
-                    : "Nothing changes on the place."}
+                    : "Nothing changes on the place. The person who sent it will see your reason."}
                 </DialogDescription>
               </DialogHeader>
               <form
