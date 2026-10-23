@@ -1,6 +1,14 @@
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
@@ -21,8 +29,8 @@ import { ApiError } from "@/lib/api"
 
 import { HoursEditor, hoursComplete } from "@/features/places/hours-editor"
 import { DAYS } from "@/features/places/labels"
-import type { TaxonomyKind } from "@/features/places/queries"
-import { TaxonMultiPicker, TaxonPicker } from "@/features/places/taxon-picker"
+import { useTaxonomy, type TaxonomyKind } from "@/features/places/queries"
+import { TaxonPicker } from "@/features/places/taxon-picker"
 import type { Hours, Taxon } from "@/features/places/types"
 
 /** Tells them a save didn't go through, with the API's reasons if it gave any. */
@@ -307,7 +315,10 @@ function usePendingValue<T>(value: T) {
   return [draft, save] as const
 }
 
-/** Pick several (cuisines, tags…); each pick saves. */
+/**
+ * Pick several (cuisines, tags…). One line in the row, like every other cell;
+ * the choices open as a searchable list, and each tick saves.
+ */
 export function TaxaCell({
   kind,
   label,
@@ -320,13 +331,64 @@ export function TaxaCell({
   onSave: (value: Taxon[]) => Promise<unknown>
 }) {
   const [draft, save] = usePendingValue(value)
+  const { data = [] } = useTaxonomy(kind)
+  const chosen = new Set(draft.map((t) => t.id))
+  // What's picked first, then the rest A to Z; retired ones only if picked.
+  const options = [
+    ...draft,
+    ...data.filter((t) => t.status === "active" && !chosen.has(t.id)),
+  ]
+  const summary = draft.map((t) => t.name).join(", ")
+
+  const toggle = (taxon: Taxon) =>
+    save(
+      chosen.has(taxon.id)
+        ? draft.filter((t) => t.id !== taxon.id)
+        : [...draft, taxon],
+      onSave,
+      label.toLowerCase()
+    )
+
   return (
-    <TaxonMultiPicker
-      kind={kind}
-      value={draft}
-      onChange={(next) => save(next, onSave, label.toLowerCase())}
-      placeholder={`Add ${label.toLowerCase()}`}
-    />
+    <Popover>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            className="w-full justify-start font-normal"
+            aria-label={
+              summary ? `${label}: ${summary}` : `Add ${label.toLowerCase()}`
+            }
+          />
+        }
+      >
+        <span
+          className={summary ? "truncate" : "truncate text-muted-foreground"}
+        >
+          {summary || `Add ${label.toLowerCase()}`}
+        </span>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-0" align="start">
+        <Command>
+          <CommandInput placeholder={`Search ${label.toLowerCase()}…`} />
+          <CommandList>
+            <CommandEmpty>Nothing matches.</CommandEmpty>
+            <CommandGroup>
+              {options.map((t) => (
+                <CommandItem
+                  key={t.id}
+                  value={`${t.name} ${t.id}`}
+                  data-checked={chosen.has(t.id)}
+                  onSelect={() => toggle(t)}
+                >
+                  {t.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }
 

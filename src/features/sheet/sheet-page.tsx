@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -155,9 +154,12 @@ export function SheetPage() {
 
       <ApiErrorAlert error={rows.error} title="Couldn't load the sheet" />
 
-      <div className="min-h-0 flex-1 rounded-lg border">
-        <Table>
-          <TableHeader>
+      {/* One scroll area both ways, so the header and the place column stay
+          in view and the pager stays below. The stock <Table> scrolls only
+          sideways inside itself, which unpins the header. */}
+      <div className="min-h-0 flex-1 overflow-auto rounded-lg border">
+        <table data-slot="table" className="w-full caption-bottom text-sm">
+          <TableHeader className="sticky top-0 z-20 bg-background">
             <TableRow>
               {COLUMNS.map((c, i) => (
                 <TableHead
@@ -197,7 +199,7 @@ export function SheetPage() {
                   <SheetRowView key={row.id} row={row} />
                 ))}
           </TableBody>
-        </Table>
+        </table>
         {rows.data && rows.data.rows.length === 0 ? (
           <Empty>
             <EmptyHeader>
