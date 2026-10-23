@@ -11,6 +11,14 @@ import {
 } from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -221,11 +229,18 @@ function hoursSummary(hours: Hours | null) {
     .join("; ")
 }
 
-/** Opening hours, edited in a popover with the branch editor's own editor. */
+/**
+ * Opening hours. A week of them is a small form, so it opens in a dialog wide
+ * enough for the branch editor's own hours editor (a popover from the cell
+ * was too narrow and ran off the screen).
+ */
 export function HoursCell({
+  label,
   value,
   onSave,
 }: {
+  /** Which row it is ("Tomoca · Piassa"), for the dialog's title. */
+  label: string
   value: Hours | null
   onSave: (value: Hours) => Promise<unknown>
 }) {
@@ -235,6 +250,7 @@ export function HoursCell({
   const summary = hoursSummary(value)
 
   async function save() {
+    if (saving) return
     if (!hoursComplete(draft)) {
       toast.add({
         title: "Fill in every opening and closing time",
@@ -254,39 +270,41 @@ export function HoursCell({
   }
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next)
-        if (next) setDraft(value ?? {})
-      }}
-    >
-      <PopoverTrigger
-        render={
-          <Button
-            variant="outline"
-            className="w-full justify-start truncate font-normal"
-            aria-label={summary ? `Hours: ${summary}` : "Add hours"}
-          />
-        }
+    <>
+      <Button
+        variant="outline"
+        className="w-full justify-start font-normal"
+        aria-label={summary ? `Hours: ${summary}` : "Add hours"}
+        onClick={() => {
+          setDraft(value ?? {})
+          setOpen(true)
+        }}
       >
-        <span className={summary ? "truncate" : "text-muted-foreground"}>
+        <span
+          className={summary ? "truncate" : "truncate text-muted-foreground"}
+        >
           {summary || "Add hours"}
         </span>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto" align="start">
-        <HoursEditor value={draft} onChange={setDraft} />
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={() => void save()}>
-            {saving ? <Spinner data-icon="inline-start" /> : null}
-            Save hours
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Opening hours</DialogTitle>
+            <DialogDescription>{label}</DialogDescription>
+          </DialogHeader>
+          <HoursEditor value={draft} onChange={setDraft} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => void save()}>
+              {saving ? <Spinner data-icon="inline-start" /> : null}
+              Save hours
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

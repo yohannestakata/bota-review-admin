@@ -336,7 +336,11 @@ function SheetRowView({ row }: { row: SheetRow }) {
         />
       </TableCell>
       <TableCell>
-        <HoursCell value={row.hours} onSave={(hours) => save({ hours })} />
+        <HoursCell
+          label={`${row.place.name} · ${row.label}`}
+          value={row.hours}
+          onSave={(hours) => save({ hours })}
+        />
       </TableCell>
       <TableCell>
         <TaxaCell
