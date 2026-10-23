@@ -25,7 +25,7 @@ function FullScreen({ children }: { children: React.ReactNode }) {
 
 /**
  * Signed out → Clerk sign-in. Signed in → the API confirms the account is an
- * admin before anything else loads.
+ * admin or editor before anything else loads.
  */
 export function AuthGate() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -65,11 +65,13 @@ export function AuthGate() {
         <Empty>
           <EmptyHeader>
             <EmptyTitle>
-              {forbidden ? "This account isn't an admin" : "Can't reach Bota"}
+              {forbidden
+                ? "This account doesn't have access"
+                : "Can't reach Bota"}
             </EmptyTitle>
             <EmptyDescription>
               {forbidden
-                ? "Sign in with an admin account to continue."
+                ? "Sign in with an admin or editor account to continue."
                 : "Check that the API is running, then try again."}
             </EmptyDescription>
           </EmptyHeader>
@@ -90,7 +92,7 @@ export function AuthGate() {
   return <Outlet />
 }
 
-/** The signed-in admin, as confirmed by the API. Only valid inside AuthGate. */
+/** The signed-in admin or editor, as confirmed by the API. Only valid inside AuthGate. */
 export function useMe() {
   const queryClient = useQueryClient()
   return queryClient.getQueryData<AuthCheck>(["auth-check"])?.user

@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router"
 
-import { AppLayout } from "@/app/app-layout"
+import { RoleLayout } from "@/app/app-layout"
 import { AuthGate } from "@/app/auth-gate"
 import { InboxPage } from "@/features/inbox/inbox-page"
 import { ErrorPage } from "@/pages/error-page"
@@ -14,7 +14,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        element: <AppLayout />,
+        element: <RoleLayout />,
         children: [
           {
             errorElement: <ErrorPage />,
@@ -46,6 +46,13 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import("@/features/places/place-page").then((m) => ({
                     Component: m.PlacePage,
+                  })),
+              },
+              {
+                path: "sheet",
+                lazy: () =>
+                  import("@/features/sheet/sheet-page").then((m) => ({
+                    Component: m.SheetPage,
                   })),
               },
               {

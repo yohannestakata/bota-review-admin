@@ -13,11 +13,18 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import { useMe } from "./auth-gate"
 import { AppSidebar } from "./app-sidebar"
 import { CommandMenu, useCommandMenu } from "./command-menu"
+import { EditorLayout } from "./editor-layout"
 import { NAV } from "./nav"
 
-export function AppLayout() {
+/** Admins get the whole admin; editors only the data sheet. */
+export function RoleLayout() {
+  return useMe()?.role === "editor" ? <EditorLayout /> : <AppLayout />
+}
+
+function AppLayout() {
   const { pathname } = useLocation()
   const [commandOpen, setCommandOpen] = useCommandMenu()
   const current =
