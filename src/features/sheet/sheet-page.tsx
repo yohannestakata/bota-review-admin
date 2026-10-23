@@ -249,7 +249,9 @@ function SheetRowView({ row }: { row: SheetRow }) {
       ]
 
   return (
-    <TableRow>
+    // No hover tint: the pinned Place cell can't take it without showing
+    // the cells that scroll under it.
+    <TableRow className="hover:bg-transparent">
       <TableCell className="sticky left-0 z-10 bg-background">
         <TextCell
           label="Place name"

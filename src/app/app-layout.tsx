@@ -41,7 +41,8 @@ function AppLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="flex h-svh flex-col">
+      {/* min-w-0: a wide page (the sheet) scrolls inside, not the window. */}
+      <SidebarInset className="flex h-svh min-w-0 flex-col">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
