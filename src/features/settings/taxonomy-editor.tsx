@@ -242,6 +242,7 @@ export function TaxonomyEditor() {
                       row={row}
                       isTags={isTags}
                       kind={kind}
+                      groupItems={groupItems}
                       groupName={groups.nameOf}
                       sortable={canReorder}
                     />
@@ -258,12 +259,15 @@ function TaxonRowView({
   row,
   isTags,
   kind,
+  groupItems,
   groupName,
   sortable,
 }: {
   row: TaxonRow
   isTags: boolean
   kind: TaxonomyKind
+  /** The tag groups a tag can be moved to. */
+  groupItems: { value: string; label: string }[]
   groupName: (key: string | null | undefined) => string
   /** Ordered lists get a drag handle. */
   sortable: boolean
@@ -350,7 +354,60 @@ function TaxonRowView({
           </span>
         )}
       </TableCell>
-      {isTags ? <TableCell>{groupName(row.category)}</TableCell> : null}
+      {isTags ? (
+        <TableCell>
+          {/* Moving a tag moves it in the app's filters too. */}
+          <Select
+            items={
+              groupItems.some((g) => g.value === row.category)
+                ? groupItems
+                : [
+                    {
+                      value: row.category ?? "",
+                      label: groupName(row.category),
+                    },
+                    ...groupItems,
+                  ]
+            }
+            value={row.category ?? ""}
+            onValueChange={(v) => {
+              if (!v || v === row.category) return
+              act.mutate(
+                {
+                  action: "update",
+                  id: row.id,
+                  category: String(v) as TagCategory,
+                },
+                {
+                  onError,
+                  onSuccess: () =>
+                    toast.add({
+                      title: `${row.name} moved to ${groupName(String(v))}`,
+                      type: "success",
+                    }),
+                }
+              )
+            }}
+          >
+            <SelectTrigger
+              aria-label={`${row.name}'s group`}
+              className="w-36"
+              size="sm"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {groupItems.map((g) => (
+                  <SelectItem key={g.value} value={g.value}>
+                    {g.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </TableCell>
+      ) : null}
       <TableCell className="text-right">
         {editing ? null : (
           <div className="flex justify-end gap-1">
