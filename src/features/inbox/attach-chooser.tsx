@@ -20,6 +20,13 @@ const GENERIC = new Set([
   "house",
   "hotel",
   "and",
+  "lounge",
+  "butchery",
+  "club",
+  "tej",
+  "shop",
+  "fast",
+  "food",
 ])
 
 const words = (name: string) =>

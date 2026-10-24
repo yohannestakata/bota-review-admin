@@ -229,6 +229,7 @@ type PlaceMissing = {
   latitude?: number
   longitude?: number
   cuisines?: string[]
+  foodCategories?: string[]
   tags?: string[]
   amenities?: string[]
   hours?: { day: string; open: string; close: string }[]
@@ -243,10 +244,11 @@ function list(values?: string[]) {
 type Changes = { add?: string[]; remove?: string[] }
 
 /**
- * Names for the cuisines, tags and amenities a submission picked. Newer apps
+ * Names for the food types, cuisines, tags and amenities a submission picked. Newer apps
  * send ids, older ones slugs; anything unknown shows as sent.
  */
 function useTaxonNames() {
+  const foodCategories = useTaxonomy("food-categories").data
   const cuisines = useTaxonomy("cuisines").data
   const tags = useTaxonomy("tags").data
   const amenities = useTaxonomy("amenities").data
@@ -257,6 +259,7 @@ function useTaxonNames() {
     ...(names(rows, c?.remove) ?? []).map((n) => `− ${n}`),
   ]
   return {
+    foodCategories: (v?: string[]) => names(foodCategories, v),
     cuisines: (v?: string[]) => names(cuisines, v),
     tags: (v?: string[]) => names(tags, v),
     amenities: (v?: string[]) => names(amenities, v),
@@ -396,6 +399,11 @@ function SubmissionDetail({
                     </a>
                   </Row>
                 ) : null}
+                {list(taxon.foodCategories(details.foodCategories)) ? (
+                  <Row label="Food types">
+                    {list(taxon.foodCategories(details.foodCategories))}
+                  </Row>
+                ) : null}
                 {list(taxon.cuisines(details.cuisines)) ? (
                   <Row label="Cuisines">
                     {list(taxon.cuisines(details.cuisines))}
@@ -432,6 +440,11 @@ function SubmissionDetail({
           submission.type === "field_correction" &&
           !submission.fieldName ? (
             <>
+              {list(taxon.foodCategories(details.foodCategories)) ? (
+                <Row label="Food types">
+                  {list(taxon.foodCategories(details.foodCategories))}
+                </Row>
+              ) : null}
               {list(taxon.cuisines(details.cuisines)) ? (
                 <Row label="Cuisines">
                   {list(taxon.cuisines(details.cuisines))}

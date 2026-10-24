@@ -80,8 +80,8 @@ const COLUMNS: {
   { key: "pin", label: "Pin (lat, lng)", width: "min-w-52" },
   { key: "phone", label: "Phone", width: "min-w-40" },
   { key: "hours", label: "Hours", width: "min-w-60" },
-  { key: "cuisines", label: "Cuisines", width: "min-w-64" },
   { key: "foodCategories", label: "Food categories", width: "min-w-64" },
+  { key: "cuisines", label: "Cuisines", width: "min-w-64" },
   { key: "tags", label: "Tags", width: "min-w-64" },
   { key: "amenities", label: "Amenities", width: "min-w-64" },
   { key: "description", label: "Description", place: true, width: "min-w-80" },
@@ -346,18 +346,18 @@ function SheetRowView({ row }: { row: SheetRow }) {
       </TableCell>
       <TableCell>
         <TaxaCell
-          kind="cuisines"
-          label="Cuisines"
-          value={row.cuisines}
-          onSave={(v) => save({ cuisineIds: v.map((t) => t.id) })}
-        />
-      </TableCell>
-      <TableCell>
-        <TaxaCell
           kind="food-categories"
           label="Food categories"
           value={row.foodCategories}
           onSave={(v) => save({ foodCategoryIds: v.map((t) => t.id) })}
+        />
+      </TableCell>
+      <TableCell>
+        <TaxaCell
+          kind="cuisines"
+          label="Cuisines"
+          value={row.cuisines}
+          onSave={(v) => save({ cuisineIds: v.map((t) => t.id) })}
         />
       </TableCell>
       <TableCell>

@@ -322,16 +322,6 @@ export function BranchForm({ branch }: { branch: Branch }) {
               <FieldLegend>What it is</FieldLegend>
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="branch-cuisines">Cuisines</FieldLabel>
-                  <TaxonMultiPicker
-                    id="branch-cuisines"
-                    kind="cuisines"
-                    value={draft.cuisines}
-                    onChange={(v) => set("cuisines", v)}
-                    placeholder="Ethiopian, Italian…"
-                  />
-                </Field>
-                <Field>
                   <FieldLabel htmlFor="branch-categories">
                     Food categories
                   </FieldLabel>
@@ -343,8 +333,19 @@ export function BranchForm({ branch }: { branch: Branch }) {
                     placeholder="Burgers, coffee…"
                   />
                   <FieldDescription>
-                    Publishing needs at least one cuisine or food category.
+                    What people come for. Publishing needs at least one food
+                    category or cuisine.
                   </FieldDescription>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="branch-cuisines">Cuisines</FieldLabel>
+                  <TaxonMultiPicker
+                    id="branch-cuisines"
+                    kind="cuisines"
+                    value={draft.cuisines}
+                    onChange={(v) => set("cuisines", v)}
+                    placeholder="Ethiopian, Italian…"
+                  />
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="branch-tags">Tags</FieldLabel>
