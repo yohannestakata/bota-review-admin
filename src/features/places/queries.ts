@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query"
 
 import { useApi } from "@/lib/api"
+import { uploadImage } from "@/lib/images"
 import { toPage } from "@/lib/paginated"
 
 import type {
@@ -291,15 +292,12 @@ export function useMenuItemAction(branchId: string) {
         case "remove":
           return api(`/admin/menu-items/${input.itemId}`, { method: "DELETE" })
         case "photo": {
-          const photo = input.file
-            ? await uploadToCloudinary(api, input.file)
+          const uploadKey = input.file
+            ? await uploadImage(api, input.file)
             : null
           return api(`/admin/menu-items/${input.itemId}`, {
             method: "PATCH",
-            body: {
-              imageUrl: photo?.secure_url ?? null,
-              cloudinaryPublicId: photo?.public_id ?? null,
-            },
+            body: { uploadKey },
           })
         }
         case "add":
@@ -440,50 +438,10 @@ export function usePlaceSearch(q: string) {
 /** A photo category's key; the list is editable in Settings. */
 export type PhotoCategory = string
 
-type PhotoSignature = {
-  signature: string
-  timestamp: number
-  cloudName: string
-  apiKey: string
-  uploadPreset?: string
-  folder: string
-}
-
-/** Uploads an image straight to Cloudinary, signed by the API. */
-async function uploadToCloudinary(api: ReturnType<typeof useApi>, file: File) {
-  const sig = (await api<PhotoSignature>("/photos/sign", { method: "POST" }))
-    .data
-  const form = new FormData()
-  form.append("file", file)
-  form.append("api_key", sig.apiKey)
-  form.append("timestamp", String(sig.timestamp))
-  form.append("signature", sig.signature)
-  form.append("folder", sig.folder)
-  if (sig.uploadPreset) form.append("upload_preset", sig.uploadPreset)
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-    { method: "POST", body: form }
-  )
-  if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as {
-      error?: { message?: string }
-    } | null
-    throw new Error(
-      `${file.name} didn't upload: ${body?.error?.message ?? `status ${response.status}`}`
-    )
-  }
-  return (await response.json()) as {
-    public_id: string
-    secure_url: string
-    width: number
-    height: number
-  }
-}
-
 /**
- * Uploads photos straight to Cloudinary (signed by the API), then adds them
- * to the branch. Admin uploads are approved at once; the first becomes the
- * cover if the branch has none.
+ * Uploads photos straight to storage (through a link from the API), then
+ * adds them to the branch. Admin uploads are approved at once; the first
+ * becomes the cover if the branch has none.
  */
 export function useUploadPhotos(branchId: string) {
   const api = useApi()
@@ -498,16 +456,10 @@ export function useUploadPhotos(branchId: string) {
     }) => {
       let added = 0
       for (const file of files) {
-        const uploaded = await uploadToCloudinary(api, file)
+        const uploadKey = await uploadImage(api, file)
         await api(`/branches/${branchId}/photos`, {
           method: "POST",
-          body: {
-            publicId: uploaded.public_id,
-            url: uploaded.secure_url,
-            width: uploaded.width,
-            height: uploaded.height,
-            category,
-          },
+          body: { uploadKey, category },
         })
         added += 1
       }

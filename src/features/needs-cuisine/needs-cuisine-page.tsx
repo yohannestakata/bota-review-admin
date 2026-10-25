@@ -42,7 +42,7 @@ import { useSetCuisines, useLookup } from "@/features/places/queries"
 import { TaxonMultiPicker } from "@/features/places/taxon-picker"
 import type { Taxon } from "@/features/places/types"
 import { useUrlFilters } from "@/hooks/use-url-filters"
-import { thumbnail } from "@/lib/cloudinary"
+import { photoSize } from "@/lib/images"
 import type { Page } from "@/lib/paginated"
 
 import {
@@ -202,7 +202,7 @@ function PlaceRow({
       {row.photoUrl ? (
         <ItemMedia variant="image">
           <img
-            src={thumbnail(row.photoUrl, 80)}
+            src={photoSize(row.photoUrl, 80)}
             alt=""
             width={40}
             height={40}

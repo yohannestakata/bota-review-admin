@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 import { useHidden } from "@/hooks/use-hidden"
-import { thumbnail } from "@/lib/cloudinary"
+import { photoSize } from "@/lib/images"
 import { undoable } from "@/lib/undoable"
 
 import { useBranchMenus, useMenuItemAction } from "./queries"
@@ -193,7 +193,7 @@ function MenuTable({
                           <Spinner />
                         ) : item.imageUrl ? (
                           <img
-                            src={thumbnail(item.imageUrl, 80)}
+                            src={photoSize(item.imageUrl, 80)}
                             alt=""
                             className="size-full rounded-md object-cover"
                           />
@@ -288,7 +288,7 @@ function MenuTable({
         <input
           ref={photoInput}
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/heic"
+          accept="image/jpeg,image/png,image/webp"
           hidden
           onChange={(e) => {
             const file = e.target.files?.[0]

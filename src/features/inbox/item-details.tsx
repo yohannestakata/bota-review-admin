@@ -1,4 +1,4 @@
-import { thumbnail } from "@/lib/cloudinary"
+import { photoSize } from "@/lib/images"
 import { TimeAgo } from "@/components/time-ago"
 import { LinkSquare02Icon, StarIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -197,7 +197,7 @@ function PhotoDetail({ photo }: { photo: PhotoRow }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <img
-          src={thumbnail(photo.url, 1200)}
+          src={photoSize(photo.url, 1200)}
           alt={`Photo by ${photo.uploader.displayName}, waiting for review`}
           width={photo.width}
           height={photo.height}
@@ -234,7 +234,14 @@ type PlaceMissing = {
   amenities?: string[]
   hours?: { day: string; open: string; close: string }[]
   menu?: { name: string; price?: number }[]
-  photos?: { url: string }[]
+  photos?: {
+    imageKey: string
+    url: string
+    width: number
+    height: number
+    thumbhash?: string
+    category?: string
+  }[]
 }
 
 function list(values?: string[]) {
@@ -473,14 +480,14 @@ function SubmissionDetail({
           <div className="grid grid-cols-3 gap-2">
             {photos.map((p) => (
               <a
-                key={p.url}
+                key={p.imageKey}
                 href={p.url}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Open the photo full size"
               >
                 <img
-                  src={thumbnail(p.url, 400)}
+                  src={photoSize(p.url, 400)}
                   alt=""
                   width={400}
                   height={400}

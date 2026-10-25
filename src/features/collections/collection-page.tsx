@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { thumbnail } from "@/lib/cloudinary"
+import { photoSize } from "@/lib/images"
 import {
   Image01Icon,
   Cancel01Icon,
@@ -475,7 +475,7 @@ function SortablePlace({
         {b.coverPhotoUrl ? (
           <ItemMedia variant="image">
             <img
-              src={thumbnail(b.coverPhotoUrl, 80)}
+              src={photoSize(b.coverPhotoUrl, 80)}
               alt=""
               width={40}
               height={40}

@@ -35,7 +35,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import { useHidden } from "@/hooks/use-hidden"
 import { undoable } from "@/lib/undoable"
-import { thumbnail } from "@/lib/cloudinary"
+import { photoSize } from "@/lib/images"
 
 import { ApiErrorAlert } from "@/components/api-error-alert"
 
@@ -169,7 +169,7 @@ export function BranchPhotos({ branchId }: { branchId: string }) {
                       </EmptyMedia>
                     </Empty>
                     <img
-                      src={thumbnail(photo.url, 600)}
+                      src={photoSize(photo.url, 600)}
                       width={600}
                       height={600}
                       alt={`Photo by ${photo.uploader.displayName}`}
@@ -270,7 +270,7 @@ function PhotoUploader({ branchId }: { branchId: string }) {
       <input
         ref={input}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/heic"
+        accept="image/jpeg,image/png,image/webp"
         multiple
         hidden
         onChange={(e) => {
