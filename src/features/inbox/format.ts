@@ -55,18 +55,51 @@ export function summary(item: InboxItem): string {
       if (s.type === "field_correction" && s.fieldName) {
         if (s.suggestedValue !== null)
           return `${s.fieldName}: ${s.suggestedValue}`
-        // A photo suggestion has photos instead of a text value.
-        const photos =
-          (s.details as { photos?: unknown[] } | null)?.photos?.length ?? 0
-        return photos > 0
-          ? `${s.fieldName}: ${photos === 1 ? "1 photo" : `${photos} photos`} suggested`
-          : `${s.fieldName}: suggested removal`
+        // Hours, menus, tags and photos carry their changes in the details.
+        const what = detailSummary(s.details)
+        return what ? `${s.fieldName}: ${what}` : s.fieldName
       }
       return SUBMISSION_LABEL[s.type]
     }
     case "claim":
       return `${item.data.contactName}, ${item.data.contactRole}`
   }
+}
+
+const plural = (n: number, one: string, many: string) =>
+  `${n} ${n === 1 ? one : many}`
+
+/** What a correction's details change, e.g. "3 menu photos, 2 dishes". */
+function detailSummary(details: unknown) {
+  const d = (details ?? {}) as Record<string, unknown>
+  const length = (key: string) =>
+    Array.isArray(d[key]) ? (d[key] as unknown[]).length : 0
+  const changes = (key: string) => {
+    const c = d[key] as { add?: unknown[]; remove?: unknown[] } | undefined
+    return (c?.add?.length ?? 0) + (c?.remove?.length ?? 0)
+  }
+  const photos = Array.isArray(d.photos)
+    ? (d.photos as { category?: string }[])
+    : []
+  const menuPhotos = photos.filter((p) => p.category === "menu").length
+  const otherPhotos = photos.length - menuPhotos
+  const taxonomy =
+    changes("foodCategoryChanges") +
+    changes("cuisineChanges") +
+    changes("tagChanges") +
+    changes("amenityChanges")
+  const dishes = length("menuChanges") || length("menu")
+  const days = length("hourChanges") || length("hours")
+  return [
+    menuPhotos ? plural(menuPhotos, "menu photo", "menu photos") : null,
+    otherPhotos ? plural(otherPhotos, "photo", "photos") : null,
+    dishes ? plural(dishes, "dish", "dishes") : null,
+    days ? plural(days, "day", "days") : null,
+    taxonomy ? plural(taxonomy, "change", "changes") : null,
+    d.reportedPhotoId ? "a photo reported" : null,
+  ]
+    .filter(Boolean)
+    .join(", ")
 }
 
 export function title(item: InboxItem): string {

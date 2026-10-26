@@ -270,9 +270,125 @@ function useTaxonNames() {
     cuisines: (v?: string[]) => names(cuisines, v),
     tags: (v?: string[]) => names(tags, v),
     amenities: (v?: string[]) => names(amenities, v),
+    foodCategoryChanges: (c?: Changes) => changes(foodCategories, c),
+    cuisineChanges: (c?: Changes) => changes(cuisines, c),
     tagChanges: (c?: Changes) => changes(tags, c),
     amenityChanges: (c?: Changes) => changes(amenities, c),
   }
+}
+
+const DAY_NAME: Record<string, string> = {
+  mon: "Mon",
+  tue: "Tue",
+  wed: "Wed",
+  thu: "Thu",
+  fri: "Fri",
+  sat: "Sat",
+  sun: "Sun",
+}
+
+type MenuItemTip = {
+  name: string
+  price?: number
+  category?: string
+  photoIsNew?: boolean
+}
+
+type CorrectionDetails = {
+  foodCategoryChanges?: Changes
+  cuisineChanges?: Changes
+  tagChanges?: Changes
+  amenityChanges?: Changes
+  foodCategories?: string[]
+  cuisines?: string[]
+  hourChanges?: (
+    | { operation: "set"; day: string; open: string; close: string }
+    | { operation: "close"; day: string }
+  )[]
+  hours?: { day: string; open: string; close: string }[]
+  menuChanges?: (
+    | { operation: "add"; item: MenuItemTip }
+    | { operation: "update"; itemId: string; item: MenuItemTip }
+    | { operation: "remove"; itemId: string; itemName: string }
+  )[]
+  menu?: MenuItemTip[]
+  reportedPhotoId?: string
+  reportedPhotoUrl?: string
+}
+
+// The details keys the rows below know how to show; anything else still
+// shows, raw, so nothing a newer app sends goes unseen.
+const SHOWN_KEYS = new Set([
+  "foodCategoryChanges",
+  "cuisineChanges",
+  "tagChanges",
+  "amenityChanges",
+  "foodCategories",
+  "cuisines",
+  "hourChanges",
+  "hours",
+  "menuChanges",
+  "menu",
+  "photos",
+  "reportedPhotoId",
+  "reportedPhotoUrl",
+])
+
+function dish(item: MenuItemTip) {
+  return [
+    item.name,
+    item.price != null ? `${item.price} Br` : null,
+    item.photoIsNew ? "with a photo" : null,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+}
+
+/** A correction's structured changes as labelled lines, in plain words. */
+function correctionRows(
+  details: CorrectionDetails,
+  taxon: ReturnType<typeof useTaxonNames>
+) {
+  const rows: { label: string; lines: string[] }[] = []
+  const add = (label: string, lines: string[] | undefined) => {
+    if (lines?.length) rows.push({ label, lines })
+  }
+  add("Food types", taxon.foodCategoryChanges(details.foodCategoryChanges))
+  add("Cuisines", taxon.cuisineChanges(details.cuisineChanges))
+  add("Tags", taxon.tagChanges(details.tagChanges))
+  add("Features", taxon.amenityChanges(details.amenityChanges))
+  // Older apps sent the whole list instead of changes.
+  add("Food types", taxon.foodCategories(details.foodCategories))
+  add("Cuisines", taxon.cuisines(details.cuisines))
+  add(
+    "Hours",
+    details.hourChanges?.map((change) =>
+      change.operation === "close"
+        ? `${DAY_NAME[change.day] ?? change.day}: closed`
+        : `${DAY_NAME[change.day] ?? change.day}: ${change.open}–${change.close}`
+    )
+  )
+  add(
+    "Hours",
+    details.hours?.map(
+      (h) => `${DAY_NAME[h.day] ?? h.day}: ${h.open}–${h.close}`
+    )
+  )
+  add(
+    "Menu",
+    details.menuChanges?.map((change) =>
+      change.operation === "add"
+        ? `+ ${dish(change.item)}`
+        : change.operation === "update"
+          ? `Change: ${dish(change.item)}`
+          : `− ${change.itemName}`
+    )
+  )
+  add(
+    "Menu",
+    details.menu?.map((item) => `+ ${dish(item)}`)
+  )
+  return rows
 }
 
 function SubmissionDetail({
@@ -288,23 +404,49 @@ function SubmissionDetail({
   const details = (submission.details ?? {}) as PlaceMissing &
     Record<string, unknown>
   const isNew = submission.type === "place_missing"
-  const photos = Array.isArray(details.photos) ? details.photos : []
+  const allPhotos = Array.isArray(details.photos) ? details.photos : []
+  // Menu photos go to Menu photos on approve (to be read into dishes); the
+  // rest come to the Inbox one by one.
+  const menuPhotos = allPhotos.filter((p) => p.category === "menu")
+  const photos = allPhotos.filter((p) => p.category !== "menu")
   const taxon = useTaxonNames()
   const placeTypes = useLookup("place-types")
   const neighborhoods = useTaxonomy("neighborhoods").data
   const areaName =
     neighborhoods?.find((n) => n.id === details.neighborhoodId)?.name ??
     details.neighborhood
-  // Corrections: taxonomy picks get their own rows; the rest stays raw.
-  const { tagChanges, amenityChanges } = details as {
-    tagChanges?: Changes
-    amenityChanges?: Changes
-  }
-  const otherChanges = Object.fromEntries(
-    Object.entries(details).filter(
-      ([key]) =>
-        !["cuisines", "tagChanges", "amenityChanges", "photos"].includes(key)
-    )
+  const isCorrection = submission.type === "field_correction"
+  const correction = details as CorrectionDetails
+  const changeRows = isCorrection ? correctionRows(correction, taxon) : []
+  const otherChanges = isCorrection
+    ? Object.fromEntries(
+        Object.entries(details).filter(([key]) => !SHOWN_KEYS.has(key))
+      )
+    : {}
+  // A text field (name, phone, location…) has a value to compare; hours,
+  // menus, tags and photos carry their changes in the details instead.
+  const hasValue = submission.suggestedValue !== null
+  const photoGrid = (items: typeof allPhotos) => (
+    <div className="grid grid-cols-3 gap-2">
+      {items.map((p) => (
+        <a
+          key={p.imageKey}
+          href={p.url}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Open the photo full size"
+        >
+          <img
+            src={photoSize(p.url, 400)}
+            alt=""
+            width={400}
+            height={400}
+            loading="lazy"
+            className="aspect-square rounded-md bg-muted object-cover"
+          />
+        </a>
+      ))}
+    </div>
   )
 
   return (
@@ -333,26 +475,52 @@ function SubmissionDetail({
         />
         <Separator />
         <div className="flex flex-col gap-3">
-          {submission.type === "field_correction" && submission.fieldName ? (
+          {isCorrection ? (
             <>
-              <Row label="Field">{submission.fieldName}</Row>
-              {submission.suggestedValue === null && photos.length > 0 ? (
-                // A photo suggestion carries the photos, not a text value.
-                <Row label="Suggested">
-                  {photos.length === 1
-                    ? "1 photo, shown below"
-                    : `${photos.length} photos, shown below`}
-                </Row>
-              ) : (
+              {submission.fieldName ? (
+                <Row label="Field">{submission.fieldName}</Row>
+              ) : null}
+              {hasValue ? (
                 <>
                   <Row label="Now">{submission.currentValue ?? "Empty"}</Row>
                   <Row label="Suggested">
                     <span className="font-medium">
-                      {submission.suggestedValue ?? "Empty"}
+                      {submission.suggestedValue}
                     </span>
                   </Row>
                 </>
-              )}
+              ) : null}
+              {changeRows.map((row, index) => (
+                <Row key={`${row.label}-${index}`} label={row.label}>
+                  <span className="whitespace-pre-line">
+                    {row.lines.join("\n")}
+                  </span>
+                </Row>
+              ))}
+              {menuPhotos.length ? (
+                <Row label="Menu photos">
+                  {menuPhotos.length === 1
+                    ? "1 photo, shown below"
+                    : `${menuPhotos.length} photos, shown below`}
+                </Row>
+              ) : null}
+              {photos.length ? (
+                <Row label="Photos">
+                  {photos.length === 1
+                    ? "1 photo, shown below"
+                    : `${photos.length} photos, shown below`}
+                </Row>
+              ) : null}
+              {correction.reportedPhotoId ? (
+                <Row label="Reported photo">Shown below</Row>
+              ) : null}
+              {Object.keys(otherChanges).length > 0 ? (
+                <Row label="Other">
+                  <pre className="font-mono text-xs whitespace-pre-wrap">
+                    {JSON.stringify(otherChanges, null, 2)}
+                  </pre>
+                </Row>
+              ) : null}
             </>
           ) : null}
           {isNew ? (
@@ -443,61 +611,33 @@ function SubmissionDetail({
               </FieldSet>
             </>
           ) : null}
-          {!isNew &&
-          submission.type === "field_correction" &&
-          !submission.fieldName ? (
-            <>
-              {list(taxon.foodCategories(details.foodCategories)) ? (
-                <Row label="Food types">
-                  {list(taxon.foodCategories(details.foodCategories))}
-                </Row>
-              ) : null}
-              {list(taxon.cuisines(details.cuisines)) ? (
-                <Row label="Cuisines">
-                  {list(taxon.cuisines(details.cuisines))}
-                </Row>
-              ) : null}
-              {list(taxon.tagChanges(tagChanges)) ? (
-                <Row label="Tags">{list(taxon.tagChanges(tagChanges))}</Row>
-              ) : null}
-              {list(taxon.amenityChanges(amenityChanges)) ? (
-                <Row label="Amenities">
-                  {list(taxon.amenityChanges(amenityChanges))}
-                </Row>
-              ) : null}
-              {Object.keys(otherChanges).length > 0 ? (
-                <Row label="Changes">
-                  <pre className="font-mono text-xs whitespace-pre-wrap">
-                    {JSON.stringify(otherChanges, null, 2)}
-                  </pre>
-                </Row>
-              ) : null}
-            </>
-          ) : null}
           {submission.note ? <Row label="Note">{submission.note}</Row> : null}
         </div>
-        {photos.length > 0 ? (
-          <div className="grid grid-cols-3 gap-2">
-            {photos.map((p) => (
-              <a
-                key={p.imageKey}
-                href={p.url}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Open the photo full size"
-              >
-                <img
-                  src={photoSize(p.url, 400)}
-                  alt=""
-                  width={400}
-                  height={400}
-                  loading="lazy"
-                  className="aspect-square rounded-md bg-muted object-cover"
-                />
-              </a>
-            ))}
+        {correction.reportedPhotoUrl ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-muted-foreground">
+              The photo they reported
+            </p>
+            {photoGrid([
+              {
+                imageKey: correction.reportedPhotoId ?? "reported",
+                url: correction.reportedPhotoUrl,
+                width: 0,
+                height: 0,
+              },
+            ])}
           </div>
         ) : null}
+        {menuPhotos.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-muted-foreground">
+              Menu photos: once you approve, they go to Menu photos and are read
+              into a draft of the dishes for you to check.
+            </p>
+            {photoGrid(menuPhotos)}
+          </div>
+        ) : null}
+        {photos.length > 0 ? photoGrid(photos) : null}
       </CardContent>
     </Card>
   )
