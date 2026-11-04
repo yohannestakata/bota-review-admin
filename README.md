@@ -25,8 +25,8 @@ pnpm build
 
 ## Deploy
 
-`render.yaml` describes a Render static site. Create it from the Blueprint,
-then set:
+The admin is a Cloudflare Worker serving the built `dist/` as static assets
+(`wrangler.jsonc`, with client-side routing). Its build needs:
 
 - `VITE_API_URL`: the API's public URL including `/v1`.
 - `VITE_CLERK_PUBLISHABLE_KEY`: the production Clerk publishable key.
