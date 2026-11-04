@@ -426,6 +426,11 @@ function SubmissionDetail({
   // A text field (name, phone, location…) has a value to compare; hours,
   // menus, tags and photos carry their changes in the details instead.
   const hasValue = submission.suggestedValue !== null
+  // A type is sent as its key ("dairy-shop"); show its name.
+  const shown = (value: string | null) =>
+    submission.fieldName === "Place type" && value
+      ? placeTypes.nameOf(value)
+      : value
   const photoGrid = (items: typeof allPhotos) => (
     <div className="grid grid-cols-3 gap-2">
       {items.map((p) => (
@@ -482,10 +487,12 @@ function SubmissionDetail({
               ) : null}
               {hasValue ? (
                 <>
-                  <Row label="Now">{submission.currentValue ?? "Empty"}</Row>
+                  <Row label="Now">
+                    {shown(submission.currentValue) ?? "Empty"}
+                  </Row>
                   <Row label="Suggested">
                     <span className="font-medium">
-                      {submission.suggestedValue}
+                      {shown(submission.suggestedValue)}
                     </span>
                   </Row>
                 </>
