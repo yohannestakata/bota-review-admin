@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { FailedJobs } from "./failed-jobs"
 import { MealTimes } from "./meal-times"
+import { SearchWords } from "./search-words"
 import { TaxonomyEditor } from "./taxonomy-editor"
 
 export function SettingsPage() {
@@ -18,6 +19,7 @@ export function SettingsPage() {
         <TabsList variant="line">
           <TabsTrigger value="lists">Lists</TabsTrigger>
           <TabsTrigger value="meal-times">Meal times</TabsTrigger>
+          <TabsTrigger value="search-words">Search words</TabsTrigger>
           <TabsTrigger value="jobs">Background jobs</TabsTrigger>
         </TabsList>
         <TabsContent value="lists" className="pt-4">
@@ -25,6 +27,9 @@ export function SettingsPage() {
         </TabsContent>
         <TabsContent value="meal-times" className="pt-4">
           <MealTimes />
+        </TabsContent>
+        <TabsContent value="search-words" className="pt-4">
+          <SearchWords />
         </TabsContent>
         <TabsContent value="jobs" className="pt-4">
           <FailedJobs />

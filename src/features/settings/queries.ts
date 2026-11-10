@@ -166,3 +166,74 @@ export function useSetMealTime() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
   })
 }
+
+/** A search word: what a search for it also finds (Settings → Search words). */
+export type SearchPhrase = {
+  id: string
+  phrase: string
+  /** Words that mean the same, searched as well ("bday" → "birthday"). */
+  alsoSearch: string[]
+  tagIds: string[]
+  foodCategoryIds: string[]
+  placeTypes: PlaceType[]
+  status: "active" | "archived"
+}
+
+export type SearchPhraseChange = Partial<
+  Pick<
+    SearchPhrase,
+    | "phrase"
+    | "alsoSearch"
+    | "tagIds"
+    | "foodCategoryIds"
+    | "placeTypes"
+    | "status"
+  >
+>
+
+export function useSearchPhrases() {
+  const api = useApi()
+  return useQuery({
+    queryKey: ["search-phrases"],
+    queryFn: async () =>
+      (await api<SearchPhrase[]>("/admin/search-phrases")).data,
+  })
+}
+
+/** Adds a search word, or saves a change to one (shown at once, undone on failure). */
+export function useSearchPhraseAction() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  const key = ["search-phrases"]
+  return useMutation({
+    mutationFn: async (
+      input:
+        | { action: "create"; phrase: string }
+        | { action: "update"; id: string; change: SearchPhraseChange }
+    ) =>
+      input.action === "create"
+        ? api<SearchPhrase>("/admin/search-phrases", {
+            method: "POST",
+            body: { phrase: input.phrase },
+          })
+        : api<SearchPhrase>(`/admin/search-phrases/${input.id}`, {
+            method: "PATCH",
+            body: input.change,
+          }),
+    onMutate: async (input) => {
+      if (input.action !== "update") return {}
+      await queryClient.cancelQueries({ queryKey: key })
+      const before = queryClient.getQueryData<SearchPhrase[]>(key)
+      queryClient.setQueryData<SearchPhrase[]>(key, (rows) =>
+        rows?.map((row) =>
+          row.id === input.id ? { ...row, ...input.change } : row
+        )
+      )
+      return { before }
+    },
+    onError: (_error, _input, context) => {
+      if (context?.before) queryClient.setQueryData(key, context.before)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+  })
+}
