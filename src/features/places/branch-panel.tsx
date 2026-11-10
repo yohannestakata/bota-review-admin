@@ -41,6 +41,7 @@ import { useUrlFilters } from "@/hooks/use-url-filters"
 import { BranchForm } from "./branch-form"
 import { BranchMenus } from "./branch-menus"
 import { BranchPhotos } from "./branch-photos"
+import { BranchSimilar } from "./branch-similar"
 import { BranchStats } from "./branch-stats"
 import {
   useBranch,
@@ -147,6 +148,7 @@ export function BranchPanel({ branchId }: { branchId: string }) {
           </TabsTrigger>
           <TabsTrigger value="menu">Menu</TabsTrigger>
           <TabsTrigger value="stats">Stats</TabsTrigger>
+          <TabsTrigger value="similar">Similar</TabsTrigger>
         </TabsList>
         <TabsContent value="details" keepMounted className="pt-4">
           <BranchForm key={branch.data.id} branch={branch.data} />
@@ -159,6 +161,9 @@ export function BranchPanel({ branchId }: { branchId: string }) {
         </TabsContent>
         <TabsContent value="stats" className="pt-4">
           <BranchStats branchId={branchId} />
+        </TabsContent>
+        <TabsContent value="similar" className="pt-4">
+          <BranchSimilar branchId={branchId} />
         </TabsContent>
       </Tabs>
     </div>
