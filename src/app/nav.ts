@@ -7,6 +7,7 @@ import {
   Layers01Icon,
   Settings02Icon,
   Store01Icon,
+  Tag01Icon,
   UserGroupIcon,
   Wrench01Icon,
 } from "@hugeicons/core-free-icons"
@@ -19,6 +20,7 @@ export const NAV = [
   { to: "/featured", label: "Featured", icon: StarIcon },
   { to: "/fix", label: "Fix list", icon: Wrench01Icon },
   { to: "/needs-cuisine", label: "Needs cuisine", icon: Restaurant01Icon },
+  { to: "/suggested-tags", label: "Suggested tags", icon: Tag01Icon },
   { to: "/collections", label: "Collections", icon: Layers01Icon },
   { to: "/people", label: "People", icon: UserGroupIcon },
   { to: "/settings", label: "Settings", icon: Settings02Icon },

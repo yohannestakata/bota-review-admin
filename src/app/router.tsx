@@ -70,6 +70,13 @@ export const router = createBrowserRouter([
                   ),
               },
               {
+                path: "suggested-tags",
+                lazy: () =>
+                  import("@/features/suggested-tags/suggested-tags-page").then(
+                    (m) => ({ Component: m.SuggestedTagsPage })
+                  ),
+              },
+              {
                 path: "collections",
                 lazy: () =>
                   import("@/features/collections/collections-page").then(
