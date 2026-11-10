@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -84,7 +83,9 @@ export function SuggestedTagsPage() {
             descriptions and reviews point to, read by the search model.
             Approving adds it to the place; rejecting teaches the model.
           </CardDescription>
-          <CardAction className="flex flex-wrap items-center gap-2">
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
             <ToggleGroup
               value={[kind || "all"]}
               onValueChange={(v) => v[0] && set("kind", v[0])}
@@ -104,9 +105,7 @@ export function SuggestedTagsPage() {
               placeholder="Search places…"
               className="w-56"
             />
-          </CardAction>
-        </CardHeader>
-        <CardContent>
+          </div>
           <ApiErrorAlert error={rows.error} title="Couldn't load suggestions" />
           {rows.data && rows.data.total === 0 && (q || kind) ? (
             <Empty>
