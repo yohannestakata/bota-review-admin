@@ -287,7 +287,14 @@ function ImportCard({ row, typeName }: { row: MenuImport; typeName: string }) {
                       ) : null}
                     </div>
                     <span className="shrink-0 text-sm tabular-nums">
-                      {birr.format(dish.price)} Br
+                      {dish.sizes?.length
+                        ? dish.sizes
+                            .map(
+                              (size) =>
+                                `${size.label} ${birr.format(size.price)}`
+                            )
+                            .join(" · ") + " Br"
+                        : `${birr.format(dish.price)} Br`}
                     </span>
                   </li>
                 ))}

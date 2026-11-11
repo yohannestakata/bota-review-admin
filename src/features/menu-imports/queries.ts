@@ -15,6 +15,7 @@ export type QueuedDish = {
   name: string
   description: string | null
   price: number
+  sizes?: { label: string; price: number }[] | null
   imageUrl: string | null
   imageKey: string | null
 }
