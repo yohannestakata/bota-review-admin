@@ -73,7 +73,7 @@ export function useDecideMenuImport() {
       id: string
       decision: "approve" | "reject"
     }) =>
-      api<{ status: ImportStatus; added: number }>(
+      api<{ status: ImportStatus; added: number; photos: number }>(
         `/admin/menu-imports/${id}/decision`,
         { method: "POST", body: { decision } }
       ),

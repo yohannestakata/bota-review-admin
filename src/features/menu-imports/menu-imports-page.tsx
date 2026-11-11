@@ -161,7 +161,7 @@ function ImportCard({ row, typeName }: { row: MenuImport; typeName: string }) {
         toast.add({
           title:
             decision === "approve"
-              ? `${row.placeName}: ${res.data.added} dishes added`
+              ? `${row.placeName}: ${res.data.added} dishes added${res.data.photos ? `, ${res.data.photos} photos` : ""}`
               : `${row.placeName}: import rejected`,
           type: "success",
         }),
