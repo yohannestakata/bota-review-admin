@@ -77,6 +77,13 @@ export const router = createBrowserRouter([
                   ),
               },
               {
+                path: "menu-imports",
+                lazy: () =>
+                  import("@/features/menu-imports/menu-imports-page").then(
+                    (m) => ({ Component: m.MenuImportsPage })
+                  ),
+              },
+              {
                 path: "collections",
                 lazy: () =>
                   import("@/features/collections/collections-page").then(
