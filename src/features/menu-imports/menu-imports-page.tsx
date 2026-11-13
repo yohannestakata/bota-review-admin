@@ -51,6 +51,7 @@ const STATUSES: { value: ImportStatus; label: string }[] = [
 const SOURCE_LABEL: Record<string, string> = {
   website: "its website",
   deliveraddis: "Deliver Addis",
+  social: "a social channel",
   bota: "Bota",
   owner: "the owner",
 }
