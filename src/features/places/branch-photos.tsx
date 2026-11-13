@@ -3,6 +3,14 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { useRef, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,11 +49,14 @@ import { ApiErrorAlert } from "@/components/api-error-alert"
 
 import {
   useBranchPhotos,
+  useBranchShownMenus,
   usePhotoAction,
   useLookup,
+  useSetPhotoDish,
   useUploadPhotos,
   type PhotoCategory,
 } from "./queries"
+import type { BranchPhoto, MenuItem } from "./types"
 
 const STATUS_LABEL = {
   pending: "Waiting",
@@ -55,6 +66,8 @@ const STATUS_LABEL = {
 
 export function BranchPhotos({ branchId }: { branchId: string }) {
   const photos = useBranchPhotos(branchId)
+  const menus = useBranchShownMenus(branchId)
+  const dishes = (menus.data ?? []).flatMap((menu) => menu.items)
   const act = usePhotoAction(branchId)
   const { hidden, hide, unhide } = useHidden()
 
@@ -177,6 +190,13 @@ export function BranchPhotos({ branchId }: { branchId: string }) {
                       className="absolute inset-0 size-full rounded-lg object-cover"
                     />
                   </AspectRatio>
+                  {dishes.length > 0 ? (
+                    <DishPicker
+                      branchId={branchId}
+                      photo={photo}
+                      dishes={dishes}
+                    />
+                  ) : null}
                 </CardContent>
                 <CardFooter className="gap-2">
                   {photo.moderationStatus === "approved" && !photo.isCover ? (
@@ -214,6 +234,85 @@ export function BranchPhotos({ branchId }: { branchId: string }) {
           })}
       </div>
     </div>
+  )
+}
+
+/**
+ * Which dish the photo shows. Tagging an approved photo makes it the dish's
+ * picture on the menu when the dish has none; clearing untags it.
+ */
+function DishPicker({
+  branchId,
+  photo,
+  dishes,
+}: {
+  branchId: string
+  photo: BranchPhoto
+  dishes: MenuItem[]
+}) {
+  const setDish = useSetPhotoDish(branchId)
+  const current = dishes.find((dish) => dish.id === photo.menuItemId) ?? null
+
+  const choose = (dish: MenuItem | null) => {
+    if ((dish?.id ?? null) === photo.menuItemId) return
+    setDish.mutate(
+      { photoId: photo.id, menuItemId: dish?.id ?? null },
+      {
+        onSuccess: (result) =>
+          toast.add({
+            title: dish
+              ? result.dishPicture
+                ? `Now the picture for ${dish.name}`
+                : `Tagged as ${dish.name}`
+              : "Dish removed",
+            description:
+              dish && !result.dishPicture
+                ? photo.moderationStatus === "approved"
+                  ? "The dish already has a picture, so this one is tagged only."
+                  : "It becomes the dish's picture once approved, if the dish has none."
+                : undefined,
+            type: "success",
+          }),
+        onError: (error) =>
+          toast.add({
+            title: "That didn't go through",
+            description: error.message,
+            type: "error",
+          }),
+      }
+    )
+  }
+
+  return (
+    <Combobox
+      items={dishes}
+      value={current}
+      onValueChange={(dish: MenuItem | null) => choose(dish)}
+      itemToStringLabel={(dish: MenuItem) => dish.name}
+      disabled={setDish.isPending}
+    >
+      <ComboboxInput
+        placeholder="Which dish is this?"
+        aria-label="Dish in this photo"
+        className="mt-2 w-full"
+        showClear={Boolean(current)}
+      />
+      <ComboboxContent>
+        <ComboboxEmpty>No dish matches.</ComboboxEmpty>
+        <ComboboxList>
+          {(dish: MenuItem) => (
+            <ComboboxItem key={dish.id} value={dish}>
+              <span className="min-w-0 flex-1 truncate">{dish.name}</span>
+              {dish.imageUrl ? (
+                <span className="text-xs text-muted-foreground">
+                  has a picture
+                </span>
+              ) : null}
+            </ComboboxItem>
+          )}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
   )
 }
 

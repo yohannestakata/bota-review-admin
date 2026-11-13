@@ -235,6 +235,38 @@ export function useBranchStatus(branchId: string) {
   })
 }
 
+/** The menus a branch shows, its own or a sibling's (for picking dishes). */
+export function useBranchShownMenus(id: string | undefined) {
+  const api = useApi()
+  return useQuery({
+    queryKey: [...branchKey(id ?? ""), "menus", "shown"],
+    queryFn: async () => (await api<Menu[]>(`/branches/${id}/menus`)).data,
+    enabled: Boolean(id),
+  })
+}
+
+/** Tag a photo with the dish it shows, or clear it (null). */
+export function useSetPhotoDish(branchId: string) {
+  const api = useApi()
+  const invalidate = useInvalidateBranch()
+  return useMutation({
+    mutationFn: async ({
+      photoId,
+      menuItemId,
+    }: {
+      photoId: string
+      menuItemId: string | null
+    }) =>
+      (
+        await api<{ menuItemId: string | null; dishPicture: boolean }>(
+          `/admin/photos/${photoId}/dish`,
+          { method: "PATCH", body: { menuItemId } }
+        )
+      ).data,
+    onSuccess: () => invalidate(branchId),
+  })
+}
+
 export function usePhotoAction(branchId: string) {
   const api = useApi()
   const invalidate = useInvalidateBranch()

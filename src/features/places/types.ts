@@ -79,6 +79,8 @@ export type BranchPhoto = {
   moderationStatus: "pending" | "approved" | "rejected"
   isCover: boolean
   reviewId: string | null
+  /** The dish the photo shows, if tagged. */
+  menuItemId: string | null
   createdAt: string
   uploader: { id: string; displayName: string }
 }
