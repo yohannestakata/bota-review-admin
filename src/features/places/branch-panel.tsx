@@ -40,6 +40,7 @@ import { useUrlFilters } from "@/hooks/use-url-filters"
 
 import { BranchForm } from "./branch-form"
 import { BranchMenus } from "./branch-menus"
+import { BranchOffers } from "./branch-offers"
 import { BranchPhotos } from "./branch-photos"
 import { BranchSimilar } from "./branch-similar"
 import { BranchStats } from "./branch-stats"
@@ -147,6 +148,7 @@ export function BranchPanel({ branchId }: { branchId: string }) {
             Photos{photos.data ? ` (${photos.data.length})` : ""}
           </TabsTrigger>
           <TabsTrigger value="menu">Menu</TabsTrigger>
+          <TabsTrigger value="deals">Deals</TabsTrigger>
           <TabsTrigger value="stats">Stats</TabsTrigger>
           <TabsTrigger value="similar">Similar</TabsTrigger>
         </TabsList>
@@ -158,6 +160,9 @@ export function BranchPanel({ branchId }: { branchId: string }) {
         </TabsContent>
         <TabsContent value="menu" className="pt-4">
           <BranchMenus branchId={branchId} />
+        </TabsContent>
+        <TabsContent value="deals" className="pt-4">
+          <BranchOffers branchId={branchId} />
         </TabsContent>
         <TabsContent value="stats" className="pt-4">
           <BranchStats branchId={branchId} />
